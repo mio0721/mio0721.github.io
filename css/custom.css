@@ -1,0 +1,430 @@
+/* =========================================================
+   Mio's Blog - Butterfly Custom Glass Style
+   ========================================================= */
+
+
+/* =========================================================
+   1. 页面主体保持透明
+   让整站背景连续显示
+   ========================================================= */
+
+html,
+body,
+#body-wrap,
+#content-inner,
+#content-inner.layout,
+.layout,
+#recent-posts,
+#aside-content {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+
+/* =========================================================
+   2. 统一顶部 Banner 与下方背景遮罩
+   ========================================================= */
+
+
+/* ---------- 日间模式：不加暗色遮罩 ---------- */
+
+html:not([data-theme="dark"]) #page-header::before,
+html:not([data-theme="dark"]) .full_page #page-header::before,
+html:not([data-theme="dark"]) #web_bg::before {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  opacity: 0 !important;
+}
+
+
+/* ---------- 夜间模式：上下统一暗色遮罩 ---------- */
+
+html[data-theme="dark"] #page-header::before,
+html[data-theme="dark"] .full_page #page-header::before,
+html[data-theme="dark"] #web_bg::before {
+  background: rgba(0, 0, 0, 0.24) !important;
+  background-color: rgba(0, 0, 0, 0.24) !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   3. 网站背景本身保持正常
+   ========================================================= */
+
+#web_bg {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+
+/* =========================================================
+   4. 毛玻璃参数
+   ========================================================= */
+
+:root {
+  --mio-glass-light: rgba(255, 255, 255, 0.48);
+  --mio-glass-dark: rgba(18, 20, 26, 0.46);
+
+  --mio-border-light: rgba(255, 255, 255, 0.36);
+  --mio-border-dark: rgba(255, 255, 255, 0.10);
+
+  --mio-blur: 16px;
+}
+
+
+/* =========================================================
+   5. Hello World 首页文章卡片
+   ========================================================= */
+
+#recent-posts > .recent-post-item {
+  background: var(--mio-glass-light) !important;
+
+  backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  -webkit-backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  border:
+    1px solid var(--mio-border-light) !important;
+
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.14) !important;
+
+  overflow: hidden;
+}
+
+
+/* 深色模式文章卡片 */
+
+html[data-theme="dark"]
+#recent-posts > .recent-post-item {
+  background: var(--mio-glass-dark) !important;
+
+  border-color:
+    var(--mio-border-dark) !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* =========================================================
+   6. Hello World 卡片内部透明
+   ========================================================= */
+
+#recent-posts > .recent-post-item .recent-post-info,
+#recent-posts > .recent-post-item .content,
+#recent-posts > .recent-post-item .article-meta-wrap,
+#recent-posts > .recent-post-item .post-meta {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+/* =========================================================
+   7. 右侧个人介绍 / 分类 / 标签等卡片
+   ========================================================= */
+
+#aside-content .card-widget {
+  background: var(--mio-glass-light) !important;
+
+  backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  -webkit-backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  border:
+    1px solid var(--mio-border-light) !important;
+
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.14) !important;
+
+  overflow: hidden;
+}
+
+
+/* 深色模式侧栏卡片 */
+
+html[data-theme="dark"]
+#aside-content .card-widget {
+  background: var(--mio-glass-dark) !important;
+
+  border-color:
+    var(--mio-border-dark) !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* =========================================================
+   8. 侧栏内部不要再套黑底
+   ========================================================= */
+
+#aside-content > div,
+#aside-content .card-info,
+#aside-content .card-announcement,
+#aside-content .card-recent-post,
+#aside-content .card-categories,
+#aside-content .card-tags,
+#aside-content .card-archives,
+#aside-content .card-webinfo {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+
+/* =========================================================
+   9. 文章正文 / About / 分类 / 标签 / 归档
+   ========================================================= */
+
+#post,
+#page,
+#archive,
+#tag,
+#category {
+  background: var(--mio-glass-light) !important;
+
+  backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  -webkit-backdrop-filter:
+    blur(var(--mio-blur))
+    saturate(125%) !important;
+
+  border:
+    1px solid var(--mio-border-light) !important;
+
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.14) !important;
+}
+
+
+html[data-theme="dark"] #post,
+html[data-theme="dark"] #page,
+html[data-theme="dark"] #archive,
+html[data-theme="dark"] #tag,
+html[data-theme="dark"] #category {
+  background: var(--mio-glass-dark) !important;
+
+  border-color:
+    var(--mio-border-dark) !important;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* =========================================================
+   10. 顶部固定导航栏毛玻璃
+   ========================================================= */
+
+#page-header.nav-fixed #nav {
+  background:
+    rgba(18, 20, 26, 0.42) !important;
+
+  backdrop-filter:
+    blur(14px)
+    saturate(125%) !important;
+
+  -webkit-backdrop-filter:
+    blur(14px)
+    saturate(125%) !important;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.16);
+}
+
+
+/* 日间导航栏 */
+
+html:not([data-theme="dark"])
+#page-header.nav-fixed #nav {
+  background:
+    rgba(255, 255, 255, 0.48) !important;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.30);
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =========================================================
+   11. Footer
+   ========================================================= */
+
+#footer {
+  background:
+    rgba(20, 22, 28, 0.22) !important;
+
+  backdrop-filter:
+    blur(12px)
+    saturate(120%) !important;
+
+  -webkit-backdrop-filter:
+    blur(12px)
+    saturate(120%) !important;
+}
+
+
+/* 日间 Footer */
+
+html:not([data-theme="dark"])
+#footer {
+  background:
+    rgba(255, 255, 255, 0.28) !important;
+}
+
+
+/* =========================================================
+   12. 卡片悬浮
+   ========================================================= */
+
+#recent-posts > .recent-post-item,
+#aside-content .card-widget {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+
+#recent-posts > .recent-post-item:hover,
+#aside-content .card-widget:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.25) !important;
+
+  border-color:
+    rgba(255, 255, 255, 0.18) !important;
+}
+
+
+/* =========================================================
+   13. 文章封面图片
+   ========================================================= */
+
+#recent-posts >
+.recent-post-item
+.post_cover img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  border-radius: 0 !important;
+}
+
+
+/* =========================================================
+   14. 滚动条
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background:
+    rgba(150, 150, 150, 0.42);
+
+  border-radius: 10px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(180, 180, 180, 0.58);
+}
+
+
+/* =========================================================
+   15. 手机端
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  #recent-posts > .recent-post-item,
+  #aside-content .card-widget,
+  #post,
+  #page,
+  #archive,
+  #tag,
+  #category {
+    backdrop-filter:
+      blur(10px)
+      saturate(115%) !important;
+
+    -webkit-backdrop-filter:
+      blur(10px)
+      saturate(115%) !important;
+  }
+
+}
+
+
+/* =========================================================
+   恢复首页 Hello World 卡片透明
+   ========================================================= */
+
+html body #recent-posts > .recent-post-item {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+/* Hello World 右侧文字区域 */
+html body #recent-posts > .recent-post-item .recent-post-info {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+/* 防止内部区域继续产生黑底 */
+html body #recent-posts > .recent-post-item .content,
+html body #recent-posts > .recent-post-item .article-meta-wrap,
+html body #recent-posts > .recent-post-item .post-meta {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+
+/* 深色模式也强制保持透明 */
+html[data-theme="dark"] body #recent-posts > .recent-post-item,
+html[data-theme="dark"] body #recent-posts > .recent-post-item .recent-post-info {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
