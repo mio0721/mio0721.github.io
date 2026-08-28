@@ -1,5 +1,15 @@
 /* =========================================================
    Mio's Blog - Butterfly Custom Glass Style
+
+   快速修改索引：
+   - 夜间整体遮罩：第 2 节 rgba(0, 0, 0, 0.4)
+   - 日/夜卡片透明度：第 4 节 --mio-glass-light / dark
+   - 日间文字颜色：第 4 节下方的主题变量
+   - 滚动条颜色和宽度：第 14 节
+   - 手机端模糊强度：第 15 节
+
+   rgba 最后一个数字是透明度：
+   0 = 完全透明，1 = 完全不透明。
    ========================================================= */
 
 
@@ -16,6 +26,7 @@ body,
 .layout,
 #recent-posts,
 #aside-content {
+  /* 清除 Butterfly 默认的页面底色，露出 #web_bg 全局背景图 */
   background: transparent !important;
   background-color: transparent !important;
 }
@@ -28,23 +39,34 @@ body,
 
 /* ---------- 日间模式：不加暗色遮罩 ---------- */
 
+/*
+ * :not([data-theme="dark"]) 同时覆盖 data-theme="light"
+ * 和页面初始尚未写入 data-theme 的状态。
+ */
+
 html:not([data-theme="dark"]) #page-header::before,
 html:not([data-theme="dark"]) .full_page #page-header::before,
 html:not([data-theme="dark"]) #web_bg::before {
   background: transparent !important;
   background-color: transparent !important;
 
+  /* 关闭伪元素遮罩 */
   opacity: 0 !important;
 }
 
 
 /* ---------- 夜间模式：上下统一暗色遮罩 ---------- */
 
+/*
+ * 修改 0.4 即可调整整页暗度：
+ * 0.3 较柔和，0.4 明显变暗，0.5 以上会很暗。
+ */
+
 html[data-theme="dark"] #page-header::before,
 html[data-theme="dark"] .full_page #page-header::before,
 html[data-theme="dark"] #web_bg::before {
-  background: rgba(0, 0, 0, 0.24) !important;
-  background-color: rgba(0, 0, 0, 0.24) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
 
   opacity: 1 !important;
 }
@@ -55,6 +77,7 @@ html[data-theme="dark"] #web_bg::before {
    ========================================================= */
 
 #web_bg {
+  /* 防止主题或其他插件再改变背景层的透明度/滤镜 */
   opacity: 1 !important;
   filter: none !important;
 }
@@ -65,13 +88,31 @@ html[data-theme="dark"] #web_bg::before {
    ========================================================= */
 
 :root {
-  --mio-glass-light: rgba(255, 255, 255, 0.48);
+  /* 日间卡片：0 表示无白色蒙层，只显示背景模糊 */
+  --mio-glass-light: rgba(255, 255, 255, 0);
+
+  /* 夜间卡片：深灰蓝蒙层，0.46 是其不透明度 */
   --mio-glass-dark: rgba(18, 20, 26, 0.46);
 
+  /* 日间/夜间卡片边框颜色，最后的数字越大边框越明显 */
   --mio-border-light: rgba(255, 255, 255, 0.36);
   --mio-border-dark: rgba(255, 255, 255, 0.10);
 
+  /* 桌面端毛玻璃模糊半径；数值越大，背景越模糊 */
   --mio-blur: 16px;
+}
+
+
+/* 日间透明玻璃上统一使用纯白文字 */
+
+html:not([data-theme="dark"]) {
+  /* 覆盖 Butterfly 的全局文字变量，提高透明背景上的可读性 */
+  --font-color: #fff;
+  --text-highlight-color: #fff;
+  --card-meta: #fff;
+  --blockquote-color: #fff;
+  --toc-link-color: #fff;
+  --headline-presudo: #fff;
 }
 
 
@@ -79,9 +120,11 @@ html[data-theme="dark"] #web_bg::before {
    5. Hello World 首页文章卡片
    ========================================================= */
 
-#recent-posts > .recent-post-item {
+#recent-posts .recent-post-item {
+  /* 首页每一张文章预览卡的玻璃底色 */
   background: var(--mio-glass-light) !important;
 
+  /* blur 负责模糊背后图像，saturate 防止颜色变得过灰 */
   backdrop-filter:
     blur(var(--mio-blur))
     saturate(125%) !important;
@@ -90,14 +133,18 @@ html[data-theme="dark"] #web_bg::before {
     blur(var(--mio-blur))
     saturate(125%) !important;
 
+  /* 半透明白边构成玻璃边缘 */
   border:
     1px solid var(--mio-border-light) !important;
 
+  /* 卡片圆角 */
   border-radius: 16px !important;
 
+  /* 卡片投影：水平偏移、垂直偏移、模糊半径、颜色 */
   box-shadow:
     0 8px 30px rgba(0, 0, 0, 0.14) !important;
 
+  /* 防止封面图或内容越出圆角 */
   overflow: hidden;
 }
 
@@ -105,7 +152,8 @@ html[data-theme="dark"] #web_bg::before {
 /* 深色模式文章卡片 */
 
 html[data-theme="dark"]
-#recent-posts > .recent-post-item {
+#recent-posts .recent-post-item {
+  /* 夜间仅替换底色、边框和阴影，其他参数继承日间通用规则 */
   background: var(--mio-glass-dark) !important;
 
   border-color:
@@ -120,10 +168,11 @@ html[data-theme="dark"]
    6. Hello World 卡片内部透明
    ========================================================= */
 
-#recent-posts > .recent-post-item .recent-post-info,
-#recent-posts > .recent-post-item .content,
-#recent-posts > .recent-post-item .article-meta-wrap,
-#recent-posts > .recent-post-item .post-meta {
+#recent-posts .recent-post-item .recent-post-info,
+#recent-posts .recent-post-item .content,
+#recent-posts .recent-post-item .article-meta-wrap,
+#recent-posts .recent-post-item .post-meta {
+  /* 内层不再绘制底色，避免出现“卡片里又套卡片” */
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
@@ -135,6 +184,7 @@ html[data-theme="dark"]
    ========================================================= */
 
 #aside-content .card-widget {
+  /* 侧栏的个人、公告、最新文章、分类、归档等卡片 */
   background: var(--mio-glass-light) !important;
 
   backdrop-filter:
@@ -161,6 +211,7 @@ html[data-theme="dark"]
 
 html[data-theme="dark"]
 #aside-content .card-widget {
+  /* 侧栏卡片的夜间底色和阴影 */
   background: var(--mio-glass-dark) !important;
 
   border-color:
@@ -174,6 +225,12 @@ html[data-theme="dark"]
 /* =========================================================
    8. 侧栏内部不要再套黑底
    ========================================================= */
+
+/*
+ * Butterfly 会把 card-info、card-announcement 等 class
+ * 与 card-widget 放在同一个元素上。日间模式因此完全透明，
+ * 夜间模式则由上方更高优先级的 data-theme 规则恢复深色玻璃。
+ */
 
 #aside-content > div,
 #aside-content .card-info,
@@ -197,6 +254,7 @@ html[data-theme="dark"]
 #archive,
 #tag,
 #category {
+  /* 文章详情、独立页、归档、标签、分类页共用这套玻璃参数 */
   background: var(--mio-glass-light) !important;
 
   backdrop-filter:
@@ -222,6 +280,7 @@ html[data-theme="dark"] #page,
 html[data-theme="dark"] #archive,
 html[data-theme="dark"] #tag,
 html[data-theme="dark"] #category {
+  /* 上述正文类页面的夜间外观 */
   background: var(--mio-glass-dark) !important;
 
   border-color:
@@ -237,6 +296,7 @@ html[data-theme="dark"] #category {
    ========================================================= */
 
 #page-header.nav-fixed #nav {
+  /* 滚动页面后固定在顶部的导航栏；这里先定义夜间外观 */
   background:
     rgba(18, 20, 26, 0.42) !important;
 
@@ -260,8 +320,9 @@ html[data-theme="dark"] #category {
 
 html:not([data-theme="dark"])
 #page-header.nav-fixed #nav {
+  /* 日间导航栏与其他日间玻璃共用透明底色 */
   background:
-    rgba(255, 255, 255, 0.48) !important;
+    var(--mio-glass-light) !important;
 
   border-bottom:
     1px solid rgba(255, 255, 255, 0.30);
@@ -276,6 +337,7 @@ html:not([data-theme="dark"])
    ========================================================= */
 
 #footer {
+  /* Footer 默认采用深色半透明背景 */
   background:
     rgba(20, 22, 28, 0.22) !important;
 
@@ -293,8 +355,9 @@ html:not([data-theme="dark"])
 
 html:not([data-theme="dark"])
 #footer {
+  /* 日间 Footer 与卡片共用透明度 */
   background:
-    rgba(255, 255, 255, 0.28) !important;
+    var(--mio-glass-light) !important;
 }
 
 
@@ -302,8 +365,9 @@ html:not([data-theme="dark"])
    12. 卡片悬浮
    ========================================================= */
 
-#recent-posts > .recent-post-item,
+#recent-posts .recent-post-item,
 #aside-content .card-widget {
+  /* 为位移、阴影、边框变化添加平滑过渡 */
   transition:
     transform 0.22s ease,
     box-shadow 0.22s ease,
@@ -311,8 +375,9 @@ html:not([data-theme="dark"])
 }
 
 
-#recent-posts > .recent-post-item:hover,
+#recent-posts .recent-post-item:hover,
 #aside-content .card-widget:hover {
+  /* 悬浮时上移 3px，并增强阴影 */
   transform: translateY(-3px);
 
   box-shadow:
@@ -327,12 +392,14 @@ html:not([data-theme="dark"])
    13. 文章封面图片
    ========================================================= */
 
-#recent-posts >
+#recent-posts
 .recent-post-item
 .post_cover img {
+  /* 封面图填满封面容器 */
   width: 100%;
   height: 100%;
 
+  /* 保持图片比例，超出部分自动裁切 */
   object-fit: cover;
 
   border-radius: 0 !important;
@@ -344,27 +411,77 @@ html:not([data-theme="dark"])
    ========================================================= */
 
 ::-webkit-scrollbar {
+  /* Chrome / Edge / Safari 的竖向宽度和横向高度 */
   width: 8px;
   height: 8px;
 }
 
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  /* 日间滑块槽：半透明深灰，避免白色背景过于刺眼 */
+  background: rgba(5, 6, 8, 0.42);
 }
 
 
 ::-webkit-scrollbar-thumb {
+  /* 日间可拖动滑块：与夜间一样使用半透明浅色 */
   background:
-    rgba(150, 150, 150, 0.42);
+    rgba(255, 255, 255, 0.6);
 
   border-radius: 10px;
 }
 
 
 ::-webkit-scrollbar-thumb:hover {
+  /* 日间鼠标悬停时增亮 */
   background:
-    rgba(180, 180, 180, 0.58);
+    rgba(255, 255, 255, 0.8);
+}
+
+
+/* Firefox 的日间滚动条：滑块颜色在前，滑块槽颜色在后 */
+
+html:not([data-theme="dark"]) {
+  scrollbar-color:
+    rgba(255, 255, 255, 0.30)
+    rgba(5, 6, 8, 0.42);
+}
+
+
+/* 夜间模式滚动条：Firefox 使用 scrollbar-color */
+
+html[data-theme="dark"] {
+  scrollbar-color:
+    /* 第一个颜色是滑块，第二个颜色是滑块槽 */
+    rgba(255, 255, 255, 0.30)
+    #050608;
+}
+
+
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  /* Chrome / Edge / Safari 的夜间滑块槽；修改此值可调整黑色深浅 */
+  background:
+    #050608;
+}
+
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  /* 夜间可拖动滑块；最后的 0.1 越大，滑块越亮 */
+  background:
+    rgba(255, 255, 255, 0.1);
+
+
+
+  background-clip: padding-box;
+}
+
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  /* 夜间鼠标悬停时增亮，便于确认可拖动区域 */
+  background:
+    rgba(255, 255, 255, 0.48);
+
+  background-clip: padding-box;
 }
 
 
@@ -374,13 +491,14 @@ html:not([data-theme="dark"])
 
 @media (max-width: 768px) {
 
-  #recent-posts > .recent-post-item,
+  #recent-posts .recent-post-item,
   #aside-content .card-widget,
   #post,
   #page,
   #archive,
   #tag,
   #category {
+    /* 移动端降低模糊和饱和度，减少 GPU 压力 */
     backdrop-filter:
       blur(10px)
       saturate(115%) !important;
@@ -390,41 +508,4 @@ html:not([data-theme="dark"])
       saturate(115%) !important;
   }
 
-}
-
-
-/* =========================================================
-   恢复首页 Hello World 卡片透明
-   ========================================================= */
-
-html body #recent-posts > .recent-post-item {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-
-/* Hello World 右侧文字区域 */
-html body #recent-posts > .recent-post-item .recent-post-info {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-
-/* 防止内部区域继续产生黑底 */
-html body #recent-posts > .recent-post-item .content,
-html body #recent-posts > .recent-post-item .article-meta-wrap,
-html body #recent-posts > .recent-post-item .post-meta {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-
-/* 深色模式也强制保持透明 */
-html[data-theme="dark"] body #recent-posts > .recent-post-item,
-html[data-theme="dark"] body #recent-posts > .recent-post-item .recent-post-info {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
 }
