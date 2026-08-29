@@ -654,3 +654,39 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   overflow: visible;
   gap: 10px;
 }
+
+
+/* =========================================================
+   18. 顶部导航布局
+
+   桌面端参考常见 Butterfly 三段式导航：
+   - 左侧：博客名称
+   - 中间：主页 / 归档 / 标签 / 分类
+   - 右侧：搜索
+
+   移动端不使用绝对定位，交给 Butterfly 自动收起为菜单按钮。
+   ========================================================= */
+
+@media (min-width: 769px) {
+
+  /* 将菜单项的整体中心锁定到导航栏中点 */
+  #nav .menus_items {
+    position: absolute;
+    left: 50%;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  /* 搜索按钮固定在导航栏最右侧 */
+  #nav #search-button {
+    position: absolute;
+    right: 36px;
+    padding-left: 0;
+  }
+
+  /* 宽度不足而折叠菜单时，为搜索和汉堡按钮留出间距 */
+  #nav.hide-menu #toggle-menu {
+    margin-right: 42px;
+  }
+
+}
