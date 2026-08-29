@@ -124,6 +124,9 @@ html:not([data-theme="dark"]) {
 #aside-content .card-tag-cloud a {
   font-size: 1em !important;
   font-family: inherit !important;
+
+  /* 覆盖 Hexo 生成的内联颜色，中英文标签统一跟随当前主题文字色 */
+  color: var(--font-color) !important;
 }
 
 
@@ -595,4 +598,59 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     order: 90;
   }
 
+}
+
+
+/* =========================================================
+   17. 文章页翻页与相关推荐卡片
+
+   目标：复用 .post-copyright 版权声明卡片的外观：
+   - 背景透明
+   - 1px 主题浅色边框
+   - 6px 圆角
+   - 鼠标悬浮时显示柔和白色光晕
+
+   .pagination-related 同时用于“上/下一篇”和“相关推荐”，
+   因此下方一组规则可以统一两处样式。
+   ========================================================= */
+
+#post #pagination .pagination-related,
+#post .relatedPosts-list .pagination-related {
+  background: transparent !important;
+  border: 1px solid var(--light-grey);
+  border-radius: 6px !important;
+  box-shadow: none;
+  transition:
+    box-shadow 0.3s ease-in-out,
+    border-color 0.3s ease-in-out;
+}
+
+
+/*
+ * Butterfly 原本在卡片中放置封面图或默认色块。
+ * 设为透明后才能显示文章页连续的毛玻璃背景。
+ */
+#post #pagination .pagination-related .cover,
+#post .relatedPosts-list .pagination-related .cover,
+#post #pagination .pagination-related:hover .cover,
+#post .relatedPosts-list .pagination-related:hover .cover {
+  background: transparent !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+
+
+/* 与版权声明卡片相同的悬浮光晕 */
+#post #pagination .pagination-related:hover,
+#post .relatedPosts-list .pagination-related:hover {
+  box-shadow:
+    0 0 8px 0 rgba(232, 237, 250, 0.60),
+    0 2px 4px 0 rgba(232, 237, 250, 0.50);
+}
+
+
+/* 上一篇与下一篇之间留出空隙，避免两层边框粘在一起 */
+#post #pagination.pagination-post {
+  overflow: visible;
+  gap: 10px;
 }
