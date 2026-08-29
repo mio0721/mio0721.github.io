@@ -672,16 +672,19 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   /* 将菜单项的整体中心锁定到导航栏中点 */
   #nav .menus_items {
     position: absolute;
+    top: 50%;
     left: 50%;
     white-space: nowrap;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
   }
 
   /* 搜索按钮固定在导航栏最右侧 */
   #nav #search-button {
     position: absolute;
+    top: 50%;
     right: 36px;
     padding-left: 0;
+    transform: translateY(-50%);
   }
 
   /* 宽度不足而折叠菜单时，为搜索和汉堡按钮留出间距 */
@@ -689,4 +692,208 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     margin-right: 42px;
   }
 
+}
+
+
+/* =========================================================
+   19. 个人卡片社交图标
+
+   社交链接来自 _config.butterfly.yml 的 social 配置，
+   依次为 GitHub、邮箱和哔哩哔哩。
+   ========================================================= */
+
+#aside-content .card-info-social-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 -4px;
+  gap: 8px;
+}
+
+
+#aside-content .card-info-social-icons .social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--font-color);
+  font-size: 1.2em;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/* 悬浮时显示与毛玻璃卡片协调的浅色方框 */
+#aside-content .card-info-social-icons .social-icon:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: var(--mio-border-light);
+  transform: translateY(-2px);
+}
+
+
+/* 取消 Butterfly 默认的图标 360 度旋转，保持简洁 */
+#aside-content .card-info .card-info-social-icons i:hover {
+  transform: none;
+}
+
+
+/* 避免 social 配置在移动端首页头图中额外显示一次 */
+#site_social_icons {
+  display: none !important;
+}
+
+
+/* =========================================================
+   20. 公告图标
+
+   Butterfly 默认给公告喇叭添加 fa-shake 动画和主题色。
+   这里关闭动画，并让颜色与其他侧栏图标一致。
+   ========================================================= */
+
+#aside-content .card-announcement .item-headline i {
+  color: var(--font-color) !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+
+/* =========================================================
+   21. 标签总览页实时搜索
+
+   搜索框由 /js/tag-search.js 动态插入，
+   只会出现在 /tags/ 标签总览页。
+   ========================================================= */
+
+.mio-tag-search {
+  display: flex;
+  align-items: center;
+  margin: 0 auto 8px;
+  padding: 0 14px;
+  width: min(100%, 520px);
+  height: 46px;
+  background: rgba(18, 20, 26, 0.24);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid var(--mio-border-light);
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+  color: var(--font-color);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.mio-tag-search:focus-within {
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.10),
+    0 6px 20px rgba(0, 0, 0, 0.16);
+}
+
+
+.mio-tag-search > i {
+  flex: none;
+  opacity: 0.78;
+}
+
+
+.mio-tag-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  outline: none;
+  border: 0;
+  background: transparent;
+  color: var(--font-color);
+  font: inherit;
+}
+
+
+.mio-tag-search input::placeholder {
+  color: var(--font-color);
+  opacity: 0.62;
+}
+
+
+/* 隐藏 Chromium 搜索框默认的右侧清空按钮，使用下方自定义按钮 */
+.mio-tag-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+
+.mio-tag-search-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--font-color);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+
+.mio-tag-search-clear.is-visible {
+  opacity: 0.72;
+  pointer-events: auto;
+}
+
+
+.mio-tag-search-clear:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+
+.mio-tag-search-status {
+  margin: 0 auto 14px;
+  width: min(100%, 520px);
+  color: var(--font-color);
+  text-align: center;
+  font-size: 0.88em;
+  opacity: 0.72;
+}
+
+
+/* hidden 由 JavaScript 按搜索结果切换 */
+.tag-cloud-list a[hidden] {
+  display: none !important;
+}
+
+
+.tag-cloud-list.is-empty::after {
+  display: block;
+  padding: 28px 0;
+  color: var(--font-color);
+  content: "暂无匹配标签";
+  opacity: 0.68;
+}
+
+
+html[data-theme="dark"] .mio-tag-search {
+  background: rgba(5, 6, 8, 0.34);
+  border-color: var(--mio-border-dark);
+}
+
+
+@media (max-width: 768px) {
+  .mio-tag-search {
+    height: 42px;
+  }
 }
