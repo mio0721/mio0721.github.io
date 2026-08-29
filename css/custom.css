@@ -116,6 +116,17 @@ html:not([data-theme="dark"]) {
 }
 
 
+/*
+ * Butterfly 默认根据每个标签的文章数量，在 HTML 内联写入
+ * 1.1em ~ 1.5em 的动态字号，所以 Hexo 等标签会显得比中文大。
+ * !important 用于覆盖内联 font-size，让侧栏标签全部统一。
+ */
+#aside-content .card-tag-cloud a {
+  font-size: 1em !important;
+  font-family: inherit !important;
+}
+
+
 /* =========================================================
    5. Hello World 首页文章卡片
    ========================================================= */
@@ -351,6 +362,15 @@ html:not([data-theme="dark"])
 }
 
 
+/*
+ * Butterfly 默认上下各留 40px，这里改为 20px，
+ * 使底部版权栏的垂直高度约缩小一半。
+ */
+#footer .footer-other {
+  padding: 20px 20px;
+}
+
+
 /* 日间 Footer */
 
 html:not([data-theme="dark"])
@@ -506,6 +526,73 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     -webkit-backdrop-filter:
       blur(10px)
       saturate(115%) !important;
+  }
+
+}
+
+
+/* =========================================================
+   16. 移动端首页卡片顺序
+
+   Butterfly 默认把整个 #aside-content 当成一块，
+   因此单纯修改 order 无法把博客列表插入侧栏中间。
+   display: contents 只在窄屏下取消这两层布局盒，
+   让每张卡片都能在 .layout 中独立排序。
+   桌面端不命中此媒体查询，仍保持左右双栏。
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  #recent-posts + #aside-content,
+  #recent-posts + #aside-content .sticky_layout {
+    display: contents;
+  }
+
+  /* 所有被拆出来的侧栏卡片占满移动端宽度 */
+  #recent-posts + #aside-content .card-widget {
+    width: 100%;
+
+    /* 其他未单独指定的侧栏卡片放在网站信息之前 */
+    order: 80;
+  }
+
+  /* 1. Mio 个人信息卡 */
+  #recent-posts + #aside-content .card-info {
+    order: 10;
+  }
+
+  /* 2. 公告 */
+  #recent-posts + #aside-content .card-announcement {
+    order: 20;
+  }
+
+  /* 3. 最新文章 */
+  #recent-posts + #aside-content .card-recent-post {
+    order: 30;
+  }
+
+  /* 4. Hello World 等博客文章列表 */
+  #recent-posts {
+    order: 40;
+  }
+
+  /* 5. 归档 */
+  #recent-posts + #aside-content .card-archives {
+    order: 50;
+  }
+
+  /* 将未来可能出现的分类/标签放在归档之后 */
+  #recent-posts + #aside-content .card-categories {
+    order: 60;
+  }
+
+  #recent-posts + #aside-content .card-tags {
+    order: 70;
+  }
+
+  /* 6. 网站信息始终最后显示 */
+  #recent-posts + #aside-content .card-webinfo {
+    order: 90;
   }
 
 }
