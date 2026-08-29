@@ -88,7 +88,7 @@ html[data-theme="dark"] #web_bg::before {
    ========================================================= */
 
 :root {
-  /* 日间卡片：淡黑蒙层避免白字落在云朵等浅色背景上看不清 */
+  /* 日间卡片：18% 淡黑蒙层，避免白字落在浅色背景上看不清 */
   --mio-glass-light: rgba(10, 12, 18, 0.18);
 
   /* 夜间卡片：深灰蓝蒙层，0.46 是其不透明度 */
@@ -1092,4 +1092,41 @@ html[data-theme="dark"] #page-header.not-home-page,
 html[data-theme="dark"] #page-header.post-bg {
   border-bottom-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.32);
+}
+
+
+/*
+ * 日间全局背景不带暗色遮罩，因此只在顶部标题区叠加一层淡黑色。
+ * 这不会重新裁剪背景图片，只调整亮度，所以图像仍然上下连续。
+ */
+html:not([data-theme="dark"]) #page-header.not-home-page::before,
+html:not([data-theme="dark"]) #page-header.post-bg::before {
+  background: rgba(0, 0, 0, 0.16) !important;
+  background-color: rgba(0, 0, 0, 0.16) !important;
+  opacity: 1 !important;
+}
+
+
+/* 加强归档/标签/分类标题以及文章标题、元信息在浅色图片上的轮廓 */
+html:not([data-theme="dark"]) #page-header.not-home-page #page-site-info,
+html:not([data-theme="dark"]) #page-header.post-bg #post-info {
+  text-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.85),
+    0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   25. 首页中央站点标题描边与阴影
+
+   仅处理首页头图中央的 mio's blog，不影响左上角导航站名。
+   细描边负责勾勒字形，双层阴影兼顾浅色和复杂图片背景。
+   ========================================================= */
+
+#page-header.full_page #site-info #site-title {
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.58);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.88),
+    0 0 18px rgba(0, 0, 0, 0.58);
 }
