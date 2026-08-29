@@ -88,8 +88,8 @@ html[data-theme="dark"] #web_bg::before {
    ========================================================= */
 
 :root {
-  /* 日间卡片：0 表示无白色蒙层，只显示背景模糊 */
-  --mio-glass-light: rgba(255, 255, 255, 0);
+  /* 日间卡片：淡黑蒙层避免白字落在云朵等浅色背景上看不清 */
+  --mio-glass-light: rgba(10, 12, 18, 0.18);
 
   /* 夜间卡片：深灰蓝蒙层，0.46 是其不透明度 */
   --mio-glass-dark: rgba(18, 20, 26, 0.46);
@@ -113,6 +113,30 @@ html:not([data-theme="dark"]) {
   --blockquote-color: #fff;
   --toc-link-color: #fff;
   --headline-presudo: #fff;
+}
+
+
+/*
+ * 日间模式仍使用纯白文字，但增加轻微暗色阴影。
+ * 这样经过天空、云朵等浅色背景时仍能看清，同时不破坏透明感。
+ */
+html:not([data-theme="dark"]) #recent-posts .recent-post-item,
+html:not([data-theme="dark"]) #aside-content .card-widget,
+html:not([data-theme="dark"]) #post,
+html:not([data-theme="dark"]) #page,
+html:not([data-theme="dark"]) #archive,
+html:not([data-theme="dark"]) #tag,
+html:not([data-theme="dark"]) #category,
+html:not([data-theme="dark"]) #page-header #nav,
+html:not([data-theme="dark"]) #footer {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+
+/* 代码内容保持干净锐利，不继承正文的文字阴影 */
+html:not([data-theme="dark"]) #article-container code,
+html:not([data-theme="dark"]) #article-container pre {
+  text-shadow: none;
 }
 
 
@@ -748,6 +772,24 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   display: none !important;
 }
 
+/* GitHub 长方形按钮：日间 */
+/* 
+#aside-content #card-info-btn {
+  background: rgba(20, 20, 20, 0.65);
+  color: #fff;
+}
+*/
+
+/* 鼠标悬浮 */
+/* #aside-content #card-info-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+} */
+
+/* GitHub 长方形按钮：夜间 */
+html[data-theme="dark"] #aside-content #card-info-btn {
+  background: rgba(0, 0, 0, 0.65);
+}
+
 
 /* =========================================================
    20. 公告图标
@@ -896,4 +938,122 @@ html[data-theme="dark"] .mio-tag-search {
   .mio-tag-search {
     height: 42px;
   }
+}
+
+
+/* =========================================================
+   22. 友情链接卡片紧凑布局
+   Butterfly 默认高度为 90px，这里缩至约 2/3（60px）。
+   图标和两行文字同步缩小并重新居中，避免内容被裁切。
+   ========================================================= */
+
+#article-container .flink-list > .flink-list-item {
+  background: transparent !important;
+  border: 1px solid var(--light-grey);
+  border-radius: 6px !important;
+  box-shadow: none;
+  height: 60px;
+  line-height: 15px;
+  transition:
+    box-shadow 0.3s ease-in-out,
+    border-color 0.3s ease-in-out;
+}
+
+
+/* 关闭主题默认的整块底色扩张动画，保持相关推荐卡片的透明效果 */
+#article-container .flink-list > .flink-list-item::before {
+  background: transparent !important;
+  transform: none !important;
+}
+
+
+/* 与文章页“相关推荐”卡片使用相同的柔和悬浮光晕 */
+#article-container .flink-list > .flink-list-item:hover {
+  box-shadow:
+    0 0 8px 0 rgba(232, 237, 250, 0.60),
+    0 2px 4px 0 rgba(232, 237, 250, 0.50);
+}
+
+
+#article-container .flink-list > .flink-list-item .flink-item-icon {
+  margin: 9px 10px;
+  width: 42px;
+  height: 42px;
+}
+
+
+/* 取消 Butterfly 默认的悬浮收起图标，避免卡片内容左右跳动 */
+#article-container .flink-list > .flink-list-item:hover .flink-item-icon {
+  margin-left: 10px;
+  width: 42px;
+}
+
+
+#article-container .flink-list > .flink-list-item .flink-item-name {
+  padding: 8px 10px 0 0;
+  height: 30px;
+  font-size: 1.1em;
+}
+
+
+#article-container .flink-list > .flink-list-item .flink-item-desc {
+  padding: 3px 10px 7px 0;
+  height: 30px;
+  font-size: 0.85em;
+}
+
+
+/* =========================================================
+   23. 文章正文字体与代码字体
+
+   - 普通正文：霞骛文楷（LXGW WenKai）
+   - 行内代码与代码块：JetBrains Mono
+   - 仅作用于文章详情页 #post，不改变首页、侧栏和独立页面
+   - font-display: swap 避免字体下载期间出现空白文字
+   ========================================================= */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local("JetBrains Mono"),
+    url("https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/webfonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("JetBrains Mono Bold"),
+    url("https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/fonts/webfonts/JetBrainsMono-Bold.woff2") format("woff2");
+}
+
+
+/* 文章标题下方的正文、标题、列表、引用和表格都会继承霞骛文楷 */
+#post #article-container {
+  font-family:
+    "LXGW WenKai",
+    "Microsoft YaHei",
+    "PingFang SC",
+    sans-serif;
+}
+
+
+/* 覆盖 Butterfly 自带的 Monaco / Ubuntu Mono 代码字体 */
+#post #article-container code,
+#post #article-container pre,
+#post #article-container kbd,
+#post #article-container samp,
+#post #article-container figure.highlight pre,
+#post #article-container figure.highlight code {
+  font-family:
+    "JetBrains Mono",
+    "SFMono-Regular",
+    Consolas,
+    monospace !important;
 }
