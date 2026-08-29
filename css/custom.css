@@ -1057,3 +1057,39 @@ html[data-theme="dark"] .mio-tag-search {
     Consolas,
     monospace !important;
 }
+
+
+/* =========================================================
+   24. 归档 / 标签 / 分类 / 文章页顶部连续背景与分隔线
+
+   .not-home-page 是 Butterfly 给归档、标签和分类头图使用的类名。
+   .post-bg 是文章详情页头图使用的类名。
+   原先头图和 #web_bg 各自以 cover 裁剪同一张图片，因此接缝错位。
+   这里取消头图自己的图片和重复遮罩，让全局背景连续显示；
+   同时在原接缝位置保留一条细横线，明确区分标题区与内容区。
+   ========================================================= */
+
+#page-header.not-home-page,
+#page-header.post-bg {
+  background-image: none !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+
+/* 全局背景已经包含日间/夜间遮罩，头图不再重复叠加一层 */
+#page-header.not-home-page::before,
+#page-header.post-bg::before {
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+
+/* 夜间分隔线略淡，避免在深色背景上过亮 */
+html[data-theme="dark"] #page-header.not-home-page,
+html[data-theme="dark"] #page-header.post-bg {
+  border-bottom-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.32);
+}
