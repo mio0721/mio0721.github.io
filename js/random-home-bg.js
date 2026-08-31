@@ -1,25 +1,31 @@
-const homeBackgrounds = [
-  "/img/home-bg/home-bg.png",
-  "/img/home-bg/home-bg2.png",
-  "/img/home-bg/home-bg3.png",
-  "/img/home-bg/home-bg4.png",
-  "/img/home-bg/home-bg5.jpg",
-  "/img/home-bg/home-bg6.png",
-  "/img/home-bg/home-bg7.png",
-  "/img/home-bg/home-bg8.png",
-  "/img/home-bg/home-bg9.png",
-  "/img/home-bg/home-bg10.png",
-  "/img/home-bg/home-bg11.jpg",
-  "/img/home-bg/home-bg12.png",
-  "/img/home-bg/home-bg13.png",
-  "/img/home-bg/home-bg14.png",
-  "/img/home-bg/home-bg15.png",
-  "/img/home-bg/home-bg16.jpg"
-];
+/* 清单加载失败时使用的备用背景，防止页面出现空白。 */
+const fallbackBackgrounds = ["/img/home-bg/home-bg.png"];
 
-function applyPageBackground() {
+
+/**
+ * 读取 Hexo 构建时自动生成的背景清单。
+ * cache: "no-store" 确保新增图片并重新部署后无需修改版本号。
+ */
+async function loadBackgrounds() {
+  try {
+    const response = await fetch(`/background-images.json?t=${Date.now()}`, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const images = await response.json();
+    return Array.isArray(images) && images.length ? images : fallbackBackgrounds;
+  } catch (error) {
+    console.warn("随机背景清单加载失败，已使用备用背景。", error);
+    return fallbackBackgrounds;
+  }
+}
+
+
+function applyPageBackground(backgroundImages) {
   const randomImage =
-    homeBackgrounds[Math.floor(Math.random() * homeBackgrounds.length)];
+    backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
 
   /*
    * 文章背景优先级：top_img（头图）> cover（封面）> 随机图库。
@@ -67,4 +73,4 @@ function applyPageBackground() {
   }
 }
 
-applyPageBackground();
+loadBackgrounds().then(applyPageBackground);

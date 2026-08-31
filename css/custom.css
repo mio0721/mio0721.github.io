@@ -1246,3 +1246,208 @@ html:not([data-theme="dark"]) #page-header.post-bg #post-info {
     line-height: 28px;
   }
 }
+
+
+/* =========================================================
+   27. 无头图独立页面的顶部导航栏
+
+   关于、日志、链接页面在 Front Matter 中设置了 top_img: false，
+   Butterfly 因此会给页头添加 .not-top-img，而不是 .not-home-page。
+   主题默认会为这种页头加入较实的白色/黑色导航背景。
+   这里只覆盖页面位于顶部时的状态，使其与其他页面一样透明；
+   滚动后的 .nav-fixed 仍沿用第 10 节定义的毛玻璃背景。
+   ========================================================= */
+
+#page-header.not-top-img:not(.nav-fixed) #nav {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+
+/* =========================================================
+   28. 日志首页独立卡片
+
+   /logs/ 页面本身不再使用一整张大卡片包住全部内容，
+   每个 type: log-entry 的 Markdown 会生成一张独立日志卡片。
+   日间、夜间分别复用全站统一的玻璃透明度变量。
+   ========================================================= */
+
+#body-wrap.type-logs #page {
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+
+#body-wrap.type-logs #page > .page-title {
+  margin: 0 0 20px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+}
+
+
+.mio-logs-intro {
+  margin-bottom: 18px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.70);
+}
+
+
+.mio-logs-intro > :first-child {
+  margin-top: 0;
+}
+
+
+.mio-log-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+
+.mio-log-card {
+  overflow: hidden;
+  margin: 0;
+  min-height: 170px;
+  background: var(--mio-glass-light) !important;
+  border: 1px solid var(--mio-border-light);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(var(--mio-blur)) saturate(125%);
+  -webkit-backdrop-filter: blur(var(--mio-blur)) saturate(125%);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+
+html[data-theme="dark"] .mio-log-card {
+  background: var(--mio-glass-dark) !important;
+  border-color: var(--mio-border-dark);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22);
+}
+
+
+.mio-log-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--theme-color);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
+
+.mio-log-card-link {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 22px 24px;
+  width: 100%;
+  height: 100%;
+  min-height: 170px;
+  color: var(--font-color) !important;
+  text-decoration: none !important;
+}
+
+
+/* 覆盖 Butterfly 正文区域链接悬浮时默认添加的下划线 */
+.mio-log-card-link:hover,
+.mio-log-card-link:focus,
+.mio-log-card-link:active {
+  text-decoration: none !important;
+}
+
+
+.mio-log-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+
+.mio-log-card-title {
+  margin: 0 !important;
+  color: inherit;
+  font-size: 1.28em;
+  line-height: 1.4;
+}
+
+
+.mio-log-card-date {
+  flex: none;
+  padding-top: 4px;
+  opacity: 0.76;
+  font-size: 0.88em;
+}
+
+
+.mio-log-card-description {
+  margin: 16px 0 !important;
+  line-height: 1.7;
+  opacity: 0.88;
+}
+
+
+.mio-log-card-more {
+  margin-top: auto;
+  color: var(--theme-color);
+  font-size: 0.9em;
+}
+
+
+.mio-log-card-more i {
+  margin-left: 5px;
+  transition: transform 0.2s ease;
+}
+
+
+.mio-log-card:hover .mio-log-card-more i {
+  transform: translateX(4px);
+}
+
+
+.mio-log-empty {
+  padding: 36px;
+  background: var(--mio-glass-light);
+  border: 1px solid var(--mio-border-light);
+  border-radius: 16px;
+  text-align: center;
+}
+
+
+html[data-theme="dark"] .mio-log-empty {
+  background: var(--mio-glass-dark);
+  border-color: var(--mio-border-dark);
+}
+
+
+@media (max-width: 768px) {
+  .mio-log-list {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+
+  .mio-log-card,
+  .mio-log-card-link {
+    min-height: 150px;
+  }
+
+
+  .mio-log-card-link {
+    padding: 18px;
+  }
+
+
+  .mio-log-card-header {
+    display: block;
+  }
+
+
+  .mio-log-card-date {
+    display: block;
+    margin-top: 6px;
+  }
+}

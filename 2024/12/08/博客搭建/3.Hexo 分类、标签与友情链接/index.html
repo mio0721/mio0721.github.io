@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hexo 分类、标签与友情链接整理 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Hexo 分类、标签与友情链接整理文章数量少的时候，只通过首页也能找到内容。 文章逐渐增加以后，可以使用分类、标签和友情链接页面整理网站结构： 123分类：文章属于哪一类标签：文章具体涉及哪些内容链接：常用网站和朋友的网站  本文记录这三部分的配置方法。  给文章添加分类分类写在文章开头的 Front Matter 中： 12categories:    - 博客搭建  例如： 12345678-">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo 分类、标签与友情链接整理">
+<meta property="og:url" content="https://mio0721.github.io/2024/12/08/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/3.Hexo%20%E5%88%86%E7%B1%BB%E3%80%81%E6%A0%87%E7%AD%BE%E4%B8%8E%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="Hexo 分类、标签与友情链接整理文章数量少的时候，只通过首页也能找到内容。 文章逐渐增加以后，可以使用分类、标签和友情链接页面整理网站结构： 123分类：文章属于哪一类标签：文章具体涉及哪些内容链接：常用网站和朋友的网站  本文记录这三部分的配置方法。  给文章添加分类分类写在文章开头的 Front Matter 中： 12categories:    - 博客搭建  例如： 12345678-">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2024-12-08T12:40:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T05:42:35.939Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="Butterfly">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="分类">
+<meta property="article:tag" content="友情链接">
+<meta property="article:tag" content="标签">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hexo 分类、标签与友情链接整理",
+  "url": "https://mio0721.github.io/2024/12/08/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/3.Hexo%20%E5%88%86%E7%B1%BB%E3%80%81%E6%A0%87%E7%AD%BE%E4%B8%8E%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2024-12-08T12:40:00.000Z",
+  "dateModified": "2026-08-31T05:42:35.939Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2024/12/08/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/3.Hexo%20%E5%88%86%E7%B1%BB%E3%80%81%E6%A0%87%E7%AD%BE%E4%B8%8E%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hexo 分类、标签与友情链接整理',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260831-5"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">40</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Hexo 分类、标签与友情链接整理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hexo 分类、标签与友情链接整理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-12-08T12:40:00.000Z" title="发表于 2024-12-08 20:40:00">2024-12-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-31T05:42:35.939Z" title="更新于 2026-08-31 13:42:35">2026-08-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Hexo-分类、标签与友情链接整理"><a href="#Hexo-分类、标签与友情链接整理" class="headerlink" title="Hexo 分类、标签与友情链接整理"></a>Hexo 分类、标签与友情链接整理</h1><p>文章数量少的时候，只通过首页也能找到内容。</p>
+<p>文章逐渐增加以后，可以使用分类、标签和友情链接页面整理网站结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">分类：文章属于哪一类</span><br><span class="line">标签：文章具体涉及哪些内容</span><br><span class="line">链接：常用网站和朋友的网站</span><br></pre></td></tr></table></figure>
+
+<p>本文记录这三部分的配置方法。</p>
+<hr>
+<h2 id="给文章添加分类"><a href="#给文章添加分类" class="headerlink" title="给文章添加分类"></a>给文章添加分类</h2><p>分类写在文章开头的 Front Matter 中：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">博客搭建</span></span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Butterfly</span> <span class="string">毛玻璃样式</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2024-11-24 21:00:00</span></span><br><span class="line"><span class="attr">aside:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">博客搭建</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>同一类文章尽量使用完全相同的名称，避免同时出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">博客搭建</span><br><span class="line">博客</span><br><span class="line">Hexo 博客</span><br></pre></td></tr></table></figure>
+
+<p>这种含义接近但被 Hexo 当作不同分类的情况。</p>
+<hr>
+<h2 id="给文章添加标签"><a href="#给文章添加标签" class="headerlink" title="给文章添加标签"></a>给文章添加标签</h2><p>标签同样写在 Front Matter 中：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tags:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Hexo</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Butterfly</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">CSS</span></span><br></pre></td></tr></table></figure>
+
+<p>分类通常只保留一个较大的方向，标签则可以有多个。</p>
+<p>例如一篇毛玻璃文章可以归类为：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">博客搭建</span></span><br></pre></td></tr></table></figure>
+
+<p>同时使用：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">tags:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Hexo</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Butterfly</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">CSS</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">毛玻璃</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="标签字号不一致"><a href="#标签字号不一致" class="headerlink" title="标签字号不一致"></a>标签字号不一致</h2><p>Butterfly 标签云可能会根据文章数量动态设置字号。</p>
+<p>文章较多的标签会变大，文章较少的标签会变小，因此中文和英文标签看起来可能不统一。</p>
+<p>如果希望全部保持同样大小，可以覆盖：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#aside-content</span> <span class="selector-class">.card-tag-cloud</span> <span class="selector-tag">a</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">1em</span> <span class="meta">!important</span>;</span><br><span class="line">  <span class="attribute">font-family</span>: inherit <span class="meta">!important</span>;</span><br><span class="line">  <span class="attribute">color</span>: <span class="built_in">var</span>(--font-color) <span class="meta">!important</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>!important</code> 用来覆盖标签元素上的内联字号和颜色。</p>
+<hr>
+<h2 id="创建友情链接页面"><a href="#创建友情链接页面" class="headerlink" title="创建友情链接页面"></a>创建友情链接页面</h2><p>链接页面入口位于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/links/index.md</span><br></pre></td></tr></table></figure>
+
+<p>内容可以保持简单：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">奇奇怪怪的网站</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">link</span></span><br><span class="line"><span class="attr">top_img:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">aside:</span> <span class="literal">false</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>真正的链接数据放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/_data/link.yml</span><br></pre></td></tr></table></figure>
+
+<p>这样页面结构和链接数据可以分开维护。</p>
+<hr>
+<h2 id="按类型整理链接"><a href="#按类型整理链接" class="headerlink" title="按类型整理链接"></a>按类型整理链接</h2><p><code>link.yml</code> 可以创建多个分组：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">class_name:</span> <span class="string">视频网站</span></span><br><span class="line">  <span class="attr">class_desc:</span> <span class="string">常用的视频平台</span></span><br><span class="line">  <span class="attr">link_list:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">哔哩哔哩</span></span><br><span class="line">      <span class="attr">link:</span> <span class="string">https://www.bilibili.com/</span></span><br><span class="line">      <span class="attr">avatar:</span> <span class="string">/img/links/bilibili.png</span></span><br><span class="line">      <span class="attr">descr:</span> <span class="string">哔哩哔哩视频平台</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> <span class="attr">class_name:</span> <span class="string">开发网站</span></span><br><span class="line">  <span class="attr">class_desc:</span> <span class="string">编程和项目管理</span></span><br><span class="line">  <span class="attr">link_list:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">GitHub</span></span><br><span class="line">      <span class="attr">link:</span> <span class="string">https://github.com/</span></span><br><span class="line">      <span class="attr">avatar:</span> <span class="string">/img/links/github.png</span></span><br><span class="line">      <span class="attr">descr:</span> <span class="string">代码托管平台</span></span><br></pre></td></tr></table></figure>
+
+<p>最终页面会按照分组显示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">视频网站</span><br><span class="line">  ├── 哔哩哔哩</span><br><span class="line">  └── 其他视频平台</span><br><span class="line"></span><br><span class="line">开发网站</span><br><span class="line">  ├── GitHub</span><br><span class="line">  └── 其他开发网站</span><br></pre></td></tr></table></figure>
+
+<p>每个链接都是独立卡片，后续新增网站时只需要继续修改 <code>link.yml</code>。</p>
+<hr>
+<h2 id="常见-YAML-错误"><a href="#常见-YAML-错误" class="headerlink" title="常见 YAML 错误"></a>常见 YAML 错误</h2><p>YAML 对缩进比较敏感。</p>
+<p>正确写法：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">博客搭建</span></span><br></pre></td></tr></table></figure>
+
+<p>不要在 Front Matter 外面额外包一层 Markdown 代码块，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">````markdown</span><br><span class="line">---</span><br><span class="line">title: 标题</span><br><span class="line">---</span><br><span class="line">````</span><br></pre></td></tr></table></figure>
+
+<p>如果文件第一行变成代码围栏，Hexo 会尝试把它当作 YAML 解析，可能出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">YAMLException</span><br></pre></td></tr></table></figure>
+
+<p>Front Matter 必须从文件第一行的三个短横线开始。</p>
+<hr>
+<h2 id="整理原则"><a href="#整理原则" class="headerlink" title="整理原则"></a>整理原则</h2><p>分类、标签和链接可以按照下面的方式使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">一篇文章</span><br><span class="line">  ├── 一个主要分类</span><br><span class="line">  └── 多个具体标签</span><br><span class="line"></span><br><span class="line">一个链接页面</span><br><span class="line">  ├── 视频网站</span><br><span class="line">  ├── 开发网站</span><br><span class="line">  └── 友情链接</span><br></pre></td></tr></table></figure>
+
+<p>统一名称和缩进以后，文章数量增加时仍然比较容易查找。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2024/12/08/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/3.Hexo%20%E5%88%86%E7%B1%BB%E3%80%81%E6%A0%87%E7%AD%BE%E4%B8%8E%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/">https://mio0721.github.io/2024/12/08/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/3.Hexo%20%E5%88%86%E7%B1%BB%E3%80%81%E6%A0%87%E7%AD%BE%E4%B8%8E%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/Butterfly/">Butterfly</a><a class="post-meta__tags" href="/tags/%E5%88%86%E7%B1%BB/">分类</a><a class="post-meta__tags" href="/tags/%E6%A0%87%E7%AD%BE/">标签</a><a class="post-meta__tags" href="/tags/%E5%8F%8B%E6%83%85%E9%93%BE%E6%8E%A5/">友情链接</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/12/09/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/2.Ubuntu%20%E5%AE%89%E8%A3%85%20Anaconda%20%E5%B9%B6%E5%85%B3%E9%97%AD%20base%20%E8%87%AA%E5%8A%A8%E6%BF%80%E6%B4%BB/" title="Ubuntu 安装 Anaconda 并关闭 base 自动激活"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Ubuntu 安装 Anaconda 并关闭 base 自动激活</div></div><div class="info-2"><div class="info-item-1">Ubuntu 安装 Anaconda 并关闭 base 自动激活在 Ubuntu 下使用 Python 时，Anaconda 可以用来管理不同的 Python 环境。 这里记录两个最常用的操作：  使用 .sh 安装包安装 Anaconda 关闭终端启动时自动进入 base 环境   安装 Anaconda之前使用的安装包是： 1Anaconda3-2024.06-1-Linux-x86_64.sh  进入安装包所在目录后执行： 1bash Anaconda3-2024.06-1-Linux-x86_64.sh  之后按照终端中的安装提示继续即可。 不同版本的 Anaconda 安装包名称会发生变化，因此实际使用时把文件名替换成当前下载的版本。 基本形式就是： 1bash Anaconda3-xxx-Linux-x86_64.sh   检查 Conda安装完成后可以检查： 1conda --version  如果能够正常输出版本号，说明当前终端已经可以使用 Conda。 例如： 1conda 24.x.x   Conda 的环境Anaconda 安装完成后，会有一个默认环境： 1...</div></div></div></a><a class="pagination-related" href="/2024/12/06/Robot/Ubuntu%2022.04%20%E5%AE%89%E8%A3%85%20ROS%202%20Humble/" title="Ubuntu 22.04 安装 ROS 2 Humble"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Ubuntu 22.04 安装 ROS 2 Humble</div></div><div class="info-2"><div class="info-item-1">Ubuntu 22.04 安装 ROS 2 HumbleROS 2 的安装主要包括几个步骤： 123456789配置 Ubuntu 软件源    ↓添加 ROS 2 软件源    ↓安装 ROS 2 Humble    ↓配置环境变量    ↓使用 turtlesim 测试  这里记录 Ubuntu 22.04 下 ROS 2 Humble 的安装和基本测试过程。  更换 Ubuntu 软件源如果默认 Ubuntu 软件源访问速度较慢，可以先更换为清华镜像。 执行： 1sudo sed -i &quot;s@http://.*archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g&quot; /etc/apt/sources.list  以及： 1sudo sed -i &quot;s@http://.*security.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g&quot; /etc/apt/sources.list  然后更新软件源： 1sudo apt upd...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/11/24/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/2.Butterfly%20%E6%AF%9B%E7%8E%BB%E7%92%83%E6%A0%B7%E5%BC%8F/" title="Butterfly 日间与夜间毛玻璃样式"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-24</div><div class="info-item-2">Butterfly 日间与夜间毛玻璃样式</div></div><div class="info-2"><div class="info-item-1">Butterfly 日间与夜间毛玻璃样式Butterfly 默认卡片通常使用纯色背景。 如果网站本身使用了大幅背景图，纯色卡片会遮住较多内容，因此可以把文章卡片、侧栏和正文区域统一修改为毛玻璃效果。 毛玻璃主要由三部分组成： 12345半透明背景    +背景模糊    +浅色边框和阴影  本文记录日间和夜间模式下统一卡片透明度的方法。  添加自定义 CSS自定义样式放在： 1source/css/custom.css  然后在 _config.butterfly.yml 中加载： 123inject:  head:    - &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/custom.css&quot;&gt;  如果浏览器一直显示旧样式，可以给文件地址加一个版本参数： 1- &lt;link rel=&quot;stylesheet&quot; href=&quot;/css/custom.css?v=20241124-1&quot;&gt;  参数变化后，浏览器会重新获取 CSS。  统一毛玻璃变量先把常用参数集中在...</div></div></div></a><a class="pagination-related" href="/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/" title="Hexo + Butterfly 搭建博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-28</div><div class="info-item-2">Hexo + Butterfly 搭建博客</div></div><div class="info-2"><div class="info-item-1">Hexo + Butterfly 搭建博客Hexo 是一个基于 Node.js 的静态博客框架，可以直接使用 Markdown 编写文章，再由 Hexo 生成对应的静态网页。 Butterfly 是 Hexo 的一个主题，在 Hexo 的基础上提供了文章目录、暗色模式、代码块、侧边栏、访问统计等功能，同时也方便继续通过 CSS 和 JavaScript 做自定义。 目前博客采用： 1Hexo + Butterfly  主要用于记录 Linux、机器人、开发环境配置以及平时遇到的一些问题。 本文整理一下从 Hexo 初始化、Butterfly 配置，到自定义 CSS、JavaScript 和 Git 管理的基本流程。  Hexo 的基本工作方式Hexo 本质上是一个静态网站生成器。 平时只需要维护 Markdown 文件： 1xxx.md  然后由 Hexo 生成网页： 1234567Markdown   ↓Hexo   ↓HTML / CSS / JavaScript   ↓静态博客  文章默认放在： 1source/_posts/  因此博客内容本身仍然主要使用 Markdow...</div></div></div></a><a class="pagination-related" href="/2024/11/10/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/1.Butterfly%20%E5%AF%BC%E8%88%AA%E6%A0%8F%E4%B8%8E%E7%8B%AC%E7%AB%8B%E9%A1%B5%E9%9D%A2/" title="Butterfly 导航栏与独立页面配置"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-10</div><div class="info-item-2">Butterfly 导航栏与独立页面配置</div></div><div class="info-2"><div class="info-item-1">Butterfly 导航栏与独立页面配置博客刚搭建完成时，顶部通常只有首页、归档、标签和分类几个入口。 随着内容逐渐增加，还可以继续加入：  关于 日志 友情链接 学术主页  本文记录 Butterfly 顶部导航栏的配置方法，以及 Hexo 独立页面的基本目录结构。  配置顶部菜单Butterfly 的菜单可以在： 1_config.butterfly.yml  中配置。 例如： 123456789menu:  主页: / || fas fa-home  归档: /archives/ || fas fa-archive  标签: /tags/ || fas fa-tags  分类: /categories/ || fas fa-folder-open  关于: /about/ || fas fa-user  日志: /logs/ || fas fa-pen-to-square  链接: /links/ || fas fa-link  学术: https://mio0721.github.io/profile/ || fas fa-graduation-cap  每一项的结构可以...</div></div></div></a><a class="pagination-related" href="/2024/12/29/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/4.Hexo%20%E8%83%8C%E6%99%AF%E3%80%81%E5%B0%81%E9%9D%A2%E4%B8%8E%E5%A4%B4%E5%9B%BE/" title="Hexo 背景、封面与头图的区别"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-29</div><div class="info-item-2">Hexo 背景、封面与头图的区别</div></div><div class="info-2"><div class="info-item-1">Hexo 背景、封面与头图的区别博客中同时存在整站背景、文章封面和文章头图，这几个概念比较容易混在一起。 可以简单理解为： 123background  整个网站背后的图片cover       首页文章卡片的封面top_img     点进文章后顶部使用的图片  本文整理三者的用途，以及如何避免头图和背景之间出现明显接缝。  整站背景Butterfly 的背景可以在 _config.butterfly.yml 中设置： 1background: /img/home-bg/home-bg.png  对应的实际文件是： 1source/img/home-bg/home-bg.png  Hexo 生成网站后，浏览器访问路径会变成： 1/img/home-bg/home-bg.png  图片不要直接放进 public，因为执行： 1hexo clean  会删除整个 public 目录。  文章封面文章封面写在 Front Matter 中： 1cover: /img/posts/博客搭建/cover.jpg  主要用于首页文章卡片、归档等位置。 对应文件： 1source/img/p...</div></div></div></a><a class="pagination-related" href="/2025/01/26/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/6.GitHub%20Pages%20%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%BA%90%E7%A0%81%E5%A4%87%E4%BB%BD/" title="Hexo GitHub Pages 部署与源码备份"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-01-26</div><div class="info-item-2">Hexo GitHub Pages 部署与源码备份</div></div><div class="info-2"><div class="info-item-1">Hexo GitHub Pages 部署与源码备份Hexo 部署到 GitHub Pages 时，公开仓库中通常只有生成后的 HTML、CSS 和 JavaScript。 真正用于编辑博客的内容还包括： 1234567source/themes/scripts/_config.yml_config.butterfly.ymlpackage.jsonpackage-lock.json  如果只保留 Pages 仓库，换电脑以后无法直接恢复完整的博客开发环境。 因此可以把“网站源码”和“部署结果”分别保存到两个仓库。  两个仓库的作用可以使用下面的结构： 12homepage-source      私有仓库，保存 Hexo 源码mio0721.github.io    公开仓库，保存生成后的网页  两个仓库的作用不同： 1234567编辑 Markdown 和配置        ↓提交 homepage-source        ↓Hexo 生成 public        ↓部署到 mio0721.github.io  源码仓库可以设为私有，Pages 仓库保持公开。  不需要...</div></div></div></a><a class="pagination-related" href="/2024/10/27/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.hello-world/" title="Hello World"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-27</div><div class="info-item-2">Hello World</div></div><div class="info-2"><div class="info-item-1">Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;  More info: Writing Run server1$ hexo server  More info: Server Generate static files1$ hexo generate  More info: Generating Deploy to remote sites1$ hexo deploy  More info: Deployment </div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script src="/js/random-home-bg.js?v=20260831-3"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
