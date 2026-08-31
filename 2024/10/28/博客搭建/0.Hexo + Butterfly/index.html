@@ -1,0 +1,577 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Hexo + Butterfly 搭建博客 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Hexo + Butterfly 搭建博客Hexo 是一个基于 Node.js 的静态博客框架，可以直接使用 Markdown 编写文章，再由 Hexo 生成对应的静态网页。 Butterfly 是 Hexo 的一个主题，在 Hexo 的基础上提供了文章目录、暗色模式、代码块、侧边栏、访问统计等功能，同时也方便继续通过 CSS 和 JavaScript 做自定义。 目前博客采用： 1Hexo +">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo + Butterfly 搭建博客">
+<meta property="og:url" content="https://mio0721.github.io/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="Hexo + Butterfly 搭建博客Hexo 是一个基于 Node.js 的静态博客框架，可以直接使用 Markdown 编写文章，再由 Hexo 生成对应的静态网页。 Butterfly 是 Hexo 的一个主题，在 Hexo 的基础上提供了文章目录、暗色模式、代码块、侧边栏、访问统计等功能，同时也方便继续通过 CSS 和 JavaScript 做自定义。 目前博客采用： 1Hexo +">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2024-10-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-31T02:09:05.201Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="Butterfly">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="博客搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hexo + Butterfly 搭建博客",
+  "url": "https://mio0721.github.io/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2024-10-27T16:00:00.000Z",
+  "dateModified": "2026-08-31T02:09:05.201Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Hexo + Butterfly 搭建博客',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260830-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">22</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Hexo + Butterfly 搭建博客</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Hexo + Butterfly 搭建博客</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-10-27T16:00:00.000Z" title="发表于 2024-10-28 00:00:00">2024-10-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-31T02:09:05.201Z" title="更新于 2026-08-31 10:09:05">2026-08-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Hexo-Butterfly-搭建博客"><a href="#Hexo-Butterfly-搭建博客" class="headerlink" title="Hexo + Butterfly 搭建博客"></a>Hexo + Butterfly 搭建博客</h1><p>Hexo 是一个基于 Node.js 的静态博客框架，可以直接使用 Markdown 编写文章，再由 Hexo 生成对应的静态网页。</p>
+<p>Butterfly 是 Hexo 的一个主题，在 Hexo 的基础上提供了文章目录、暗色模式、代码块、侧边栏、访问统计等功能，同时也方便继续通过 CSS 和 JavaScript 做自定义。</p>
+<p>目前博客采用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hexo + Butterfly</span><br></pre></td></tr></table></figure>
+
+<p>主要用于记录 Linux、机器人、开发环境配置以及平时遇到的一些问题。</p>
+<p>本文整理一下从 Hexo 初始化、Butterfly 配置，到自定义 CSS、JavaScript 和 Git 管理的基本流程。</p>
+<hr>
+<h2 id="Hexo-的基本工作方式"><a href="#Hexo-的基本工作方式" class="headerlink" title="Hexo 的基本工作方式"></a>Hexo 的基本工作方式</h2><p>Hexo 本质上是一个静态网站生成器。</p>
+<p>平时只需要维护 Markdown 文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx.md</span><br></pre></td></tr></table></figure>
+
+<p>然后由 Hexo 生成网页：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Markdown</span><br><span class="line">   ↓</span><br><span class="line">Hexo</span><br><span class="line">   ↓</span><br><span class="line">HTML / CSS / JavaScript</span><br><span class="line">   ↓</span><br><span class="line">静态博客</span><br></pre></td></tr></table></figure>
+
+<p>文章默认放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/_posts/</span><br></pre></td></tr></table></figure>
+
+<p>因此博客内容本身仍然主要使用 Markdown 编写，页面生成、文章索引和网站结构则由 Hexo 负责。</p>
+<hr>
+<h2 id="安装-Node-js-和-npm"><a href="#安装-Node-js-和-npm" class="headerlink" title="安装 Node.js 和 npm"></a>安装 Node.js 和 npm</h2><p>Hexo 基于 Node.js，因此首先需要安装 Node.js 和 npm。</p>
+<p>可以先检查当前环境：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node -v</span><br><span class="line">npm -v</span><br></pre></td></tr></table></figure>
+
+<p>能够正常输出版本号即可。</p>
+<p>然后安装 Hexo CLI：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<p>检查 Hexo：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo -v</span><br></pre></td></tr></table></figure>
+
+<p>如果能够正常输出 Hexo 和相关组件版本，说明安装完成。</p>
+<hr>
+<h2 id="创建-Hexo-项目"><a href="#创建-Hexo-项目" class="headerlink" title="创建 Hexo 项目"></a>创建 Hexo 项目</h2><p>创建一个新的博客：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init blog</span><br></pre></td></tr></table></figure>
+
+<p>进入项目目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog</span><br></pre></td></tr></table></figure>
+
+<p>安装依赖：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>Hexo 项目中会有一个：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">package.json</span><br></pre></td></tr></table></figure>
+
+<p>里面记录项目所需要的 Node.js 依赖。</p>
+<p>执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>后，npm 会根据 <code>package.json</code> 和 <code>package-lock.json</code> 安装对应依赖，通常保存在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node_modules/</span><br></pre></td></tr></table></figure>
+
+<p>所以项目迁移到其他电脑时，一般不需要把整个 <code>node_modules</code> 一起复制。</p>
+<p>重新拉取项目后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> &lt;仓库地址&gt;</span><br><span class="line"><span class="built_in">cd</span> &lt;项目目录&gt;</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>即可重新恢复项目依赖。</p>
+<hr>
+<h2 id="本地运行-Hexo"><a href="#本地运行-Hexo" class="headerlink" title="本地运行 Hexo"></a>本地运行 Hexo</h2><p>Hexo 自带本地服务器。</p>
+<p>启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server</span><br></pre></td></tr></table></figure>
+
+<p>也可以直接使用缩写：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下浏览器访问：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:4000</span><br></pre></td></tr></table></figure>
+
+<p>即可查看博客。</p>
+<p>几个比较常用的 Hexo 命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动本地服务器</span></span><br><span class="line">hexo s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成静态文件</span></span><br><span class="line">hexo g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 清理缓存和已经生成的文件</span></span><br><span class="line">hexo clean</span><br></pre></td></tr></table></figure>
+
+<p>如果修改主题、配置文件后页面没有正确更新，可以重新执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>如果只是修改普通 Markdown 文章，通常直接：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>即可查看效果。</p>
+<hr>
+<h2 id="安装-Butterfly"><a href="#安装-Butterfly" class="headerlink" title="安装 Butterfly"></a>安装 Butterfly</h2><p>Hexo 默认主题比较简单，因此这里使用 Butterfly。</p>
+<p>安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-theme-butterfly</span><br></pre></td></tr></table></figure>
+
+<p>然后打开 Hexo 根目录下的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_config.yml</span><br></pre></td></tr></table></figure>
+
+<p>修改主题：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">theme:</span> <span class="string">butterfly</span></span><br></pre></td></tr></table></figure>
+
+<p>重新生成并启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>Butterfly 官方文档：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://butterfly.js.org/</span><br></pre></td></tr></table></figure>
+
+<p>之后大部分主题设置都可以通过配置文件完成，不需要直接修改 HTML。</p>
+<hr>
+<h2 id="Butterfly-配置文件"><a href="#Butterfly-配置文件" class="headerlink" title="Butterfly 配置文件"></a>Butterfly 配置文件</h2><p>Butterfly 的大部分设置都集中在主题配置文件中。</p>
+<p>常见的是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_config.butterfly.yml</span><br></pre></td></tr></table></figure>
+
+<p>网站头像、首页背景、暗色模式、代码块、侧边栏等基本都可以在这里配置。</p>
+<hr>
+<h2 id="设置头像"><a href="#设置头像" class="headerlink" title="设置头像"></a>设置头像</h2><p>例如头像配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">avatar:</span></span><br><span class="line">  <span class="attr">img:</span> <span class="string">/img/butterfly-icon.png</span></span><br><span class="line">  <span class="attr">effect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>对应的实际文件可以放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/img/butterfly-icon.png</span><br></pre></td></tr></table></figure>
+
+<p>这里需要注意 Hexo 的静态资源路径。</p>
+<p>配置中写：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/img/butterfly-icon.png</span><br></pre></td></tr></table></figure>
+
+<p>对应项目里的实际位置是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/img/butterfly-icon.png</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="首页背景"><a href="#首页背景" class="headerlink" title="首页背景"></a>首页背景</h2><p>首页背景可以设置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">index_img:</span> <span class="string">/img/home-bg/home-bg1.png</span></span><br></pre></td></tr></table></figure>
+
+<p>对应文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">source/</span><br><span class="line">└── img/</span><br><span class="line">    └── home-bg/</span><br><span class="line">        └── home-bg1.png</span><br></pre></td></tr></table></figure>
+
+<p><code>source</code> 可以理解为 Hexo 的静态资源目录。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source/img/</span><br><span class="line">source/css/</span><br><span class="line">source/js/</span><br></pre></td></tr></table></figure>
+
+<p>生成网站以后，这些资源会一起被处理。</p>
+<p>因此配置中的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/img/home-bg/home-bg1.png</span><br></pre></td></tr></table></figure>
+
+<p>实际对应：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/img/home-bg/home-bg1.png</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="暗色模式"><a href="#暗色模式" class="headerlink" title="暗色模式"></a>暗色模式</h2><p>Butterfly 自带暗色模式。</p>
+<p>配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">darkmode:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">button:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">autoChangeMode:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>如果希望网站默认直接使用暗色模式，可以设置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">display_mode:</span> <span class="string">dark</span></span><br></pre></td></tr></table></figure>
+
+<p>这样进入网站时默认显示暗色主题，同时仍然可以通过页面上的按钮手动切换亮色和暗色。</p>
+<hr>
+<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h2><p>博客主要记录开发环境、Linux 和代码相关内容，因此代码块配置比较重要。</p>
+<p>目前可以配置为：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">code_blocks:</span></span><br><span class="line">  <span class="attr">theme:</span> <span class="string">light</span></span><br><span class="line">  <span class="attr">macStyle:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">height_limit:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">word_wrap:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">copy:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">language:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">shrink:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">fullpage:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">copy:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>用于开启代码复制按钮。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">language:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>用于显示代码块语言，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bash</span><br><span class="line">python</span><br><span class="line">cpp</span><br><span class="line">yaml</span><br></pre></td></tr></table></figure>
+
+<p>之后文章中正常使用 Markdown 代码块即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br></pre></td></tr></table></figure>
+
+<p>或者：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="侧边栏"><a href="#侧边栏" class="headerlink" title="侧边栏"></a>侧边栏</h2><p>Butterfly 自带 Aside 侧边栏。</p>
+<p>全局可以配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">aside:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">position:</span> <span class="string">right</span></span><br></pre></td></tr></table></figure>
+
+<p>侧边栏可以显示：</p>
+<ul>
+<li>作者信息</li>
+<li>最近文章</li>
+<li>分类</li>
+<li>标签</li>
+<li>归档</li>
+<li>网站信息</li>
+</ul>
+<p>如果某篇文章不想显示侧边栏，可以直接在文章 Front Matter 中设置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">aside:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Hello</span> <span class="string">World</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2024-10-28</span></span><br><span class="line"><span class="attr">aside:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">技术</span></span><br><span class="line"></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Hexo</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">博客搭建</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>这样只会关闭当前文章的侧边栏，不影响其他页面。</p>
+<hr>
+<h2 id="创建文章"><a href="#创建文章" class="headerlink" title="创建文章"></a>创建文章</h2><p>Hexo 的文章一般放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/_posts/</span><br></pre></td></tr></table></figure>
+
+<p>目录结构类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source/_posts/</span><br><span class="line">├── Hello-World.md</span><br><span class="line">├── Ubuntu-NVIDIA.md</span><br><span class="line">├── Hexo-Blog.md</span><br><span class="line">└── ...</span><br></pre></td></tr></table></figure>
+
+<p>可以直接自己创建 Markdown 文件，也可以使用 Hexo：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;文章标题&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;Ubuntu NVIDIA 黑屏问题&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>Hexo 会自动在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/_posts/</span><br></pre></td></tr></table></figure>
+
+<p>下面生成对应 Markdown 文件。</p>
+<hr>
+<h2 id="Front-Matter"><a href="#Front-Matter" class="headerlink" title="Front Matter"></a>Front Matter</h2><p>每篇 Hexo 文章开头都有一段 Front Matter，用来保存文章的元数据。</p>
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">Ubuntu</span> <span class="string">NVIDIA</span> <span class="string">黑屏问题</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2024-11-15 20:30:00</span></span><br><span class="line"><span class="attr">aside:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Linux</span></span><br><span class="line"></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Ubuntu</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">NVIDIA</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>常用字段包括：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">title       文章标题</span><br><span class="line">date        发布时间</span><br><span class="line">aside       是否显示侧边栏</span><br><span class="line">categories  分类</span><br><span class="line">tags        标签</span><br><span class="line">cover       首页文章封面</span><br><span class="line">top_img     文章顶部图片</span><br></pre></td></tr></table></figure>
+
+<p>如果需要给文章添加封面和头图，可以继续写：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cover:</span> <span class="string">/img/posts/ubuntu-nvidia.jpg</span></span><br><span class="line"><span class="attr">top_img:</span> <span class="string">/img/posts/ubuntu-nvidia.jpg</span></span><br></pre></td></tr></table></figure>
+
+<p>实际图片放在：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/img/posts/ubuntu-nvidia.jpg</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="分类和标签"><a href="#分类和标签" class="headerlink" title="分类和标签"></a>分类和标签</h2><p><code>categories</code> 和 <code>tags</code> 用途不完全一样。</p>
+<p>例如：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">categories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Linux</span></span><br><span class="line"></span><br><span class="line"><span class="attr">tags:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Ubuntu</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">NVIDIA</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">显卡驱动</span></span><br></pre></td></tr></table></figure>
+
+<p>可以把 <code>categories</code> 理解成比较大的文章分类：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Linux</span><br><span class="line">机器人</span><br><span class="line">编程</span><br><span class="line">技术</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>tags</code> 更适合记录文章涉及的具体内容：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu</span><br><span class="line">CUDA</span><br><span class="line">PyTorch</span><br><span class="line">ROS2</span><br><span class="line">Hexo</span><br><span class="line">Butterfly</span><br></pre></td></tr></table></figure>
+
+<p>这样文章多起来以后会比较容易整理。</p>
+<hr>
+<h2 id="添加自定义-CSS"><a href="#添加自定义-CSS" class="headerlink" title="添加自定义 CSS"></a>添加自定义 CSS</h2><p>Butterfly 自带的配置已经可以修改很多东西，如果还想继续调整页面样式，可以额外增加自己的 CSS。</p>
+<p>例如创建：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/css/custom.css</span><br></pre></td></tr></table></figure>
+
+<p>然后在 Butterfly 配置中加入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">inject:</span></span><br><span class="line">  <span class="attr">head:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&lt;link</span> <span class="string">rel=&quot;stylesheet&quot;</span> <span class="string">href=&quot;/css/custom.css&quot;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>之后网站会额外加载：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/css/custom.css</span><br></pre></td></tr></table></figure>
+
+<p>这样一些额外样式都可以直接写进：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/css/custom.css</span><br></pre></td></tr></table></figure>
+
+<p>而不需要直接修改 Butterfly 主题源码。</p>
+<p>这种方式比较适合长期维护，因为主题以后升级时，自定义内容不会全部混进主题文件。</p>
+<hr>
+<h2 id="添加自定义-JavaScript"><a href="#添加自定义-JavaScript" class="headerlink" title="添加自定义 JavaScript"></a>添加自定义 JavaScript</h2><p>JavaScript 的处理方式类似。</p>
+<p>例如创建：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/js/random-home-bg.js</span><br></pre></td></tr></table></figure>
+
+<p>然后通过 Butterfly 的 <code>inject</code> 引入：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">inject:</span></span><br><span class="line">  <span class="attr">head:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&lt;link</span> <span class="string">rel=&quot;stylesheet&quot;</span> <span class="string">href=&quot;/css/custom.css&quot;&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">bottom:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&lt;script</span> <span class="string">src=&quot;/js/random-home-bg.js&quot;&gt;&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样页面加载时，就会同时加载自己的 CSS 和 JavaScript。</p>
+<p>整体关系大概是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Butterfly</span><br><span class="line">   │</span><br><span class="line">   ├── 主题原有配置</span><br><span class="line">   │</span><br><span class="line">   ├── custom.css</span><br><span class="line">   │</span><br><span class="line">   └── random-home-bg.js</span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以在不直接修改主题源码的情况下继续调整页面。</p>
+<hr>
+<h2 id="阅读模式"><a href="#阅读模式" class="headerlink" title="阅读模式"></a>阅读模式</h2><p>Butterfly 可以开启阅读模式：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">readmode:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>开启后可以通过页面按钮进入更适合阅读文章的界面。</p>
+<hr>
+<h2 id="文章目录"><a href="#文章目录" class="headerlink" title="文章目录"></a>文章目录</h2><p>文章目录可以配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">toc:</span></span><br><span class="line">  <span class="attr">post:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">number:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">scroll_percent:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">post:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>表示文章页面显示目录。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">number:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>显示目录编号。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">scroll_percent:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>显示文章阅读进度。</p>
+<p>长文章里比较实用。</p>
+<hr>
+<h2 id="访问统计"><a href="#访问统计" class="headerlink" title="访问统计"></a>访问统计</h2><p>Butterfly 可以接入 Busuanzi 做简单访问统计：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">busuanzi:</span></span><br><span class="line">  <span class="attr">site_uv:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">site_pv:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">page_pv:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>几个字段分别表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">site_uv    网站访客数</span><br><span class="line">site_pv    网站总访问量</span><br><span class="line">page_pv    当前文章访问量</span><br></pre></td></tr></table></figure>
+
+<p>对于个人博客来说已经够用。</p>
+<hr>
+<h2 id="使用-Git-管理博客"><a href="#使用-Git-管理博客" class="headerlink" title="使用 Git 管理博客"></a>使用 Git 管理博客</h2><p>博客本身就是一个普通项目，因此可以直接使用 Git 管理。</p>
+<p>查看修改：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
+
+<p>提交：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;update blog&quot;</span></span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+
+<p>这样博客源码就会保存在远程仓库。</p>
+<p>如果换电脑，只需要重新克隆：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> &lt;仓库地址&gt;</span><br></pre></td></tr></table></figure>
+
+<p>进入项目：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> &lt;项目目录&gt;</span><br></pre></td></tr></table></figure>
+
+<p>重新安装 Node.js 依赖：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p>然后启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo s</span><br></pre></td></tr></table></figure>
+
+<p>即可继续维护。</p>
+<p>因此 Hexo 项目本身并不依赖某一台电脑，也不一定必须放在 WSL 中。</p>
+<p>Windows、Linux 或其他可以正常运行 Node.js、npm 和 Git 的环境，都可以继续维护同一个项目。</p>
+<hr>
+<h2 id="项目目录"><a href="#项目目录" class="headerlink" title="项目目录"></a>项目目录</h2><p>经过这些配置以后，Hexo 项目的主要结构大概如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">blog/</span><br><span class="line">├── _config.yml</span><br><span class="line">├── _config.butterfly.yml</span><br><span class="line">├── package.json</span><br><span class="line">├── package-lock.json</span><br><span class="line">│</span><br><span class="line">├── source/</span><br><span class="line">│   ├── _posts/</span><br><span class="line">│   │   ├── 文章1.md</span><br><span class="line">│   │   ├── 文章2.md</span><br><span class="line">│   │   └── ...</span><br><span class="line">│   │</span><br><span class="line">│   ├── img/</span><br><span class="line">│   │   ├── butterfly-icon.png</span><br><span class="line">│   │   ├── posts/</span><br><span class="line">│   │   └── home-bg/</span><br><span class="line">│   │       └── home-bg1.png</span><br><span class="line">│   │</span><br><span class="line">│   ├── css/</span><br><span class="line">│   │   └── custom.css</span><br><span class="line">│   │</span><br><span class="line">│   └── js/</span><br><span class="line">│       └── random-home-bg.js</span><br><span class="line">│</span><br><span class="line">├── node_modules/</span><br><span class="line">├── public/</span><br><span class="line">└── themes/</span><br></pre></td></tr></table></figure>
+
+<p>平时主要会修改：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">_config.yml</span><br><span class="line">_config.butterfly.yml</span><br><span class="line">source/_posts/</span><br><span class="line">source/img/</span><br><span class="line">source/css/</span><br><span class="line">source/js/</span><br></pre></td></tr></table></figure>
+
+<p>其中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/_posts/</span><br></pre></td></tr></table></figure>
+
+<p>存放文章。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/img/</span><br></pre></td></tr></table></figure>
+
+<p>存放图片。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/css/</span><br></pre></td></tr></table></figure>
+
+<p>存放自定义样式。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source/js/</span><br></pre></td></tr></table></figure>
+
+<p>存放自定义 JavaScript。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node_modules/</span><br></pre></td></tr></table></figure>
+
+<p>存放 npm 安装的依赖，通常不需要手动修改。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public/</span><br></pre></td></tr></table></figure>
+
+<p>则是 Hexo 生成出来的静态网站文件。</p>
+<hr>
+<h2 id="日常使用流程"><a href="#日常使用流程" class="headerlink" title="日常使用流程"></a>日常使用流程</h2><p>博客配置完成以后，平时其实不需要再频繁修改 Hexo 本身。</p>
+<p>主要流程就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">创建 Markdown</span><br><span class="line">      ↓</span><br><span class="line">编写文章</span><br><span class="line">      ↓</span><br><span class="line">hexo s</span><br><span class="line">      ↓</span><br><span class="line">本地检查</span><br><span class="line">      ↓</span><br><span class="line">Git 提交</span><br><span class="line">      ↓</span><br><span class="line">发布</span><br></pre></td></tr></table></figure>
+
+<p>常用命令基本也就这些：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;文章标题&quot;</span></span><br><span class="line"></span><br><span class="line">hexo s</span><br><span class="line"></span><br><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line"></span><br><span class="line">git status</span><br><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;update blog&quot;</span></span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+
+<p>Hexo 负责网站生成，Butterfly 负责页面展示，文章和其他内容则继续用 Markdown 管理。</p>
+<p>搭好以后，后面真正需要做的事情就只剩下往里面填内容了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/">https://mio0721.github.io/2024/10/28/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.Hexo%20+%20Butterfly/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a><a class="post-meta__tags" href="/tags/Butterfly/">Butterfly</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/10/30/Linux/1.Ubuntu%20+%20NVIDIA%20%E9%BB%91%E5%B1%8F/" title="Ubuntu NVIDIA 显卡导致的黑屏问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Ubuntu NVIDIA 显卡导致的黑屏问题</div></div><div class="info-2"><div class="info-item-1">Ubuntu NVIDIA 显卡导致的黑屏问题在带 NVIDIA 独显的电脑上安装 Ubuntu 时，可能会遇到系统卡在 Ubuntu Logo、无法进入安装界面或桌面的情况。 常见表现主要有两种：  安装 Ubuntu 时，启动后一直停在 Ubuntu Logo，无法进入安装界面。 Ubuntu 已经安装完成，但开机后仍然卡在 Logo，无法进入登录界面。  这类问题可能和 Ubuntu 默认加载的 nouveau 开源显卡驱动有关。 可以先临时关闭 nouveau 的 modeset，让系统正常启动，再进行后续配置。  临时修改 GRUB 启动参数开机进入 GRUB 界面后，选中 Ubuntu 启动项，按： 1e  进入启动参数编辑界面。 找到包含： 1quiet splash  的一行。 在后面加入： 1nouveau.modeset=0  最终类似： 1quiet splash nouveau.modeset=0  然后按： 1F10  继续启动。 如果问题确实和 nouveau 有关，加入这个参数后通常可以正常进入系统。 这种修改只对当前启动生效，重启后不会保留。  永...</div></div></div></a><a class="pagination-related" href="/2024/10/27/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.hello-world/" title="Hello World"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hello World</div></div><div class="info-2"><div class="info-item-1">Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;  More info: Writing Run server1$ hexo server  More info: Server Generate static files1$ hexo generate  More info: Generating Deploy to remote sites1$ hexo deploy  More info: Deployment </div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/10/27/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/0.hello-world/" title="Hello World"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-27</div><div class="info-item-2">Hello World</div></div><div class="info-2"><div class="info-item-1">Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;  More info: Writing Run server1$ hexo server  More info: Server Generate static files1$ hexo generate  More info: Generating Deploy to remote sites1$ hexo deploy  More info: Deployment </div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script src="/js/random-home-bg.js?v=20260831-2"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

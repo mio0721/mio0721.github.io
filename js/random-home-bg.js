@@ -17,14 +17,38 @@ const homeBackgrounds = [
   "/img/home-bg/home-bg16.jpg"
 ];
 
-function applyRandomBackground() {
+function applyPageBackground() {
   const randomImage =
     homeBackgrounds[Math.floor(Math.random() * homeBackgrounds.length)];
+
+  /*
+   * 文章背景优先级：top_img（头图）> cover（封面）> 随机图库。
+   * Butterfly 会将文章配置中的图片地址写入对应的全局字段。
+   */
+  const postTopImg =
+    window.GLOBAL_CONFIG_SITE &&
+    window.GLOBAL_CONFIG_SITE.pageType === "post" &&
+    typeof window.GLOBAL_CONFIG_SITE.postTopImg === "string"
+      ? window.GLOBAL_CONFIG_SITE.postTopImg
+      : "";
+
+  const postCover =
+    window.GLOBAL_CONFIG_SITE &&
+    window.GLOBAL_CONFIG_SITE.pageType === "post" &&
+    typeof window.GLOBAL_CONFIG_SITE.postCover === "string"
+      ? window.GLOBAL_CONFIG_SITE.postCover
+      : "";
+
+  const pageBackground = postTopImg || postCover || randomImage;
 
   /* 顶部 Banner */
   const pageHeader = document.querySelector("#page-header");
 
-  if (pageHeader) {
+  /*
+   * 只有首页拥有独立大头图。
+   * 文章、归档、标签和分类页的顶部已改为透明，直接透出 #web_bg。
+   */
+  if (pageHeader && pageHeader.classList.contains("full_page")) {
     pageHeader.style.backgroundImage = `url("${randomImage}")`;
     pageHeader.style.backgroundSize = "cover";
     pageHeader.style.backgroundPosition = "center";
@@ -35,7 +59,7 @@ function applyRandomBackground() {
   const webBg = document.querySelector("#web_bg");
 
   if (webBg) {
-    webBg.style.backgroundImage = `url("${randomImage}")`;
+    webBg.style.backgroundImage = `url("${pageBackground}")`;
     webBg.style.backgroundSize = "cover";
     webBg.style.backgroundPosition = "center";
     webBg.style.backgroundRepeat = "no-repeat";
@@ -43,4 +67,4 @@ function applyRandomBackground() {
   }
 }
 
-applyRandomBackground();
+applyPageBackground();
