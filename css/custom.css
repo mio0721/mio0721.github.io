@@ -1451,3 +1451,161 @@ html[data-theme="dark"] .mio-log-empty {
     margin-top: 6px;
   }
 }
+
+
+/* =========================================================
+   29. 主标签页面统一毛玻璃标签卡片
+
+   Butterfly 会根据文章数量给标签内联写入不同的 font-size，
+   同时给每个标签生成随机 background-color，所以默认会有大小和
+   颜色差异。这里使用 !important 覆盖内联值，只影响 /tags/ 主页面。
+   标签搜索仍然通过 .tag-cloud-list 中的链接工作，不受样式影响。
+   ========================================================= */
+
+#body-wrap.type-tags .tag-cloud-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+
+/* 取消主题在悬浮容器时缩小、淡化其他标签的效果 */
+#body-wrap.type-tags .tag-cloud-list:hover a:not(:hover) {
+  opacity: 1;
+  transform: none;
+}
+
+
+#body-wrap.type-tags .tag-cloud-list > a {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  height: 44px;
+  overflow: hidden;
+  border: 1px solid var(--mio-border-light);
+  border-radius: 12px !important;
+  background: var(--mio-glass-light) !important;
+  color: var(--font-color) !important;
+  font-family: inherit !important;
+  font-size: 1rem !important;
+  font-weight: 500;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.58);
+  white-space: nowrap;
+  opacity: 1;
+  zoom: 1 !important;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+  transform: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+/* 关闭 Butterfly 默认的标签扫光层，保持纯净的无彩色玻璃外观 */
+#body-wrap.type-tags .tag-cloud-list > a::before {
+  display: none !important;
+}
+
+
+#body-wrap.type-tags .tag-cloud-list > a:hover,
+#body-wrap.type-tags .tag-cloud-list > a:focus-visible {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(10, 12, 18, 0.28) !important;
+  color: var(--font-color) !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+
+#body-wrap.type-tags .tag-cloud-list > a:active {
+  transform: translateY(0);
+}
+
+
+/* 夜间标签使用更深的中性玻璃，不引入随机颜色 */
+html[data-theme="dark"] #body-wrap.type-tags .tag-cloud-list > a {
+  border-color: var(--mio-border-dark);
+  background: var(--mio-glass-dark) !important;
+  color: var(--font-color) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.22);
+}
+
+
+html[data-theme="dark"] #body-wrap.type-tags .tag-cloud-list > a:hover,
+html[data-theme="dark"] #body-wrap.type-tags .tag-cloud-list > a:focus-visible {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(18, 20, 26, 0.62) !important;
+  color: var(--font-color) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+
+@media (max-width: 768px) {
+  #body-wrap.type-tags .tag-cloud-list {
+    gap: 9px;
+  }
+
+
+  #body-wrap.type-tags .tag-cloud-list > a {
+    padding: 0 14px !important;
+    height: 42px;
+    font-size: 1rem !important;
+    zoom: 1 !important;
+  }
+}
+
+
+/* =========================================================
+   30. 右下角“欣赏背景”模式
+
+   background-view.js 会在 html 上切换 .mio-background-view。
+   这里只隐藏 main 中的内容卡片并保留原来的页面高度，因此背景、
+   顶部导航和右下角按钮仍可使用，再次点击眼睛即可恢复。
+   ========================================================= */
+
+html.mio-background-view #content-inner > * {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition:
+    opacity 0.28s ease,
+    visibility 0s linear 0.28s !important;
+}
+
+
+/* 卡片恢复时立即解除 visibility，再平滑恢复透明度 */
+html:not(.mio-background-view) #content-inner > * {
+  transition:
+    opacity 0.28s ease,
+    visibility 0s linear 0s;
+}
+
+
+/* 新按钮沿用 Butterfly 统一按钮尺寸，只补充图标切换动画 */
+#background-view-btn i {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+
+#background-view-btn:hover i {
+  transform: scale(1.08);
+}
+
+
+html.mio-background-view #background-view-btn i {
+  opacity: 0.88;
+}
