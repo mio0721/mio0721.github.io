@@ -1035,6 +1035,9 @@ html[data-theme="dark"] .mio-tag-search {
     "Microsoft YaHei",
     "PingFang SC",
     sans-serif;
+
+  /* 文章正文比站点全局字号大约 8%，提升长文阅读舒适度 */
+  font-size: 1.08em;
 }
 
 
@@ -1053,28 +1056,130 @@ html[data-theme="dark"] .mio-tag-search {
 }
 
 
+/*
+ * JetBrains Mono 的字面高度比霞鹜文楷更饱满，因此代码块稍微缩小。
+ * pre 只缩放一次，内部 code 继承 pre，避免 0.89em 被重复计算。
+ */
+#post #article-container figure.highlight pre,
+#post #article-container > pre {
+  font-size: 0.89em !important;
+}
+
+
+#post #article-container figure.highlight pre code,
+#post #article-container > pre code {
+  font-size: inherit !important;
+}
+
+
+/* 代码块工具栏中的 BASH、PYTHON 等语言名称也使用代码字体 */
+#article-container .highlight-tools .code-lang {
+  font-family:
+    "JetBrains Mono",
+    "SFMono-Regular",
+    Consolas,
+    monospace !important;
+
+  /* 取消 Butterfly 默认的 1.15em 放大 */
+  font-size: 1em !important;
+}
+
+
 /* =========================================================
-   23.1 日间代码块使用夜间深色主题
+   23.1 日间代码块使用深蓝灰主题
 
    Butterfly 通过下列 CSS 变量统一控制代码块背景、工具栏、
-   行号区域和滚动条。这里让日间模式复用夜间模式的实际数值，
-   只影响 pre / figure.highlight 等块级代码，不改变正文行内代码。
+   行号区域和滚动条。日间采用低饱和深蓝灰，减轻纯白的刺眼感，
+   同时避免纯黑色块过于厚重。这里只影响 pre / figure.highlight
+   等块级代码，不改变正文行内代码。
    ========================================================= */
 
 html:not([data-theme="dark"]) {
-  --hl-color: rgba(255, 255, 255, 0.70);
-  --hl-bg: #171717;
-  --hltools-bg: #1a1a1a;
-  --hltools-color: #90a4ae;
-  --hlnumber-bg: #171717;
-  --hlnumber-color: rgba(255, 255, 255, 0.40);
-  --hlscrollbar-bg: #1f1f1f;
+  /* 日间使用半透明深蓝灰，保留背景层次但不干扰代码阅读 */
+  --hl-color: rgba(235, 240, 246, 0.88);
+  --hl-bg: rgba(39, 49, 61, 0.78);
+  --hltools-bg: rgba(32, 41, 52, 0.86);
+  --hltools-color: #aebaca;
+  --hlnumber-bg: transparent;
+  --hlnumber-color: rgba(196, 207, 220, 0.56);
+  --hlscrollbar-bg: #465566;
   --hlexpand-bg:
     linear-gradient(
       180deg,
-      rgba(23, 23, 23, 0.60),
-      rgba(23, 23, 23, 0.90)
+      rgba(39, 49, 61, 0.60),
+      rgba(39, 49, 61, 0.92)
     );
+}
+
+
+/* 半透明底色配合轻度模糊，形成与页面卡片一致的玻璃质感 */
+html:not([data-theme="dark"]) #article-container figure.highlight,
+html:not([data-theme="dark"]) #article-container > pre {
+  backdrop-filter: blur(10px) saturate(115%);
+  -webkit-backdrop-filter: blur(10px) saturate(115%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 18px rgba(10, 18, 28, 0.14);
+}
+
+
+/*
+ * Butterfly 会同时给 figure.highlight 外框和内部 pre 绘制 --hl-bg。
+ * 半透明颜色叠加两次会接近不透明，因此清除代码正文和行号的
+ * 内层背景，只保留最外层的一层深蓝灰玻璃。
+ */
+html:not([data-theme="dark"])
+#article-container figure.highlight .code pre,
+html:not([data-theme="dark"])
+#article-container figure.highlight .gutter pre {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+
+/* 用细分隔线区分行号，不再依赖第二层底色 */
+html:not([data-theme="dark"])
+#article-container figure.highlight .gutter {
+  border-right: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+
+/* =========================================================
+   23.2 夜间代码块增加轻微透明度
+
+   夜间仍保留原来的深黑基调，只将实色改为半透明黑灰；
+   内部 pre 同样保持透明，避免多层背景叠加后重新变实。
+   ========================================================= */
+
+html[data-theme="dark"] {
+  --hl-color: rgba(255, 255, 255, 0.74);
+  --hl-bg: rgba(23, 23, 23, 0.58);
+  --hltools-bg: rgba(26, 26, 26, 0.64);
+  --hltools-color: #90a4ae;
+  --hlnumber-bg: transparent;
+  --hlnumber-color: rgba(255, 255, 255, 0.42);
+  --hlscrollbar-bg: rgba(45, 45, 45, 0.64);
+  --hlexpand-bg:
+    linear-gradient(
+      180deg,
+      rgba(23, 23, 23, 0.36),
+      rgba(23, 23, 23, 0.64)
+    );
+}
+
+
+html[data-theme="dark"] #article-container figure.highlight,
+html[data-theme="dark"] #article-container > pre {
+  backdrop-filter: blur(8px) saturate(110%);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+}
+
+
+html[data-theme="dark"]
+#article-container figure.highlight .code pre,
+html[data-theme="dark"]
+#article-container figure.highlight .gutter pre {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 
