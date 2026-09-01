@@ -2052,6 +2052,19 @@ html[data-theme="dark"] .mio-update-heatmap {
 }
 
 
+/* 正文表格只在内容确实超出容器宽度时显示横向滚动条。
+   Butterfly 默认使用 overflow-x: scroll，会让所有表格下方都出现滑块槽。 */
+#article-container .table-wrap {
+  overflow-x: auto;
+}
+
+
+/* 表格确实超宽并出现横向滚动条时，让滑块槽四角更柔和。 */
+#article-container .table-wrap::-webkit-scrollbar-track {
+  border-radius: 6px;
+}
+
+
 .mio-heatmap-canvas {
   margin-right: auto;
   margin-left: auto;
