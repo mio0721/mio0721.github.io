@@ -1086,6 +1086,42 @@ html[data-theme="dark"] .mio-tag-search {
 
 
 /* =========================================================
+   23.0 正文行内代码
+
+   例如 `_data`、`hexo server` 这类夹在段落中的短代码。
+   :not(pre) > code 可避开整段代码框，只调整行内代码胶囊。
+   ========================================================= */
+
+#post #article-container :not(pre) > code {
+  font-size: 0.92em !important;
+  color: #ffb09f !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+}
+
+
+/* 日间：与块级代码一致的半透明深蓝灰，但稍微更轻 */
+html:not([data-theme="dark"])
+#post #article-container :not(pre) > code {
+  background: rgba(39, 49, 61, 0.56) !important;
+  box-shadow: 0 2px 7px rgba(10, 18, 28, 0.10);
+}
+
+
+/* 夜间：覆盖 Butterfly 默认的实色 #2c2c2c */
+html[data-theme="dark"]
+#post #article-container :not(pre) > code {
+  background: rgba(23, 23, 23, 0.46) !important;
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================================================
    23.1 日间代码块使用深蓝灰主题
 
    Butterfly 通过下列 CSS 变量统一控制代码块背景、工具栏、
