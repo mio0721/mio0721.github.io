@@ -70,6 +70,16 @@ function applyPageBackground(backgroundImages) {
     webBg.style.backgroundPosition = "center";
     webBg.style.backgroundRepeat = "no-repeat";
     webBg.style.backgroundAttachment = "fixed";
+
+    /*
+     * 保存当前真实背景路径，供右下角“鉴赏模式”按钮显示图片 ID。
+     * 自定义事件用于处理背景清单异步加载晚于按钮初始化的情况。
+     */
+    webBg.dataset.backgroundPath = pageBackground;
+    window.mioCurrentBackground = pageBackground;
+    document.dispatchEvent(new CustomEvent("mio:background-changed", {
+      detail: { path: pageBackground }
+    }));
   }
 }
 

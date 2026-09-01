@@ -15,17 +15,45 @@
   const buttonId = "background-view-btn";
 
 
+  /**
+   * 从当前背景文件名提取图片 ID。
+   * Pixiv 常见文件名 132794947_p0.jpg 会显示 132794947；
+   * 普通文件则显示去掉扩展名后的完整文件名。
+   */
+  const getBackgroundId = () => {
+    const webBg = document.getElementById("web_bg");
+    let backgroundPath = window.mioCurrentBackground ||
+      (webBg && webBg.dataset.backgroundPath) || "";
+
+    if (!backgroundPath && webBg) {
+      const backgroundImage = webBg.style.backgroundImage ||
+        window.getComputedStyle(webBg).backgroundImage;
+      const match = backgroundImage.match(/url\(["']?(.*?)["']?\)/);
+      backgroundPath = match ? match[1] : "";
+    }
+
+    const cleanPath = backgroundPath.split(/[?#]/, 1)[0];
+    const encodedName = cleanPath.slice(cleanPath.lastIndexOf("/") + 1);
+    const fileName = decodeURIComponent(encodedName || "未知图片");
+    const stem = fileName.replace(/\.[^.]+$/, "");
+    const pixivId = stem.match(/^\d+/);
+
+    return pixivId ? pixivId[0] : stem;
+  };
+
+
   /** 根据当前状态同步图标、提示文字和无障碍属性。 */
   const updateButton = button => {
     if (!button) return;
 
     const cardsHidden = html.classList.contains(viewClass);
     const icon = button.querySelector("i");
+    const backgroundId = getBackgroundId();
+    const tooltip = `鉴赏模式\nID:${backgroundId}`;
 
-    button.title = cardsHidden
-      ? "显示所有卡片"
-      : "隐藏所有卡片，欣赏背景";
-    button.setAttribute("aria-label", button.title);
+    /* title 中写入真正的换行符，浏览器悬浮提示会分成两行。 */
+    button.title = tooltip;
+    button.setAttribute("aria-label", `鉴赏模式，背景 ID：${backgroundId}`);
     button.setAttribute("aria-pressed", String(cardsHidden));
 
     if (icon) {
@@ -73,6 +101,13 @@
 
     document.addEventListener("pjax:complete", ensureButton);
     document.addEventListener("DOMContentLoaded", ensureButton);
+    document.addEventListener("mio:background-changed", ensureButton);
+
+    /* 悬浮前再读取一次，确保提示对应 PJAX 切换后的当前背景。 */
+    document.addEventListener("pointerover", event => {
+      const button = event.target.closest(`#${buttonId}`);
+      if (button) updateButton(button);
+    });
   }
 
   ensureButton();
