@@ -2036,11 +2036,48 @@ html[data-theme="dark"] .mio-update-heatmap {
 }
 
 
-.mio-heatmap-range {
+.mio-heatmap-year-control {
+  display: inline-flex;
+  align-items: center;
   flex: 0 0 auto;
+  gap: 8px;
+  color: var(--font-color);
+  font-size: 0.82em;
+  opacity: 0.9;
+}
+
+
+.mio-heatmap-year-control select {
+  padding: 6px 28px 6px 10px;
+  background: rgba(20, 35, 52, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 9px;
+  color: var(--font-color);
   font-family: "JetBrains Mono", Consolas, monospace;
-  font-size: 0.78em;
-  opacity: 0.74;
+  font-size: 0.94em;
+  outline: none;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+
+.mio-heatmap-year-control select:focus-visible {
+  border-color: rgba(66, 185, 255, 0.82);
+  box-shadow: 0 0 0 3px rgba(66, 185, 255, 0.16);
+}
+
+
+html[data-theme="dark"] .mio-heatmap-year-control select {
+  background: rgba(5, 6, 8, 0.54);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+
+.mio-heatmap-year-control option {
+  background: #223044;
+  color: #f5f7fa;
 }
 
 
@@ -2068,23 +2105,23 @@ html[data-theme="dark"] .mio-update-heatmap {
 .mio-heatmap-canvas {
   margin-right: auto;
   margin-left: auto;
-  width: 724px;
-  min-width: 724px;
+  width: calc(var(--heatmap-weeks, 53) * 14px + 37px);
+  min-width: calc(var(--heatmap-weeks, 53) * 14px + 37px);
 }
 
 
 .mio-heatmap-months {
   position: relative;
-  margin-left: 38px;
-  height: 18px;
-  font-size: 0.72em;
+  margin-left: 40px;
+  height: 19px;
+  font-size: 0.74em;
   opacity: 0.72;
 }
 
 
 .mio-heatmap-months > span {
   position: absolute;
-  left: calc(var(--heatmap-week) * 13px);
+  left: calc(var(--heatmap-week) * 14px);
   white-space: nowrap;
 }
 
@@ -2098,11 +2135,11 @@ html[data-theme="dark"] .mio-update-heatmap {
 
 .mio-heatmap-weekdays {
   display: grid;
-  flex: 0 0 30px;
-  grid-template-rows: repeat(7, 10px);
+  flex: 0 0 32px;
+  grid-template-rows: repeat(7, 11px);
   gap: 3px;
-  font-size: 0.66em;
-  line-height: 10px;
+  font-size: 0.68em;
+  line-height: 11px;
   opacity: 0.68;
 }
 
@@ -2125,8 +2162,8 @@ html[data-theme="dark"] .mio-update-heatmap {
 .mio-heatmap-grid {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 10px;
-  grid-template-rows: repeat(7, 10px);
+  grid-auto-columns: 11px;
+  grid-template-rows: repeat(7, 11px);
   gap: 3px;
 }
 
@@ -2134,13 +2171,19 @@ html[data-theme="dark"] .mio-update-heatmap {
 .mio-heatmap-cell {
   display: inline-block;
   box-sizing: border-box;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.18);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.04);
   transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+
+.mio-heatmap-cell.is-outside-year {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 
@@ -2217,7 +2260,7 @@ html[data-theme="dark"] .mio-heatmap-cell.level-4 {
 
 
 .mio-heatmap-legend .mio-heatmap-cell {
-  flex: 0 0 10px;
+  flex: 0 0 11px;
 }
 
 
