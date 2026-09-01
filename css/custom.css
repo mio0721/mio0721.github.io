@@ -261,23 +261,17 @@ html[data-theme="dark"]
 
 
 /* =========================================================
-   8. 侧栏内部不要再套黑底
+   8. 侧栏排版容器保持透明
    ========================================================= */
 
 /*
- * Butterfly 会把 card-info、card-announcement 等 class
- * 与 card-widget 放在同一个元素上。日间模式因此完全透明，
- * 夜间模式则由上方更高优先级的 data-theme 规则恢复深色玻璃。
+ * sticky_layout 只负责包裹需要吸顶的侧栏卡片，本身不绘制底色。
+ * 不要在这里选择 card-info、card-announcement 等类：它们和
+ * card-widget 位于同一个元素上，清空它们会导致日间卡片失去
+ * 上方 --mio-glass-light 定义的淡黑色毛玻璃背景。
  */
 
-#aside-content > div,
-#aside-content .card-info,
-#aside-content .card-announcement,
-#aside-content .card-recent-post,
-#aside-content .card-categories,
-#aside-content .card-tags,
-#aside-content .card-archives,
-#aside-content .card-webinfo {
+#aside-content > .sticky_layout {
   background: transparent !important;
   background-color: transparent !important;
 }
