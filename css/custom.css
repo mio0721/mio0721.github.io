@@ -1028,8 +1028,9 @@ html[data-theme="dark"] .mio-tag-search {
 }
 
 
-/* 文章标题下方的正文、标题、列表、引用和表格都会继承霞骛文楷 */
-#post #article-container {
+/* 博客文章、关于页和日志详情的正文统一继承霞骛文楷 */
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container {
   font-family:
     "LXGW WenKai",
     "Microsoft YaHei",
@@ -1042,12 +1043,18 @@ html[data-theme="dark"] .mio-tag-search {
 
 
 /* 覆盖 Butterfly 自带的 Monaco / Ubuntu Mono 代码字体 */
-#post #article-container code,
-#post #article-container pre,
-#post #article-container kbd,
-#post #article-container samp,
-#post #article-container figure.highlight pre,
-#post #article-container figure.highlight code {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container code,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container pre,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container kbd,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container samp,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container figure.highlight pre,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container figure.highlight code {
   font-family:
     "JetBrains Mono",
     "SFMono-Regular",
@@ -1060,14 +1067,18 @@ html[data-theme="dark"] .mio-tag-search {
  * JetBrains Mono 的字面高度比霞鹜文楷更饱满，因此代码块稍微缩小。
  * pre 只缩放一次，内部 code 继承 pre，避免 0.89em 被重复计算。
  */
-#post #article-container figure.highlight pre,
-#post #article-container > pre {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container figure.highlight pre,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container > pre {
   font-size: 0.89em !important;
 }
 
 
-#post #article-container figure.highlight pre code,
-#post #article-container > pre code {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container figure.highlight pre code,
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container > pre code {
   font-size: inherit !important;
 }
 
@@ -1092,7 +1103,8 @@ html[data-theme="dark"] .mio-tag-search {
    :not(pre) > code 可避开整段代码框，只调整行内代码胶囊。
    ========================================================= */
 
-#post #article-container :not(pre) > code {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container :not(pre) > code {
   font-size: 0.92em !important;
   color: #ffb09f !important;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1106,7 +1118,8 @@ html[data-theme="dark"] .mio-tag-search {
 
 /* 日间：与块级代码一致的半透明深蓝灰，但稍微更轻 */
 html:not([data-theme="dark"])
-#post #article-container :not(pre) > code {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container :not(pre) > code {
   background: rgba(39, 49, 61, 0.56) !important;
   box-shadow: 0 2px 7px rgba(10, 18, 28, 0.10);
 }
@@ -1114,7 +1127,8 @@ html:not([data-theme="dark"])
 
 /* 夜间：覆盖 Butterfly 默认的实色 #2c2c2c */
 html[data-theme="dark"]
-#post #article-container :not(pre) > code {
+:is(#post, #body-wrap.type-about, #body-wrap.type-log-entry)
+#article-container :not(pre) > code {
   background: rgba(23, 23, 23, 0.46) !important;
   border-color: rgba(255, 255, 255, 0.09);
   box-shadow: 0 2px 7px rgba(0, 0, 0, 0.12);
@@ -1768,4 +1782,164 @@ html:not(.mio-background-view) #content-inner > * {
 
 html.mio-background-view #background-view-btn i {
   opacity: 0.88;
+}
+
+
+/* =========================================================
+   31. 搜索弹窗毛玻璃
+
+   弹窗本身使用较高模糊度保证搜索结果可读；外层遮罩降低暗度，
+   避免半透明弹窗后面只剩一整片黑色。
+   ========================================================= */
+
+.search-dialog {
+  --search-input-color: rgba(255, 255, 255, 0.92);
+  --search-a-color: rgba(255, 255, 255, 0.88);
+  --text-color: rgba(255, 255, 255, 0.72);
+  background: rgba(22, 29, 40, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(22px) saturate(125%);
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
+}
+
+
+.search-dialog .local-search-input input,
+.search-dialog #algolia-search-input input,
+.search-dialog .local-search-input .ais-SearchBox-input,
+.search-dialog #algolia-search-input .ais-SearchBox-input {
+  background: rgba(12, 18, 26, 0.30) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+
+#search-mask {
+  background: rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+
+html[data-theme="dark"] .search-dialog {
+  background: rgba(12, 15, 21, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 18px 58px rgba(0, 0, 0, 0.34);
+}
+
+
+html[data-theme="dark"] #search-mask {
+  background: rgba(0, 0, 0, 0.34) !important;
+}
+
+
+/* =========================================================
+   32. 首页 / 归档翻页按钮毛玻璃
+
+   普通按钮只使用中性玻璃；当前页继续使用原来的青色，悬浮继续
+   使用原来的橙色。只改变透明度，不改变状态对应的颜色逻辑。
+   ========================================================= */
+
+.layout #pagination .pagination > *:not(.space):not(.current) {
+  background: rgba(10, 12, 18, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 4px 13px rgba(0, 0, 0, 0.12);
+}
+
+
+.layout #pagination .page-number.current {
+  background: rgba(0, 196, 182, 0.72) !important;
+  border: 1px solid rgba(0, 196, 182, 0.82);
+  color: var(--white) !important;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 4px 14px rgba(0, 196, 182, 0.18);
+}
+
+
+.layout #pagination .pagination > *:not(.space):hover {
+  background: rgba(255, 114, 66, 0.72) !important;
+  border-color: rgba(255, 114, 66, 0.82);
+  color: var(--btn-color) !important;
+}
+
+
+html[data-theme="dark"]
+.layout #pagination .pagination > *:not(.space):not(.current) {
+  background: rgba(18, 20, 26, 0.46) !important;
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+
+html[data-theme="dark"]
+.layout #pagination .pagination > *:not(.space):hover {
+  background: rgba(120, 120, 120, 0.66) !important;
+  border-color: rgba(160, 160, 160, 0.42);
+}
+
+
+/* 搜索结果内部的分页按钮使用同一套透明卡片结构 */
+.search-dialog .ais-Pagination-link {
+  background: rgba(10, 12, 18, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+
+.search-dialog .ais-Pagination-item--selected .ais-Pagination-link {
+  background: rgba(0, 196, 182, 0.72) !important;
+  border-color: rgba(0, 196, 182, 0.82);
+}
+
+
+.search-dialog
+.ais-Pagination-item:not(.ais-Pagination-item--selected):not(.ais-Pagination-item--ellipsis):not(.ais-Pagination-item--disabled)
+.ais-Pagination-link:hover {
+  background: rgba(255, 114, 66, 0.72) !important;
+}
+
+
+/* =========================================================
+   33. 头像下方 GitHub 透明按钮
+
+   保留 Butterfly 日间蓝色、悬浮橙色以及夜间灰色的状态逻辑，
+   只把实色按钮改成带细边框和阴影的透明小卡片。
+   ========================================================= */
+
+#aside-content .card-info #card-info-btn {
+  background: rgba(73, 177, 245, 0.62) !important;
+  border: 1px solid rgba(125, 204, 255, 0.46);
+  backdrop-filter: blur(9px) saturate(120%);
+  -webkit-backdrop-filter: blur(9px) saturate(120%);
+  box-shadow:
+    0 5px 15px rgba(30, 105, 155, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+
+#aside-content .card-info #card-info-btn:hover {
+  background: rgba(255, 114, 66, 0.72) !important;
+  border-color: rgba(255, 155, 120, 0.54);
+  box-shadow: 0 7px 18px rgba(175, 70, 35, 0.22);
+}
+
+
+html[data-theme="dark"] #aside-content .card-info #card-info-btn {
+  background: rgba(31, 31, 31, 0.50) !important;
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow:
+    0 5px 16px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+
+html[data-theme="dark"] #aside-content .card-info #card-info-btn:hover {
+  background: rgba(120, 120, 120, 0.62) !important;
+  border-color: rgba(180, 180, 180, 0.26);
 }
