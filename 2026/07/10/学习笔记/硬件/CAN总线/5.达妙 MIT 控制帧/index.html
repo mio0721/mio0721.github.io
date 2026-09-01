@@ -1,0 +1,385 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>达妙 MIT 控制帧：8 Byte 如何装下 5 个参数 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="达妙 MIT 控制帧：8 Byte 如何装下 5 个参数达妙 MIT 模式的一帧 CAN 数据可以同时发送五个控制参数： 12345p_des：目标位置v_des：目标速度Kp：位置增益Kd：速度或阻尼增益t_ff：前馈力矩  经典 CAN 数据区只有 8 Byte。如果把五个参数都作为普通 float 发送，需要 20 Byte，显然无法放进一帧数据。因此，MIT 协议会先把物理量映射成定长无符">
+<meta property="og:type" content="article">
+<meta property="og:title" content="达妙 MIT 控制帧：8 Byte 如何装下 5 个参数">
+<meta property="og:url" content="https://mio0721.github.io/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="达妙 MIT 控制帧：8 Byte 如何装下 5 个参数达妙 MIT 模式的一帧 CAN 数据可以同时发送五个控制参数： 12345p_des：目标位置v_des：目标速度Kp：位置增益Kd：速度或阻尼增益t_ff：前馈力矩  经典 CAN 数据区只有 8 Byte。如果把五个参数都作为普通 float 发送，需要 20 Byte，显然无法放进一帧数据。因此，MIT 协议会先把物理量映射成定长无符">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-07-10T02:31:00.000Z">
+<meta property="article:modified_time" content="2026-07-10T02:42:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="CAN总线">
+<meta property="article:tag" content="MIT模式">
+<meta property="article:tag" content="位运算">
+<meta property="article:tag" content="达妙电机">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "达妙 MIT 控制帧：8 Byte 如何装下 5 个参数",
+  "url": "https://mio0721.github.io/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-07-10T02:31:00.000Z",
+  "dateModified": "2026-07-10T02:42:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '达妙 MIT 控制帧：8 Byte 如何装下 5 个参数',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260901-16"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">61</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">达妙 MIT 控制帧：8 Byte 如何装下 5 个参数</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">达妙 MIT 控制帧：8 Byte 如何装下 5 个参数</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-10T02:31:00.000Z" title="发表于 2026-07-10 10:31:00">2026-07-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-10T02:42:00.000Z" title="更新于 2026-07-10 10:42:00">2026-07-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/">硬件</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="达妙-MIT-控制帧：8-Byte-如何装下-5-个参数"><a href="#达妙-MIT-控制帧：8-Byte-如何装下-5-个参数" class="headerlink" title="达妙 MIT 控制帧：8 Byte 如何装下 5 个参数"></a>达妙 MIT 控制帧：8 Byte 如何装下 5 个参数</h1><p>达妙 MIT 模式的一帧 CAN 数据可以同时发送五个控制参数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">p_des：目标位置</span><br><span class="line">v_des：目标速度</span><br><span class="line">Kp：位置增益</span><br><span class="line">Kd：速度或阻尼增益</span><br><span class="line">t_ff：前馈力矩</span><br></pre></td></tr></table></figure>
+
+<p>经典 CAN 数据区只有 8 Byte。如果把五个参数都作为普通 <code>float</code> 发送，需要 20 Byte，显然无法放进一帧数据。因此，MIT 协议会先把物理量映射成定长无符号整数，再通过位运算紧凑地装入 64 bit。</p>
+<h2 id="MIT-控制律"><a href="#MIT-控制律" class="headerlink" title="MIT 控制律"></a>MIT 控制律</h2><p>MIT 模式的目标力矩可以近似理解为：</p>
+<p>$$<br>\tau &#x3D; K_p(p_{des}-p)+K_d(v_{des}-v)+\tau_{ff}<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$p_{des}$ 和 $p$ 分别是目标位置和实际位置；</li>
+<li>$v_{des}$ 和 $v$ 分别是目标速度和实际速度；</li>
+<li>$K_p$ 决定位置误差产生多强的纠正力矩；</li>
+<li>$K_d$ 决定速度误差产生多强的阻尼力矩；</li>
+<li>$\tau_{ff}$ 是额外施加的前馈力矩。</li>
+</ul>
+<p>可以把它直观地理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MIT 控制</span><br><span class="line">= 虚拟弹簧</span><br><span class="line">+ 虚拟阻尼器</span><br><span class="line">+ 前馈力矩</span><br></pre></td></tr></table></figure>
+
+<p>调节 <code>Kp</code> 和 <code>Kd</code> 后，关节可以表现得更刚硬或更柔顺，这也是阻抗控制等机器人控制方法中常见的思想。</p>
+<h2 id="五个参数的位宽"><a href="#五个参数的位宽" class="headerlink" title="五个参数的位宽"></a>五个参数的位宽</h2><p>MIT 控制帧给五个参数分配的位数为：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th align="right">位宽</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Position</td>
+<td align="right">16 bit</td>
+</tr>
+<tr>
+<td>Velocity</td>
+<td align="right">12 bit</td>
+</tr>
+<tr>
+<td>Kp</td>
+<td align="right">12 bit</td>
+</tr>
+<tr>
+<td>Kd</td>
+<td align="right">12 bit</td>
+</tr>
+<tr>
+<td>Torque</td>
+<td align="right">12 bit</td>
+</tr>
+</tbody></table>
+<p>总位数刚好是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">16 + 12 + 12 + 12 + 12</span><br><span class="line">= 64 bit</span><br><span class="line">= 8 Byte</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-Byte-的整体布局"><a href="#8-Byte-的整体布局" class="headerlink" title="8 Byte 的整体布局"></a>8 Byte 的整体布局</h2><p>完整布局如下：</p>
+<table>
+<thead>
+<tr>
+<th>字节</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>D[0]</code></td>
+<td>Position <code>[15:8]</code></td>
+</tr>
+<tr>
+<td><code>D[1]</code></td>
+<td>Position <code>[7:0]</code></td>
+</tr>
+<tr>
+<td><code>D[2]</code></td>
+<td>Velocity <code>[11:4]</code></td>
+</tr>
+<tr>
+<td><code>D[3]</code></td>
+<td>Velocity <code>[3:0]</code> + Kp <code>[11:8]</code></td>
+</tr>
+<tr>
+<td><code>D[4]</code></td>
+<td>Kp <code>[7:0]</code></td>
+</tr>
+<tr>
+<td><code>D[5]</code></td>
+<td>Kd <code>[11:4]</code></td>
+</tr>
+<tr>
+<td><code>D[6]</code></td>
+<td>Kd <code>[3:0]</code> + Torque <code>[11:8]</code></td>
+</tr>
+<tr>
+<td><code>D[7]</code></td>
+<td>Torque <code>[7:0]</code></td>
+</tr>
+</tbody></table>
+<p>可以简写为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">D0  D1  D2  D3  D4  D5  D6  D7</span><br><span class="line">PP  PP  VV  VK  KK  DD  DT  TT</span><br></pre></td></tr></table></figure>
+
+<p>16 bit 的 Position 正好占两个字节；其余参数都是 12 bit，因此需要让两个相邻参数共享一个字节。</p>
+<h2 id="Position-的拆分"><a href="#Position-的拆分" class="headerlink" title="Position 的拆分"></a>Position 的拆分</h2><p>假设位置编码后的整数为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pos_tmp = 0xB669</span><br></pre></td></tr></table></figure>
+
+<p>高 8 位放进 <code>D[0]</code>，低 8 位放进 <code>D[1]</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">D[0] = 0xB6</span><br><span class="line">D[1] = 0x69</span><br></pre></td></tr></table></figure>
+
+<p>对应代码为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data[<span class="number">0</span>] = pos_tmp &gt;&gt; <span class="number">8</span>;</span><br><span class="line">data[<span class="number">1</span>] = pos_tmp;</span><br></pre></td></tr></table></figure>
+
+<p><code>pos_tmp &gt;&gt; 8</code> 取出高 8 位；赋值给 8 bit 的 <code>data[1]</code> 时只保留低 8 位。</p>
+<h2 id="Velocity-和-Kp-的跨字节拼接"><a href="#Velocity-和-Kp-的跨字节拼接" class="headerlink" title="Velocity 和 Kp 的跨字节拼接"></a>Velocity 和 Kp 的跨字节拼接</h2><p>假设两个 12 bit 整数为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Velocity = 0xABC</span><br><span class="line">Kp       = 0x123</span><br></pre></td></tr></table></figure>
+
+<p>打包结果是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D[2] = 0xAB</span><br><span class="line">D[3] = 0xC1</span><br><span class="line">D[4] = 0x23</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>D[3]</code> 的高 4 位来自 Velocity，低 4 位来自 Kp：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">D[3]</span><br><span class="line">┌──────────────┬────────────┐</span><br><span class="line">│ Velocity低4位 │ Kp高4位    │</span><br><span class="line">└──────────────┴────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>对应代码为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data[<span class="number">2</span>] = vel_tmp &gt;&gt; <span class="number">4</span>;</span><br><span class="line">data[<span class="number">3</span>] = ((vel_tmp &amp; <span class="number">0xF</span>) &lt;&lt; <span class="number">4</span>) | (kp_tmp &gt;&gt; <span class="number">8</span>);</span><br><span class="line">data[<span class="number">4</span>] = kp_tmp;</span><br></pre></td></tr></table></figure>
+
+<p>这里几个位运算的作用分别是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">vel_tmp &gt;&gt; 4</span><br><span class="line">取出 Velocity 的高 8 位</span><br><span class="line"></span><br><span class="line">vel_tmp &amp; 0xF</span><br><span class="line">只保留 Velocity 的低 4 位</span><br><span class="line"></span><br><span class="line">(vel_tmp &amp; 0xF) &lt;&lt; 4</span><br><span class="line">把这 4 bit 移到 D[3] 的高半字节</span><br><span class="line"></span><br><span class="line">kp_tmp &gt;&gt; 8</span><br><span class="line">取出 Kp 的高 4 位</span><br><span class="line"></span><br><span class="line">|</span><br><span class="line">把两部分合并到一个字节</span><br></pre></td></tr></table></figure>
+
+<p>Kd 和 Torque 使用完全相同的方式，共享 <code>D[6]</code>。</p>
+<h2 id="从浮点数映射到整数"><a href="#从浮点数映射到整数" class="headerlink" title="从浮点数映射到整数"></a>从浮点数映射到整数</h2><p>实际控制量通常是带小数的物理量，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Position = 1.35 rad</span><br><span class="line">Velocity = 2.7 rad/s</span><br><span class="line">Torque   = 0.5 N·m</span><br></pre></td></tr></table></figure>
+
+<p>它们需要先通过等比例映射转换成无符号整数：</p>
+<p>$$<br>x_{int}&#x3D;\frac{x-x_{min}}{x_{max}-x_{min}}(2^{bits}-1)<br>$$</p>
+<p>例如，一个 12 bit 整数能够表示 <code>0～4095</code>。如果速度范围是 <code>-45～45 rad/s</code>，映射关系大致为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-45 rad/s → 0</span><br><span class="line">  0 rad/s → 约 2048</span><br><span class="line">+45 rad/s → 4095</span><br></pre></td></tr></table></figure>
+
+<p>因此，速度为 0 时，编码值并不是 0，而是在无符号整数范围的中间位置。</p>
+<p>映射前应先限制输入范围，避免超出协议范围后发生整数溢出或回绕：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> x_clamped = <span class="built_in">clamp</span>(x, x_min, x_max);</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数范围不能直接照抄"><a href="#参数范围不能直接照抄" class="headerlink" title="参数范围不能直接照抄"></a>参数范围不能直接照抄</h2><p>示例代码中经常出现 <code>P_MIN</code>、<code>P_MAX</code>、<code>V_MIN</code>、<code>V_MAX</code>、<code>T_MIN</code> 和 <code>T_MAX</code>。有些说明书示例还会使用类似下面的范围：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Position：-12.5 ～ 12.5 rad</span><br><span class="line">Velocity：-45 ～ 45 rad/s</span><br><span class="line">Torque：-18 ～ 18 N·m</span><br><span class="line">Kp：0 ～ 500</span><br><span class="line">Kd：0 ～ 5</span><br></pre></td></tr></table></figure>
+
+<p>这些数值不能脱离电机型号、参数配置和固件版本直接套用。程序中的映射范围必须与驱动器实际配置一致，否则控制器认为发送的物理量会与电机解析结果不一致。</p>
+<h2 id="完整打包代码"><a href="#完整打包代码" class="headerlink" title="完整打包代码"></a>完整打包代码</h2><p>把五个参数映射为整数后，可以按照下面的方式打包：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">pos_tmp = <span class="built_in">float_to_uint</span>(pos, P_MIN, P_MAX, <span class="number">16</span>);</span><br><span class="line">vel_tmp = <span class="built_in">float_to_uint</span>(vel, V_MIN, V_MAX, <span class="number">12</span>);</span><br><span class="line">kp_tmp  = <span class="built_in">float_to_uint</span>(kp, KP_MIN, KP_MAX, <span class="number">12</span>);</span><br><span class="line">kd_tmp  = <span class="built_in">float_to_uint</span>(kd, KD_MIN, KD_MAX, <span class="number">12</span>);</span><br><span class="line">tor_tmp = <span class="built_in">float_to_uint</span>(torque, T_MIN, T_MAX, <span class="number">12</span>);</span><br><span class="line"></span><br><span class="line">data[<span class="number">0</span>] = pos_tmp &gt;&gt; <span class="number">8</span>;</span><br><span class="line">data[<span class="number">1</span>] = pos_tmp;</span><br><span class="line">data[<span class="number">2</span>] = vel_tmp &gt;&gt; <span class="number">4</span>;</span><br><span class="line">data[<span class="number">3</span>] = ((vel_tmp &amp; <span class="number">0xF</span>) &lt;&lt; <span class="number">4</span>) | (kp_tmp &gt;&gt; <span class="number">8</span>);</span><br><span class="line">data[<span class="number">4</span>] = kp_tmp;</span><br><span class="line">data[<span class="number">5</span>] = kd_tmp &gt;&gt; <span class="number">4</span>;</span><br><span class="line">data[<span class="number">6</span>] = ((kd_tmp &amp; <span class="number">0xF</span>) &lt;&lt; <span class="number">4</span>) | (tor_tmp &gt;&gt; <span class="number">8</span>);</span><br><span class="line">data[<span class="number">7</span>] = tor_tmp;</span><br></pre></td></tr></table></figure>
+
+<p>整个过程可以概括为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">实际物理量</span><br><span class="line">  ↓</span><br><span class="line">范围限制</span><br><span class="line">  ↓</span><br><span class="line">float_to_uint()</span><br><span class="line">  ↓</span><br><span class="line">16 bit / 12 bit 整数</span><br><span class="line">  ↓</span><br><span class="line">拆分与拼接</span><br><span class="line">  ↓</span><br><span class="line">8 Byte CAN DATA</span><br></pre></td></tr></table></figure>
+
+<h2 id="不同控制效果"><a href="#不同控制效果" class="headerlink" title="不同控制效果"></a>不同控制效果</h2><p>MIT 模式可以通过五个参数组合出不同控制效果。</p>
+<p>位置控制通常使用非零的 <code>p_des</code>、<code>Kp</code> 和 <code>Kd</code>。如果只有 <code>Kp</code> 而缺少足够阻尼，关节可能因惯性发生振荡，因此不能在不了解系统特性的情况下随意增大增益或把 <code>Kd</code> 直接设为零。</p>
+<p>在相应协议配置下，纯力矩控制可以近似设置为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Kp = 0</span><br><span class="line">Kd = 0</span><br><span class="line">t_ff = 目标力矩</span><br></pre></td></tr></table></figure>
+
+<p>此时：</p>
+<p>$$<br>\tau \approx \tau_{ff}<br>$$</p>
+<p>但空载电机在持续力矩作用下可能不断加速。实验时必须固定电机，从很小的力矩开始，设置速度、位置和力矩限制，并保留可靠的失能与断电手段。</p>
+<p>理解映射和位拼接后，下一步就是反向解析电机发回来的 8 Byte 数据，将编码整数恢复成位置、速度、力矩和温度。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/">https://mio0721.github.io/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a><a class="post-meta__tags" href="/tags/%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA/">达妙电机</a><a class="post-meta__tags" href="/tags/%E4%BD%8D%E8%BF%90%E7%AE%97/">位运算</a><a class="post-meta__tags" href="/tags/MIT%E6%A8%A1%E5%BC%8F/">MIT模式</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/6.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%8F%8D%E9%A6%88%E5%B8%A7/" title="达妙电机反馈帧：解析位置、速度、力矩与状态"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">达妙电机反馈帧：解析位置、速度、力矩与状态</div></div><div class="info-2"><div class="info-item-1">达妙电机反馈帧：解析位置、速度、力矩与状态MIT 控制帧负责把目标位置、速度、增益和力矩编码成 8 Byte 发送给电机。反馈帧则完成相反的过程：电脑收到电机返回的原始字节后，将其还原成位置、速度、力矩、温度和状态信息。 12发送：物理量 → 编码 → 拆分 → CAN接收：CAN → 拼接 → 解码 → 物理量  为什么需要反馈只发送目标力矩或目标位置还不能形成完整控制过程。控制器还需要知道：  电机当前位置和速度； 实际或估计力矩； 电机是否已经使能； 是否出现过压、过流或通信错误； MOS 和电机温度是否过高。  控制帧和反馈帧共同构成最基础的闭环通信： 12控制器 ──控制帧──→ 电机控制器 ←─反馈帧── 电机  反馈帧的布局本文所用达妙反馈帧可以按下面的结构理解：    字节 内容    D[0] ERR [7:4] + Motor ID [3:0]   D[1] Position [15:8]   D[2] Position [7:0]   D[3] Velocity [11:4]   D[4] Velocity [3:0] + Torque [11:8]   D...</div></div></div></a><a class="pagination-related" href="/2026/07/08/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/4.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E4%BD%BF%E8%83%BD%E4%B8%8E%E5%A4%B1%E8%83%BD/" title="达妙电机 CAN 控制：使能、失能与保存零点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">达妙电机 CAN 控制：使能、失能与保存零点</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 控制：使能、失能与保存零点前面已经梳理了 CAN 帧的 ID、DLC、DATA，以及达妙电机中 CAN_ID 和控制模式之间的关系。 这一节开始看真正能够改变电机状态的 CAN 报文：使能、失能和保存零点。 什么是使能电机驱动器上电后，通常不会立即接受运动控制命令，而是先处于失能状态。 这时即使发送目标位置、速度或力矩，电机也不会按照正常控制流程执行。正式控制前，需要先发送使能命令，让驱动器进入可控状态。 基本流程可以表示为： 123456789电机上电  ↓检查通信与参数  ↓发送使能命令  ↓发送运动控制命令  ↓读取反馈数据  达妙的特殊命令在本文所用的达妙 MIT 模式协议中，几条常见特殊命令为：    功能 DATA    使能 FF FF FF FF FF FF FF FC   失能 FF FF FF FF FF FF FF FD   保存当前位置为零点 FF FF FF FF FF FF FF FE   三条命令前 7 Byte 完全相同，最后一个字节分别为 FC、FD 和 FE。 这些含义并不是 CAN 标准本身规定的，而是达妙通信协议定义的。C...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/08/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/4.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E4%BD%BF%E8%83%BD%E4%B8%8E%E5%A4%B1%E8%83%BD/" title="达妙电机 CAN 控制：使能、失能与保存零点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-08</div><div class="info-item-2">达妙电机 CAN 控制：使能、失能与保存零点</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 控制：使能、失能与保存零点前面已经梳理了 CAN 帧的 ID、DLC、DATA，以及达妙电机中 CAN_ID 和控制模式之间的关系。 这一节开始看真正能够改变电机状态的 CAN 报文：使能、失能和保存零点。 什么是使能电机驱动器上电后，通常不会立即接受运动控制命令，而是先处于失能状态。 这时即使发送目标位置、速度或力矩，电机也不会按照正常控制流程执行。正式控制前，需要先发送使能命令，让驱动器进入可控状态。 基本流程可以表示为： 123456789电机上电  ↓检查通信与参数  ↓发送使能命令  ↓发送运动控制命令  ↓读取反馈数据  达妙的特殊命令在本文所用的达妙 MIT 模式协议中，几条常见特殊命令为：    功能 DATA    使能 FF FF FF FF FF FF FF FC   失能 FF FF FF FF FF FF FF FD   保存当前位置为零点 FF FF FF FF FF FF FF FE   三条命令前 7 Byte 完全相同，最后一个字节分别为 FC、FD 和 FE。 这些含义并不是 CAN 标准本身规定的，而是达妙通信协议定义的。C...</div></div></div></a><a class="pagination-related" href="/2026/07/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/11.%E7%9C%9F%E5%AE%9E%E5%8F%8D%E9%A6%88%E6%8A%A5%E6%96%87%E8%A7%A3%E6%9E%90/" title="逐字节解析一条达妙电机真实反馈报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-19</div><div class="info-item-2">逐字节解析一条达妙电机真实反馈报文</div></div><div class="info-2"><div class="info-item-1">逐字节解析一条达妙电机真实反馈报文前面已经介绍了达妙反馈帧的字段布局。这一节不再重复原理，而是使用一条完整示例，从 8 Byte 原始数据开始，逐步计算电机编号、状态、位置、速度、力矩和温度。 示例报文假设 CAN 分析仪收到： 123CAN ID = 0x00DLC    = 8DATA   = 11 80 00 80 08 00 28 23  逐字节写为： 12345678D[0] = 0x11D[1] = 0x80D[2] = 0x00D[3] = 0x80D[4] = 0x08D[5] = 0x00D[6] = 0x28D[7] = 0x23  本文沿用前面示例中的反馈帧格式和对称映射范围。实际电机的字段、状态码、PMAX、VMAX 和 TMAX 必须以当前型号、固件和参数配置为准。 解析状态和 Motor IDD[0] 的高 4 bit 是状态或错误码，低 4 bit 是 Motor ID： 12uint8_t error    = data[0] &gt;&gt; 4;uint8_t motor_id = data[0] &amp; 0x0F;  对于： 1D[0] ...</div></div></div></a><a class="pagination-related" href="/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/" title="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-05</div><div class="info-item-2">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移</div></div><div class="info-2"><div class="info-item-1">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移学习达妙电机的 CAN 协议时，很容易把 CAN ID、设备地址、CAN_ID 和 Master ID 混在一起。 这一节重点梳理这些概念，以及说明书中常见的 0x01、0x101 和 0x201 分别是怎么得到的。 CAN ID 本质上是什么一帧 CAN 报文可以先简化为： 1CAN ID + DLC + DATA  其中，CAN ID 最准确的含义是：  一条 CAN 消息的标识符。  它并不等同于严格意义上的设备地址。CAN 协议本身关注的是“这是什么消息”，至于某个 ID 是否对应某台电机，由设备厂商设计的上层协议决定。 为什么 CAN ID 看起来像电机地址电机协议通常会把设备编号编码进 CAN ID。例如： 123电机 1：CAN_ID = 0x01电机 2：CAN_ID = 0x02电机 3：CAN_ID = 0x03  三个电机连接在同一条 CANH、CANL 总线上。当控制器发送 ID 为 0x02 的控制帧时，所有节点都能接收到总线信号，但只有符合协议和筛选条件的电机 2 会处理这条命令...</div></div></div></a><a class="pagination-related" href="/2026/07/22/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/12.%E8%BE%BE%E5%A6%99%20CAN%20%E5%AE%8C%E6%95%B4%E6%8E%A7%E5%88%B6%E6%B5%81%E7%A8%8B/" title="达妙电机 CAN 完整控制流程：从通信到闭环控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-22</div><div class="info-item-2">达妙电机 CAN 完整控制流程：从通信到闭环控制</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 完整控制流程：从通信到闭环控制前面的笔记分别讨论了 CAN 帧、达妙特殊命令、MIT 编码、反馈解析、仲裁、物理接线和 DMTool 抓包。这一节将这些内容组合成一个完整的电机闭环控制程序框架。 系统数据流控制方向： 123456789控制算法  ↓ 目标位置、速度或力矩达妙 MIT 协议编码  ↓ 8 ByteCAN 通信层  ↓USB2CAN  ↓ CANH / CANL达妙电机  反馈方向： 123456789达妙电机  ↓ 反馈帧USB2CAN  ↓CAN 通信层  ↓ 原始 8 Byte达妙协议解析  ↓ 位置、速度、力矩、状态和温度控制算法  这两个方向不断循环，构成闭环控制。 程序分为三层CAN 通信层负责打开适配器、设置波特率、启动通道、发送和接收 CAN 帧： 1234can_open();can_send(frame);can_receive(frame);can_close();  这一层不需要理解 MIT 参数或控制算法。 达妙协议层负责： 1234使能和失能MIT 参数映射与打包反馈帧拼接与反向映射状态码和温度解析  典型接口可以是： ...</div></div></div></a><a class="pagination-related" href="/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/6.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%8F%8D%E9%A6%88%E5%B8%A7/" title="达妙电机反馈帧：解析位置、速度、力矩与状态"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-10</div><div class="info-item-2">达妙电机反馈帧：解析位置、速度、力矩与状态</div></div><div class="info-2"><div class="info-item-1">达妙电机反馈帧：解析位置、速度、力矩与状态MIT 控制帧负责把目标位置、速度、增益和力矩编码成 8 Byte 发送给电机。反馈帧则完成相反的过程：电脑收到电机返回的原始字节后，将其还原成位置、速度、力矩、温度和状态信息。 12发送：物理量 → 编码 → 拆分 → CAN接收：CAN → 拼接 → 解码 → 物理量  为什么需要反馈只发送目标力矩或目标位置还不能形成完整控制过程。控制器还需要知道：  电机当前位置和速度； 实际或估计力矩； 电机是否已经使能； 是否出现过压、过流或通信错误； MOS 和电机温度是否过高。  控制帧和反馈帧共同构成最基础的闭环通信： 12控制器 ──控制帧──→ 电机控制器 ←─反馈帧── 电机  反馈帧的布局本文所用达妙反馈帧可以按下面的结构理解：    字节 内容    D[0] ERR [7:4] + Motor ID [3:0]   D[1] Position [15:8]   D[2] Position [7:0]   D[3] Velocity [11:4]   D[4] Velocity [3:0] + Torque [11:8]   D...</div></div></div></a><a class="pagination-related" href="/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/" title="手动构造并发送第一条达妙 CAN 报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-17</div><div class="info-item-2">手动构造并发送第一条达妙 CAN 报文</div></div><div class="info-2"><div class="info-item-1">手动构造并发送第一条达妙 CAN 报文上一节通过 DMTool 抓到了上位机自动生成的使能和失能报文。这一节不再使用控制页面上的按钮，而是在 CAN 分析仪中自行填写 CAN ID、DLC 和 DATA。 为什么从使能帧开始使能和失能帧的数据固定，不需要先计算位置、速度、Kp、Kd 和力矩，也不涉及 float_to_uint() 与跨字节拼接，因此很适合验证整个通信链路。 本文假设： 123CAN_ID = 0x01控制模式 = MIT帧格式 = 标准数据帧  实际发送前必须从 DMTool 参数页面确认自己的电机配置。 手动构造使能帧在 CAN 分析仪的自定义发送区域填写： 12345帧格式：Standard帧类型：Data FrameCAN ID：0x01DLC：8DATA：FF FF FF FF FF FF FF FC  完整报文可以表示为： 12ID      DLC      DATA0x01     8       FF FF FF FF FF FF FF FC  发送后，应通过反馈状态或 DMTool 状态显示确认电机已经进入使能状态。 手动发送失能帧失能时只需要...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>手动构造并发送第一条达妙 CAN 报文 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="手动构造并发送第一条达妙 CAN 报文上一节通过 DMTool 抓到了上位机自动生成的使能和失能报文。这一节不再使用控制页面上的按钮，而是在 CAN 分析仪中自行填写 CAN ID、DLC 和 DATA。 为什么从使能帧开始使能和失能帧的数据固定，不需要先计算位置、速度、Kp、Kd 和力矩，也不涉及 float_to_uint() 与跨字节拼接，因此很适合验证整个通信链路。 本文假设： 123CA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="手动构造并发送第一条达妙 CAN 报文">
+<meta property="og:url" content="https://mio0721.github.io/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="手动构造并发送第一条达妙 CAN 报文上一节通过 DMTool 抓到了上位机自动生成的使能和失能报文。这一节不再使用控制页面上的按钮，而是在 CAN 分析仪中自行填写 CAN ID、DLC 和 DATA。 为什么从使能帧开始使能和失能帧的数据固定，不需要先计算位置、速度、Kp、Kd 和力矩，也不涉及 float_to_uint() 与跨字节拼接，因此很适合验证整个通信链路。 本文假设： 123CA">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-07-17T12:43:00.000Z">
+<meta property="article:modified_time" content="2026-07-17T12:55:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="CAN总线">
+<meta property="article:tag" content="CAN报文">
+<meta property="article:tag" content="DMTool">
+<meta property="article:tag" content="达妙电机">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "手动构造并发送第一条达妙 CAN 报文",
+  "url": "https://mio0721.github.io/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-07-17T12:43:00.000Z",
+  "dateModified": "2026-07-17T12:55:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '手动构造并发送第一条达妙 CAN 报文',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260901-16"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">61</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">手动构造并发送第一条达妙 CAN 报文</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">手动构造并发送第一条达妙 CAN 报文</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-17T12:43:00.000Z" title="发表于 2026-07-17 20:43:00">2026-07-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-17T12:55:00.000Z" title="更新于 2026-07-17 20:55:00">2026-07-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/">硬件</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="手动构造并发送第一条达妙-CAN-报文"><a href="#手动构造并发送第一条达妙-CAN-报文" class="headerlink" title="手动构造并发送第一条达妙 CAN 报文"></a>手动构造并发送第一条达妙 CAN 报文</h1><p>上一节通过 DMTool 抓到了上位机自动生成的使能和失能报文。这一节不再使用控制页面上的按钮，而是在 CAN 分析仪中自行填写 CAN ID、DLC 和 DATA。</p>
+<h2 id="为什么从使能帧开始"><a href="#为什么从使能帧开始" class="headerlink" title="为什么从使能帧开始"></a>为什么从使能帧开始</h2><p>使能和失能帧的数据固定，不需要先计算位置、速度、<code>Kp</code>、<code>Kd</code> 和力矩，也不涉及 <code>float_to_uint()</code> 与跨字节拼接，因此很适合验证整个通信链路。</p>
+<p>本文假设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CAN_ID = 0x01</span><br><span class="line">控制模式 = MIT</span><br><span class="line">帧格式 = 标准数据帧</span><br></pre></td></tr></table></figure>
+
+<p>实际发送前必须从 DMTool 参数页面确认自己的电机配置。</p>
+<h2 id="手动构造使能帧"><a href="#手动构造使能帧" class="headerlink" title="手动构造使能帧"></a>手动构造使能帧</h2><p>在 CAN 分析仪的自定义发送区域填写：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">帧格式：Standard</span><br><span class="line">帧类型：Data Frame</span><br><span class="line">CAN ID：0x01</span><br><span class="line">DLC：8</span><br><span class="line">DATA：FF FF FF FF FF FF FF FC</span><br></pre></td></tr></table></figure>
+
+<p>完整报文可以表示为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ID      DLC      DATA</span><br><span class="line">0x01     8       FF FF FF FF FF FF FF FC</span><br></pre></td></tr></table></figure>
+
+<p>发送后，应通过反馈状态或 DMTool 状态显示确认电机已经进入使能状态。</p>
+<h2 id="手动发送失能帧"><a href="#手动发送失能帧" class="headerlink" title="手动发送失能帧"></a>手动发送失能帧</h2><p>失能时只需要把最后一个字节从 <code>FC</code> 改为 <code>FD</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CAN ID = 0x01</span><br><span class="line">DLC    = 8</span><br><span class="line">DATA   = FF FF FF FF FF FF FF FD</span><br></pre></td></tr></table></figure>
+
+<p>发送后再次检查反馈，确认电机确实退出使能状态。</p>
+<h2 id="CAN-ID-不属于-DATA"><a href="#CAN-ID-不属于-DATA" class="headerlink" title="CAN ID 不属于 DATA"></a>CAN ID 不属于 DATA</h2><p>一个容易混淆的地方是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAN ID = 0x01</span><br></pre></td></tr></table></figure>
+
+<p>并不表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data[0] = 0x01</span><br></pre></td></tr></table></figure>
+
+<p>CAN ID 是帧头中的独立字段，不占用 <code>D[0]～D[7]</code>。正确结构为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Frame</span><br><span class="line">├── ID  = 0x01</span><br><span class="line">├── DLC = 8</span><br><span class="line">└── DATA</span><br><span class="line">    ├── D[0] = 0xFF</span><br><span class="line">    ├── D[1] = 0xFF</span><br><span class="line">    ├── D[2] = 0xFF</span><br><span class="line">    ├── D[3] = 0xFF</span><br><span class="line">    ├── D[4] = 0xFF</span><br><span class="line">    ├── D[5] = 0xFF</span><br><span class="line">    ├── D[6] = 0xFF</span><br><span class="line">    └── D[7] = 0xFC</span><br></pre></td></tr></table></figure>
+
+<p>不要把它写成 9 Byte 的 <code>01 FF FF FF FF FF FF FF FC</code>。</p>
+<h2 id="哪些字段由应用程序填写"><a href="#哪些字段由应用程序填写" class="headerlink" title="哪些字段由应用程序填写"></a>哪些字段由应用程序填写</h2><p>普通 CAN API 通常要求应用程序设置：</p>
+<ul>
+<li>标准帧或扩展帧；</li>
+<li>数据帧或远程帧；</li>
+<li>CAN ID；</li>
+<li>DLC；</li>
+<li>DATA。</li>
+</ul>
+<p>SOF、仲裁过程、CRC、ACK、位填充和 EOF 等底层内容通常由 CAN 控制器或适配器完成，不需要应用程序逐 bit 生成。</p>
+<h2 id="对应的伪代码"><a href="#对应的伪代码" class="headerlink" title="对应的伪代码"></a>对应的伪代码</h2><p>不同 USB2CAN 厂商的 API 名称不同，可以先用通用结构理解：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CANFrame frame&#123;&#125;;</span><br><span class="line"></span><br><span class="line">frame.id       = <span class="number">0x01</span>;</span><br><span class="line">frame.extended = <span class="literal">false</span>;</span><br><span class="line">frame.remote   = <span class="literal">false</span>;</span><br><span class="line">frame.dlc      = <span class="number">8</span>;</span><br><span class="line"></span><br><span class="line">frame.data[<span class="number">0</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">1</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">2</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">3</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">4</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">5</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">6</span>] = <span class="number">0xFF</span>;</span><br><span class="line">frame.data[<span class="number">7</span>] = <span class="number">0xFC</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">can_send</span>(frame);</span><br></pre></td></tr></table></figure>
+
+<p>可以进一步封装为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">send_special_command</span><span class="params">(<span class="type">uint32_t</span> can_id, <span class="type">uint8_t</span> command)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    CANFrame frame&#123;&#125;;</span><br><span class="line">    frame.id  = can_id;</span><br><span class="line">    frame.dlc = <span class="number">8</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">7</span>; ++i) &#123;</span><br><span class="line">        frame.data[i] = <span class="number">0xFF</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    frame.data[<span class="number">7</span>] = command;</span><br><span class="line">    <span class="built_in">can_send</span>(frame);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">enable_motor</span><span class="params">(<span class="type">uint32_t</span> can_id)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">send_special_command</span>(can_id, <span class="number">0xFC</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">disable_motor</span><span class="params">(<span class="type">uint32_t</span> can_id)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">send_special_command</span>(can_id, <span class="number">0xFD</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>多电机系统只需使用不同的 <code>can_id</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">enable_motor</span>(<span class="number">0x01</span>);</span><br><span class="line"><span class="built_in">enable_motor</span>(<span class="number">0x02</span>);</span><br><span class="line"><span class="built_in">enable_motor</span>(<span class="number">0x03</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="用对照实验验证"><a href="#用对照实验验证" class="headerlink" title="用对照实验验证"></a>用对照实验验证</h2><p>手动发送前，可以先用普通“使能”按钮抓取标准报文，再在自定义发送区输入完全相同的 ID 和 DATA。</p>
+<p>如果两次操作得到相同反馈，说明手动构造的帧与上位机自动生成的帧一致。</p>
+<p>还可以在电机保持安全、随时可以失能的前提下验证：</p>
+<ul>
+<li>使用正确 DATA 但错误 ID，目标电机通常不会执行；</li>
+<li>使用正确 ID 但错误 DATA，电机不会把它识别成对应特殊命令；</li>
+<li>使用正确 ID 和 DATA，但错误波特率或帧格式，通信仍会失败。</li>
+</ul>
+<p>这些实验只用于理解字段作用，不能使用可能产生未知动作的随机 DATA。</p>
+<h2 id="发送成功不等于执行成功"><a href="#发送成功不等于执行成功" class="headerlink" title="发送成功不等于执行成功"></a>发送成功不等于执行成功</h2><p>API 返回“发送成功”通常只表示报文已经交给 USB2CAN 或 CAN 控制器，不代表目标电机一定收到并执行。</p>
+<p>可靠流程应是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">发送使能帧</span><br><span class="line">  ↓</span><br><span class="line">接收反馈</span><br><span class="line">  ↓</span><br><span class="line">解析 Motor ID 和状态</span><br><span class="line">  ↓</span><br><span class="line">确认目标电机已经使能</span><br></pre></td></tr></table></figure>
+
+<p>如果在规定时间内没有收到对应反馈，应进入超时处理，而不是默认命令已经生效。</p>
+<h2 id="从特殊命令过渡到-MIT-控制"><a href="#从特殊命令过渡到-MIT-控制" class="headerlink" title="从特殊命令过渡到 MIT 控制"></a>从特殊命令过渡到 MIT 控制</h2><p>使能帧的 DATA 是固定值，而位置、速度或力矩控制帧需要动态编码：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">物理控制量</span><br><span class="line">  ↓</span><br><span class="line">范围限制</span><br><span class="line">  ↓</span><br><span class="line">float_to_uint()</span><br><span class="line">  ↓</span><br><span class="line">位拆分与拼接</span><br><span class="line">  ↓</span><br><span class="line">D[0]～D[7]</span><br><span class="line">  ↓</span><br><span class="line">构造并发送 CAN 帧</span><br></pre></td></tr></table></figure>
+
+<p>例如纯力矩控制不能简单把 <code>0.1</code> 写进最后一个字节，而要根据 <code>T_MIN/T_MAX</code> 映射为 12 bit Torque，并与 Kd 的低 4 bit 一起拼入 <code>D[6]</code> 和 <code>D[7]</code>。</p>
+<p>第一次手动发帧做到使能、反馈确认、失能即可。固定电机、使用正确配置并保留随时断电的手段，比尽快让电机转起来更重要。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/">https://mio0721.github.io/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a><a class="post-meta__tags" href="/tags/%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA/">达妙电机</a><a class="post-meta__tags" href="/tags/CAN%E6%8A%A5%E6%96%87/">CAN报文</a><a class="post-meta__tags" href="/tags/DMTool/">DMTool</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/11.%E7%9C%9F%E5%AE%9E%E5%8F%8D%E9%A6%88%E6%8A%A5%E6%96%87%E8%A7%A3%E6%9E%90/" title="逐字节解析一条达妙电机真实反馈报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">逐字节解析一条达妙电机真实反馈报文</div></div><div class="info-2"><div class="info-item-1">逐字节解析一条达妙电机真实反馈报文前面已经介绍了达妙反馈帧的字段布局。这一节不再重复原理，而是使用一条完整示例，从 8 Byte 原始数据开始，逐步计算电机编号、状态、位置、速度、力矩和温度。 示例报文假设 CAN 分析仪收到： 123CAN ID = 0x00DLC    = 8DATA   = 11 80 00 80 08 00 28 23  逐字节写为： 12345678D[0] = 0x11D[1] = 0x80D[2] = 0x00D[3] = 0x80D[4] = 0x08D[5] = 0x00D[6] = 0x28D[7] = 0x23  本文沿用前面示例中的反馈帧格式和对称映射范围。实际电机的字段、状态码、PMAX、VMAX 和 TMAX 必须以当前型号、固件和参数配置为准。 解析状态和 Motor IDD[0] 的高 4 bit 是状态或错误码，低 4 bit 是 Motor ID： 12uint8_t error    = data[0] &gt;&gt; 4;uint8_t motor_id = data[0] &amp; 0x0F;  对于： 1D[0] ...</div></div></div></a><a class="pagination-related" href="/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/9.DMTool%20%E6%8A%93%E5%8F%96%20CAN%20%E6%8A%A5%E6%96%87/" title="使用 DMTool 抓取达妙电机 CAN 报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">使用 DMTool 抓取达妙电机 CAN 报文</div></div><div class="info-2"><div class="info-item-1">使用 DMTool 抓取达妙电机 CAN 报文前面已经从协议角度了解了 CAN ID、DLC、DATA，以及达妙电机的使能、失能和反馈帧。这一节使用 DMTool 的 CAN 分析功能观察真实报文，把上位机按钮和底层协议对应起来。 第一次实验只抓取使能和失能报文，不发送位置、速度或力矩命令。 什么是 CAN 抓包在 DMTool 中点击“使能”时，底层过程是： 123456789点击使能  ↓DMTool 生成 CAN 报文  ↓USB2CAN 发送  ↓CANH / CANL 传输  ↓达妙电机接收并执行  抓包就是在 CAN 分析仪中直接观察中间传输的报文，例如： 12ID     DLC    DATA001     8     FF FF FF FF FF FF FF FC  实验前检查开始前先固定电机并确认：  电机与 USB2CAN 正常供电； CANH 对 CANH、CANL 对 CANL； 参考地和终端电阻符合设备接线要求； USB2CAN 与电机的波特率一致； 已知电机的 CAN_ID、Master ID 和当前控制模式。  不要直接假定 CAN_ID 一定是 ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/9.DMTool%20%E6%8A%93%E5%8F%96%20CAN%20%E6%8A%A5%E6%96%87/" title="使用 DMTool 抓取达妙电机 CAN 报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-17</div><div class="info-item-2">使用 DMTool 抓取达妙电机 CAN 报文</div></div><div class="info-2"><div class="info-item-1">使用 DMTool 抓取达妙电机 CAN 报文前面已经从协议角度了解了 CAN ID、DLC、DATA，以及达妙电机的使能、失能和反馈帧。这一节使用 DMTool 的 CAN 分析功能观察真实报文，把上位机按钮和底层协议对应起来。 第一次实验只抓取使能和失能报文，不发送位置、速度或力矩命令。 什么是 CAN 抓包在 DMTool 中点击“使能”时，底层过程是： 123456789点击使能  ↓DMTool 生成 CAN 报文  ↓USB2CAN 发送  ↓CANH / CANL 传输  ↓达妙电机接收并执行  抓包就是在 CAN 分析仪中直接观察中间传输的报文，例如： 12ID     DLC    DATA001     8     FF FF FF FF FF FF FF FC  实验前检查开始前先固定电机并确认：  电机与 USB2CAN 正常供电； CANH 对 CANH、CANL 对 CANL； 参考地和终端电阻符合设备接线要求； USB2CAN 与电机的波特率一致； 已知电机的 CAN_ID、Master ID 和当前控制模式。  不要直接假定 CAN_ID 一定是 ...</div></div></div></a><a class="pagination-related" href="/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/5.%E8%BE%BE%E5%A6%99%20MIT%20%E6%8E%A7%E5%88%B6%E5%B8%A7/" title="达妙 MIT 控制帧：8 Byte 如何装下 5 个参数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-10</div><div class="info-item-2">达妙 MIT 控制帧：8 Byte 如何装下 5 个参数</div></div><div class="info-2"><div class="info-item-1">达妙 MIT 控制帧：8 Byte 如何装下 5 个参数达妙 MIT 模式的一帧 CAN 数据可以同时发送五个控制参数： 12345p_des：目标位置v_des：目标速度Kp：位置增益Kd：速度或阻尼增益t_ff：前馈力矩  经典 CAN 数据区只有 8 Byte。如果把五个参数都作为普通 float 发送，需要 20 Byte，显然无法放进一帧数据。因此，MIT 协议会先把物理量映射成定长无符号整数，再通过位运算紧凑地装入 64 bit。 MIT 控制律MIT 模式的目标力矩可以近似理解为： $$\tau &#x3D; K_p(p_{des}-p)+K_d(v_{des}-v)+\tau_{ff}$$ 其中：  $p_{des}$ 和 $p$ 分别是目标位置和实际位置； $v_{des}$ 和 $v$ 分别是目标速度和实际速度； $K_p$ 决定位置误差产生多强的纠正力矩； $K_d$ 决定速度误差产生多强的阻尼力矩； $\tau_{ff}$ 是额外施加的前馈力矩。  可以把它直观地理解为： 1234MIT 控制= 虚拟弹簧+ 虚拟阻尼器+ 前馈力矩  调节 Kp 和 Kd ...</div></div></div></a><a class="pagination-related" href="/2026/07/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/6.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%8F%8D%E9%A6%88%E5%B8%A7/" title="达妙电机反馈帧：解析位置、速度、力矩与状态"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-10</div><div class="info-item-2">达妙电机反馈帧：解析位置、速度、力矩与状态</div></div><div class="info-2"><div class="info-item-1">达妙电机反馈帧：解析位置、速度、力矩与状态MIT 控制帧负责把目标位置、速度、增益和力矩编码成 8 Byte 发送给电机。反馈帧则完成相反的过程：电脑收到电机返回的原始字节后，将其还原成位置、速度、力矩、温度和状态信息。 12发送：物理量 → 编码 → 拆分 → CAN接收：CAN → 拼接 → 解码 → 物理量  为什么需要反馈只发送目标力矩或目标位置还不能形成完整控制过程。控制器还需要知道：  电机当前位置和速度； 实际或估计力矩； 电机是否已经使能； 是否出现过压、过流或通信错误； MOS 和电机温度是否过高。  控制帧和反馈帧共同构成最基础的闭环通信： 12控制器 ──控制帧──→ 电机控制器 ←─反馈帧── 电机  反馈帧的布局本文所用达妙反馈帧可以按下面的结构理解：    字节 内容    D[0] ERR [7:4] + Motor ID [3:0]   D[1] Position [15:8]   D[2] Position [7:0]   D[3] Velocity [11:4]   D[4] Velocity [3:0] + Torque [11:8]   D...</div></div></div></a><a class="pagination-related" href="/2026/07/08/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/4.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E4%BD%BF%E8%83%BD%E4%B8%8E%E5%A4%B1%E8%83%BD/" title="达妙电机 CAN 控制：使能、失能与保存零点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-08</div><div class="info-item-2">达妙电机 CAN 控制：使能、失能与保存零点</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 控制：使能、失能与保存零点前面已经梳理了 CAN 帧的 ID、DLC、DATA，以及达妙电机中 CAN_ID 和控制模式之间的关系。 这一节开始看真正能够改变电机状态的 CAN 报文：使能、失能和保存零点。 什么是使能电机驱动器上电后，通常不会立即接受运动控制命令，而是先处于失能状态。 这时即使发送目标位置、速度或力矩，电机也不会按照正常控制流程执行。正式控制前，需要先发送使能命令，让驱动器进入可控状态。 基本流程可以表示为： 123456789电机上电  ↓检查通信与参数  ↓发送使能命令  ↓发送运动控制命令  ↓读取反馈数据  达妙的特殊命令在本文所用的达妙 MIT 模式协议中，几条常见特殊命令为：    功能 DATA    使能 FF FF FF FF FF FF FF FC   失能 FF FF FF FF FF FF FF FD   保存当前位置为零点 FF FF FF FF FF FF FF FE   三条命令前 7 Byte 完全相同，最后一个字节分别为 FC、FD 和 FE。 这些含义并不是 CAN 标准本身规定的，而是达妙通信协议定义的。C...</div></div></div></a><a class="pagination-related" href="/2026/07/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/11.%E7%9C%9F%E5%AE%9E%E5%8F%8D%E9%A6%88%E6%8A%A5%E6%96%87%E8%A7%A3%E6%9E%90/" title="逐字节解析一条达妙电机真实反馈报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-19</div><div class="info-item-2">逐字节解析一条达妙电机真实反馈报文</div></div><div class="info-2"><div class="info-item-1">逐字节解析一条达妙电机真实反馈报文前面已经介绍了达妙反馈帧的字段布局。这一节不再重复原理，而是使用一条完整示例，从 8 Byte 原始数据开始，逐步计算电机编号、状态、位置、速度、力矩和温度。 示例报文假设 CAN 分析仪收到： 123CAN ID = 0x00DLC    = 8DATA   = 11 80 00 80 08 00 28 23  逐字节写为： 12345678D[0] = 0x11D[1] = 0x80D[2] = 0x00D[3] = 0x80D[4] = 0x08D[5] = 0x00D[6] = 0x28D[7] = 0x23  本文沿用前面示例中的反馈帧格式和对称映射范围。实际电机的字段、状态码、PMAX、VMAX 和 TMAX 必须以当前型号、固件和参数配置为准。 解析状态和 Motor IDD[0] 的高 4 bit 是状态或错误码，低 4 bit 是 Motor ID： 12uint8_t error    = data[0] &gt;&gt; 4;uint8_t motor_id = data[0] &amp; 0x0F;  对于： 1D[0] ...</div></div></div></a><a class="pagination-related" href="/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/" title="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-05</div><div class="info-item-2">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移</div></div><div class="info-2"><div class="info-item-1">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移学习达妙电机的 CAN 协议时，很容易把 CAN ID、设备地址、CAN_ID 和 Master ID 混在一起。 这一节重点梳理这些概念，以及说明书中常见的 0x01、0x101 和 0x201 分别是怎么得到的。 CAN ID 本质上是什么一帧 CAN 报文可以先简化为： 1CAN ID + DLC + DATA  其中，CAN ID 最准确的含义是：  一条 CAN 消息的标识符。  它并不等同于严格意义上的设备地址。CAN 协议本身关注的是“这是什么消息”，至于某个 ID 是否对应某台电机，由设备厂商设计的上层协议决定。 为什么 CAN ID 看起来像电机地址电机协议通常会把设备编号编码进 CAN ID。例如： 123电机 1：CAN_ID = 0x01电机 2：CAN_ID = 0x02电机 3：CAN_ID = 0x03  三个电机连接在同一条 CANH、CANL 总线上。当控制器发送 ID 为 0x02 的控制帧时，所有节点都能接收到总线信号，但只有符合协议和筛选条件的电机 2 会处理这条命令...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

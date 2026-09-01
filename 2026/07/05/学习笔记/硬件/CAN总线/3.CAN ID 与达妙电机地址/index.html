@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移学习达妙电机的 CAN 协议时，很容易把 CAN ID、设备地址、CAN_ID 和 Master ID 混在一起。 这一节重点梳理这些概念，以及说明书中常见的 0x01、0x101 和 0x201 分别是怎么得到的。 CAN ID 本质上是什么一帧 CAN 报文可以先简化为： 1CAN ID + DLC + DATA  其中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移">
+<meta property="og:url" content="https://mio0721.github.io/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移学习达妙电机的 CAN 协议时，很容易把 CAN ID、设备地址、CAN_ID 和 Master ID 混在一起。 这一节重点梳理这些概念，以及说明书中常见的 0x01、0x101 和 0x201 分别是怎么得到的。 CAN ID 本质上是什么一帧 CAN 报文可以先简化为： 1CAN ID + DLC + DATA  其中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-07-05T13:14:00.000Z">
+<meta property="article:modified_time" content="2026-07-05T13:24:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="CAN ID">
+<meta property="article:tag" content="CAN总线">
+<meta property="article:tag" content="Master ID">
+<meta property="article:tag" content="达妙电机">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移",
+  "url": "https://mio0721.github.io/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-07-05T13:14:00.000Z",
+  "dateModified": "2026-07-05T13:24:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260901-16"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">29</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">61</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-05T13:14:00.000Z" title="发表于 2026-07-05 21:14:00">2026-07-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-05T13:24:00.000Z" title="更新于 2026-07-05 21:24:00">2026-07-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/">硬件</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="CAN-ID-与达妙电机地址：CAN-ID、Master-ID-和模式偏移"><a href="#CAN-ID-与达妙电机地址：CAN-ID、Master-ID-和模式偏移" class="headerlink" title="CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移"></a>CAN ID 与达妙电机地址：CAN_ID、Master ID 和模式偏移</h1><p>学习达妙电机的 CAN 协议时，很容易把 CAN ID、设备地址、<code>CAN_ID</code> 和 <code>Master ID</code> 混在一起。</p>
+<p>这一节重点梳理这些概念，以及说明书中常见的 <code>0x01</code>、<code>0x101</code> 和 <code>0x201</code> 分别是怎么得到的。</p>
+<h2 id="CAN-ID-本质上是什么"><a href="#CAN-ID-本质上是什么" class="headerlink" title="CAN ID 本质上是什么"></a>CAN ID 本质上是什么</h2><p>一帧 CAN 报文可以先简化为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAN ID + DLC + DATA</span><br></pre></td></tr></table></figure>
+
+<p>其中，CAN ID 最准确的含义是：</p>
+<blockquote>
+<p>一条 CAN 消息的标识符。</p>
+</blockquote>
+<p>它并不等同于严格意义上的设备地址。CAN 协议本身关注的是“这是什么消息”，至于某个 ID 是否对应某台电机，由设备厂商设计的上层协议决定。</p>
+<h2 id="为什么-CAN-ID-看起来像电机地址"><a href="#为什么-CAN-ID-看起来像电机地址" class="headerlink" title="为什么 CAN ID 看起来像电机地址"></a>为什么 CAN ID 看起来像电机地址</h2><p>电机协议通常会把设备编号编码进 CAN ID。例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">电机 1：CAN_ID = 0x01</span><br><span class="line">电机 2：CAN_ID = 0x02</span><br><span class="line">电机 3：CAN_ID = 0x03</span><br></pre></td></tr></table></figure>
+
+<p>三个电机连接在同一条 CANH、CANL 总线上。当控制器发送 ID 为 <code>0x02</code> 的控制帧时，所有节点都能接收到总线信号，但只有符合协议和筛选条件的电机 2 会处理这条命令。</p>
+<p>因此，在达妙电机的控制场景中，可以先把 <code>CAN_ID</code> 理解为电机接收控制命令时使用的编号。</p>
+<h2 id="CAN-ID-和-Master-ID"><a href="#CAN-ID-和-Master-ID" class="headerlink" title="CAN_ID 和 Master ID"></a>CAN_ID 和 Master ID</h2><p>根据本文所用达妙协议配置，可以先按通信方向理解这两个参数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CAN_ID</span><br><span class="line">控制器 → 电机</span><br><span class="line">电机接收控制命令时使用</span><br><span class="line"></span><br><span class="line">Master ID</span><br><span class="line">电机 → 控制器</span><br><span class="line">电机发送反馈帧时使用</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CAN_ID   = 0x01</span><br><span class="line">Master ID = 0x00</span><br></pre></td></tr></table></figure>
+
+<p>通信过程可以表示为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">控制器 ── ID 0x01 的控制帧 ──→ 电机</span><br><span class="line">控制器 ←─ ID 0x00 的反馈帧 ─── 电机</span><br></pre></td></tr></table></figure>
+
+<p>反馈帧的数据区中还可以携带电机自身编号、位置、速度、力矩、温度和错误状态等内容。因此要区分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CAN 帧的 ID：标识这是什么消息</span><br><span class="line">DATA 中的电机 ID：说明反馈来自哪个电机</span><br></pre></td></tr></table></figure>
+
+<p>不同型号、固件和工作模式的反馈 ID 规则可能不同，实际配置时需要以对应版本的达妙说明书为准。</p>
+<h2 id="为什么会出现-0x101-和-0x201"><a href="#为什么会出现-0x101-和-0x201" class="headerlink" title="为什么会出现 0x101 和 0x201"></a>为什么会出现 0x101 和 0x201</h2><p>达妙的不同控制模式会使用不同的 CAN ID 区间。在本文所用协议中，可以按下面的偏移关系理解。</p>
+<h3 id="MIT-模式"><a href="#MIT-模式" class="headerlink" title="MIT 模式"></a>MIT 模式</h3><p>MIT 模式控制帧使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ID = CAN_ID</span><br></pre></td></tr></table></figure>
+
+<p>如果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAN_ID = 0x01</span><br></pre></td></tr></table></figure>
+
+<p>那么控制帧 ID 为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x001</span><br></pre></td></tr></table></figure>
+
+<h3 id="位置速度模式"><a href="#位置速度模式" class="headerlink" title="位置速度模式"></a>位置速度模式</h3><p>位置速度模式使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ID = 0x100 + CAN_ID</span><br></pre></td></tr></table></figure>
+
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x100 + 0x01 = 0x101</span><br></pre></td></tr></table></figure>
+
+<h3 id="速度模式"><a href="#速度模式" class="headerlink" title="速度模式"></a>速度模式</h3><p>速度模式使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ID = 0x200 + CAN_ID</span><br></pre></td></tr></table></figure>
+
+<p>因此：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x200 + 0x01 = 0x201</span><br></pre></td></tr></table></figure>
+
+<p>把三种模式放在一起：</p>
+<table>
+<thead>
+<tr>
+<th>控制模式</th>
+<th>CAN_ID 为 <code>0x01</code> 时的帧 ID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MIT 模式</td>
+<td><code>0x001</code></td>
+</tr>
+<tr>
+<td>位置速度模式</td>
+<td><code>0x101</code></td>
+</tr>
+<tr>
+<td>速度模式</td>
+<td><code>0x201</code></td>
+</tr>
+</tbody></table>
+<p>这里的 <code>0x100</code> 是十六进制，对应十进制 256，并不是十进制的 100。</p>
+<h2 id="同一个-ID-中包含了两类信息"><a href="#同一个-ID-中包含了两类信息" class="headerlink" title="同一个 ID 中包含了两类信息"></a>同一个 ID 中包含了两类信息</h2><p>假设：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAN_ID = 0x05</span><br></pre></td></tr></table></figure>
+
+<p>那么三种模式下分别为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MIT 模式：      0x005</span><br><span class="line">位置速度模式：  0x105</span><br><span class="line">速度模式：      0x205</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>0x205</code> 可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x200 + 0x05</span><br><span class="line">速度模式 + 电机 5</span><br></pre></td></tr></table></figure>
+
+<p>这说明 CAN ID 不仅可以表示“哪台设备”，还可以表示“什么类型的消息”。在更一般的 CAN 协议设计中，ID 还可能编码消息类型、控制模式和优先级等信息。</p>
+<h2 id="多电机系统中的-ID"><a href="#多电机系统中的-ID" class="headerlink" title="多电机系统中的 ID"></a>多电机系统中的 ID</h2><p>假设机械臂上有三个电机：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">电机 1：CAN_ID = 0x01</span><br><span class="line">电机 2：CAN_ID = 0x02</span><br><span class="line">电机 3：CAN_ID = 0x03</span><br></pre></td></tr></table></figure>
+
+<p>对应的控制帧 ID 为：</p>
+<table>
+<thead>
+<tr>
+<th>电机</th>
+<th>MIT 模式</th>
+<th>位置速度模式</th>
+<th>速度模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>电机 1</td>
+<td><code>0x001</code></td>
+<td><code>0x101</code></td>
+<td><code>0x201</code></td>
+</tr>
+<tr>
+<td>电机 2</td>
+<td><code>0x002</code></td>
+<td><code>0x102</code></td>
+<td><code>0x202</code></td>
+</tr>
+<tr>
+<td>电机 3</td>
+<td><code>0x003</code></td>
+<td><code>0x103</code></td>
+<td><code>0x203</code></td>
+</tr>
+</tbody></table>
+<p>例如电机 2 工作在速度模式时，目标速度对应的控制帧应使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ID = 0x200 + 0x02 = 0x202</span><br></pre></td></tr></table></figure>
+
+<p>DATA 中再填写目标速度对应的字节。</p>
+<h2 id="CAN-ID-也参与仲裁"><a href="#CAN-ID-也参与仲裁" class="headerlink" title="CAN ID 也参与仲裁"></a>CAN ID 也参与仲裁</h2><p>CAN 总线上可能有多个节点同时尝试发送数据。标准 CAN 使用非破坏性位仲裁机制决定谁先发送。</p>
+<p>在其他条件相同的情况下，数值更小的 CAN ID 通常具有更高优先级。例如 <code>0x100</code> 与 <code>0x200</code> 同时竞争总线时，<code>0x100</code> 会获得更高优先级。</p>
+<p>因此 CAN ID 既是消息标识符，也会影响实时通信中的发送优先级。</p>
+<h2 id="ID-与工作模式必须对应"><a href="#ID-与工作模式必须对应" class="headerlink" title="ID 与工作模式必须对应"></a>ID 与工作模式必须对应</h2><p>并不是向同一台电机随意发送 <code>0x001</code>、<code>0x101</code> 或 <code>0x201</code> 都会得到相同结果。驱动器本身还有当前工作模式，报文 ID、DATA 格式和驱动器配置必须相互匹配。</p>
+<p>调试时至少要同时确认：</p>
+<ul>
+<li>电机的 <code>CAN_ID</code></li>
+<li><code>Master ID</code> 或反馈 ID 配置</li>
+<li>当前控制模式</li>
+<li>标准帧或扩展帧设置</li>
+<li>CAN 波特率</li>
+<li>协议版本和固件版本</li>
+</ul>
+<p>简单总结，<code>CAN_ID</code> 可以看作达妙电机接收控制命令的编号，<code>Master ID</code> 用于组织反馈消息；而最终出现在总线上的 CAN ID，还可能叠加控制模式偏移。理解这一点后，再看到 <code>0x01</code>、<code>0x101</code> 和 <code>0x201</code> 就不会把它们当成三台不同的电机。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/">https://mio0721.github.io/2026/07/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/3.CAN%20ID%20%E4%B8%8E%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E5%9C%B0%E5%9D%80/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/CAN%E6%80%BB%E7%BA%BF/">CAN总线</a><a class="post-meta__tags" href="/tags/%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA/">达妙电机</a><a class="post-meta__tags" href="/tags/CAN-ID/">CAN ID</a><a class="post-meta__tags" href="/tags/Master-ID/">Master ID</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/08/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/4.%E8%BE%BE%E5%A6%99%E7%94%B5%E6%9C%BA%E4%BD%BF%E8%83%BD%E4%B8%8E%E5%A4%B1%E8%83%BD/" title="达妙电机 CAN 控制：使能、失能与保存零点"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">达妙电机 CAN 控制：使能、失能与保存零点</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 控制：使能、失能与保存零点前面已经梳理了 CAN 帧的 ID、DLC、DATA，以及达妙电机中 CAN_ID 和控制模式之间的关系。 这一节开始看真正能够改变电机状态的 CAN 报文：使能、失能和保存零点。 什么是使能电机驱动器上电后，通常不会立即接受运动控制命令，而是先处于失能状态。 这时即使发送目标位置、速度或力矩，电机也不会按照正常控制流程执行。正式控制前，需要先发送使能命令，让驱动器进入可控状态。 基本流程可以表示为： 123456789电机上电  ↓检查通信与参数  ↓发送使能命令  ↓发送运动控制命令  ↓读取反馈数据  达妙的特殊命令在本文所用的达妙 MIT 模式协议中，几条常见特殊命令为：    功能 DATA    使能 FF FF FF FF FF FF FF FC   失能 FF FF FF FF FF FF FF FD   保存当前位置为零点 FF FF FF FF FF FF FF FE   三条命令前 7 Byte 完全相同，最后一个字节分别为 FC、FD 和 FE。 这些含义并不是 CAN 标准本身规定的，而是达妙通信协议定义的。C...</div></div></div></a><a class="pagination-related" href="/2026/07/03/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/2.CAN%20%E5%B8%A7%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="CAN 帧与数据结构：ID、DLC、bit 和 Byte"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">CAN 帧与数据结构：ID、DLC、bit 和 Byte</div></div><div class="info-2"><div class="info-item-1">CAN 帧与数据结构：ID、DLC、bit 和 Byte上一节梳理了电脑、USB2CAN、CAN 总线和达妙电机之间的关系。这一节继续拆开一帧 CAN 报文，理解控制程序中经常出现的 ID、DLC 和 DATA。 一帧 CAN 报文的基本结构初学阶段，可以先把一帧 CAN 数据简化为三个部分： 12345CAN 帧│├── CAN ID├── DLC└── DATA  例如： 123ID   = 0x01DLC  = 8DATA = FF FF FF FF FF FF FF FC  CAN 底层还包含起始位、仲裁段、控制段、CRC、ACK 和结束位等结构，不过大部分 CAN 接口库会自动处理这些内容。编写普通收发程序时，最常接触的仍然是 ID、DLC 和 DATA。 CAN IDCAN ID 是一条 CAN 消息的标识符。例如： 1ID = 0x01  其中 0x 表示后面的数字采用十六进制：    十进制 十六进制    0 0x00   9 0x09   10 0x0A   15 0x0F   16 0x10   CAN 数据本质上由二进制位组成。为了便于阅读和书写，工程中通...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/19/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/11.%E7%9C%9F%E5%AE%9E%E5%8F%8D%E9%A6%88%E6%8A%A5%E6%96%87%E8%A7%A3%E6%9E%90/" title="逐字节解析一条达妙电机真实反馈报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-19</div><div class="info-item-2">逐字节解析一条达妙电机真实反馈报文</div></div><div class="info-2"><div class="info-item-1">逐字节解析一条达妙电机真实反馈报文前面已经介绍了达妙反馈帧的字段布局。这一节不再重复原理，而是使用一条完整示例，从 8 Byte 原始数据开始，逐步计算电机编号、状态、位置、速度、力矩和温度。 示例报文假设 CAN 分析仪收到： 123CAN ID = 0x00DLC    = 8DATA   = 11 80 00 80 08 00 28 23  逐字节写为： 12345678D[0] = 0x11D[1] = 0x80D[2] = 0x00D[3] = 0x80D[4] = 0x08D[5] = 0x00D[6] = 0x28D[7] = 0x23  本文沿用前面示例中的反馈帧格式和对称映射范围。实际电机的字段、状态码、PMAX、VMAX 和 TMAX 必须以当前型号、固件和参数配置为准。 解析状态和 Motor IDD[0] 的高 4 bit 是状态或错误码，低 4 bit 是 Motor ID： 12uint8_t error    = data[0] &gt;&gt; 4;uint8_t motor_id = data[0] &amp; 0x0F;  对于： 1D[0] ...</div></div></div></a><a class="pagination-related" href="/2026/07/03/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/2.CAN%20%E5%B8%A7%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" title="CAN 帧与数据结构：ID、DLC、bit 和 Byte"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-03</div><div class="info-item-2">CAN 帧与数据结构：ID、DLC、bit 和 Byte</div></div><div class="info-2"><div class="info-item-1">CAN 帧与数据结构：ID、DLC、bit 和 Byte上一节梳理了电脑、USB2CAN、CAN 总线和达妙电机之间的关系。这一节继续拆开一帧 CAN 报文，理解控制程序中经常出现的 ID、DLC 和 DATA。 一帧 CAN 报文的基本结构初学阶段，可以先把一帧 CAN 数据简化为三个部分： 12345CAN 帧│├── CAN ID├── DLC└── DATA  例如： 123ID   = 0x01DLC  = 8DATA = FF FF FF FF FF FF FF FC  CAN 底层还包含起始位、仲裁段、控制段、CRC、ACK 和结束位等结构，不过大部分 CAN 接口库会自动处理这些内容。编写普通收发程序时，最常接触的仍然是 ID、DLC 和 DATA。 CAN IDCAN ID 是一条 CAN 消息的标识符。例如： 1ID = 0x01  其中 0x 表示后面的数字采用十六进制：    十进制 十六进制    0 0x00   9 0x09   10 0x0A   15 0x0F   16 0x10   CAN 数据本质上由二进制位组成。为了便于阅读和书写，工程中通...</div></div></div></a><a class="pagination-related" href="/2026/07/22/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/12.%E8%BE%BE%E5%A6%99%20CAN%20%E5%AE%8C%E6%95%B4%E6%8E%A7%E5%88%B6%E6%B5%81%E7%A8%8B/" title="达妙电机 CAN 完整控制流程：从通信到闭环控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-22</div><div class="info-item-2">达妙电机 CAN 完整控制流程：从通信到闭环控制</div></div><div class="info-2"><div class="info-item-1">达妙电机 CAN 完整控制流程：从通信到闭环控制前面的笔记分别讨论了 CAN 帧、达妙特殊命令、MIT 编码、反馈解析、仲裁、物理接线和 DMTool 抓包。这一节将这些内容组合成一个完整的电机闭环控制程序框架。 系统数据流控制方向： 123456789控制算法  ↓ 目标位置、速度或力矩达妙 MIT 协议编码  ↓ 8 ByteCAN 通信层  ↓USB2CAN  ↓ CANH / CANL达妙电机  反馈方向： 123456789达妙电机  ↓ 反馈帧USB2CAN  ↓CAN 通信层  ↓ 原始 8 Byte达妙协议解析  ↓ 位置、速度、力矩、状态和温度控制算法  这两个方向不断循环，构成闭环控制。 程序分为三层CAN 通信层负责打开适配器、设置波特率、启动通道、发送和接收 CAN 帧： 1234can_open();can_send(frame);can_receive(frame);can_close();  这一层不需要理解 MIT 参数或控制算法。 达妙协议层负责： 1234使能和失能MIT 参数映射与打包反馈帧拼接与反向映射状态码和温度解析  典型接口可以是： ...</div></div></div></a><a class="pagination-related" href="/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/10.%E6%89%8B%E5%8A%A8%E6%9E%84%E9%80%A0%20CAN%20%E6%8A%A5%E6%96%87/" title="手动构造并发送第一条达妙 CAN 报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-17</div><div class="info-item-2">手动构造并发送第一条达妙 CAN 报文</div></div><div class="info-2"><div class="info-item-1">手动构造并发送第一条达妙 CAN 报文上一节通过 DMTool 抓到了上位机自动生成的使能和失能报文。这一节不再使用控制页面上的按钮，而是在 CAN 分析仪中自行填写 CAN ID、DLC 和 DATA。 为什么从使能帧开始使能和失能帧的数据固定，不需要先计算位置、速度、Kp、Kd 和力矩，也不涉及 float_to_uint() 与跨字节拼接，因此很适合验证整个通信链路。 本文假设： 123CAN_ID = 0x01控制模式 = MIT帧格式 = 标准数据帧  实际发送前必须从 DMTool 参数页面确认自己的电机配置。 手动构造使能帧在 CAN 分析仪的自定义发送区域填写： 12345帧格式：Standard帧类型：Data FrameCAN ID：0x01DLC：8DATA：FF FF FF FF FF FF FF FC  完整报文可以表示为： 12ID      DLC      DATA0x01     8       FF FF FF FF FF FF FF FC  发送后，应通过反馈状态或 DMTool 状态显示确认电机已经进入使能状态。 手动发送失能帧失能时只需要...</div></div></div></a><a class="pagination-related" href="/2026/07/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/9.DMTool%20%E6%8A%93%E5%8F%96%20CAN%20%E6%8A%A5%E6%96%87/" title="使用 DMTool 抓取达妙电机 CAN 报文"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-17</div><div class="info-item-2">使用 DMTool 抓取达妙电机 CAN 报文</div></div><div class="info-2"><div class="info-item-1">使用 DMTool 抓取达妙电机 CAN 报文前面已经从协议角度了解了 CAN ID、DLC、DATA，以及达妙电机的使能、失能和反馈帧。这一节使用 DMTool 的 CAN 分析功能观察真实报文，把上位机按钮和底层协议对应起来。 第一次实验只抓取使能和失能报文，不发送位置、速度或力矩命令。 什么是 CAN 抓包在 DMTool 中点击“使能”时，底层过程是： 123456789点击使能  ↓DMTool 生成 CAN 报文  ↓USB2CAN 发送  ↓CANH / CANL 传输  ↓达妙电机接收并执行  抓包就是在 CAN 分析仪中直接观察中间传输的报文，例如： 12ID     DLC    DATA001     8     FF FF FF FF FF FF FF FC  实验前检查开始前先固定电机并确认：  电机与 USB2CAN 正常供电； CANH 对 CANH、CANL 对 CANL； 参考地和终端电阻符合设备接线要求； USB2CAN 与电机的波特率一致； 已知电机的 CAN_ID、Master ID 和当前控制模式。  不要直接假定 CAN_ID 一定是 ...</div></div></div></a><a class="pagination-related" href="/2026/07/03/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/1.CAN%20%E6%80%BB%E7%BA%BF%E5%9F%BA%E7%A1%80/" title="CAN 总线基础：从 USB2CAN 到达妙电机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-03</div><div class="info-item-2">CAN 总线基础：从 USB2CAN 到达妙电机</div></div><div class="info-2"><div class="info-item-1">CAN 总线基础：从 USB2CAN 到达妙电机最近开始使用达妙 DM-J4310 电机，同时也接触到了 USB 转 CAN 模块、CANH、CANL 和 CAN ID 等概念。 这篇先不深入 CAN 的底层时序，而是从实际设备出发，梳理 CAN 总线在电机控制系统中承担的作用。 整个系统是怎么连接的目前使用的设备主要包括：  电脑 USB2CAN 模块 达妙 DM-J4310 电机 电机电源 CAN 通信线  它们之间的关系可以先理解成： 12345678910电脑  │ USB  ↓USB2CAN  │ CANH / CANL  ↓达妙电机  │  ↓电机执行动作  电脑通常不能直接产生 CAN 总线上的电气信号，因此需要 USB2CAN 作为转换设备。 上位机程序先通过 USB 把命令交给 USB2CAN，再由 USB2CAN 将其转换成 CAN 报文并发送到总线上。 CAN 是什么CAN 的全称是： 1Controller Area Network  中文一般称为控制器局域网。它是一种适合控制器之间交换数据的通信方式，常见于汽车、机器人、工业设备和电机控制系统。 例如，一...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
