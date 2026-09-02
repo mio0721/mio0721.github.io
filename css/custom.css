@@ -705,9 +705,35 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     transform: translateY(-50%);
   }
 
-  /* 宽度不足而折叠菜单时，为搜索和汉堡按钮留出间距 */
+  /*
+   * Butterfly 会根据菜单总宽度在桌面端也添加 hide-menu，导致完整导航
+   * 被替换成手机抽屉。桌面端强制保留菜单，真正的移动端仍由 768px
+   * 媒体查询和主题原有逻辑处理。
+   */
+  #nav.hide-menu .menus_items {
+    display: inline !important;
+  }
+
+
   #nav.hide-menu #toggle-menu {
-    margin-right: 42px;
+    display: none !important;
+    margin-right: 0;
+  }
+
+
+  #nav.hide-menu #search-button span:not(.site-page) {
+    display: inline;
+  }
+
+
+  /* 防止从手机宽度放大窗口后，已打开的抽屉残留在桌面端。 */
+  #sidebar #menu-mask {
+    display: none !important;
+  }
+
+
+  #sidebar #sidebar-menus.open {
+    transform: none !important;
   }
 
 }
@@ -936,64 +962,139 @@ html[data-theme="dark"] .mio-tag-search {
 
 
 /* =========================================================
-   22. 友情链接卡片紧凑布局
-   Butterfly 默认高度为 90px，这里缩至约 2/3（60px）。
-   图标和两行文字同步缩小并重新居中，避免内容被裁切。
+   22. 友情链接使用标签卡片风格
+
+   链接卡片沿用标签页的中性毛玻璃、圆角、阴影和悬浮反馈。
+   因为卡片还需要显示图标与简介，所以高度使用 64px，而不是
+   标签卡片的 44px；日间和夜间分别复用对应的玻璃变量。
    ========================================================= */
 
+#article-container .flink-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px;
+  overflow: visible;
+}
+
+
 #article-container .flink-list > .flink-list-item {
-  background: transparent !important;
-  border: 1px solid var(--light-grey);
-  border-radius: 6px !important;
-  box-shadow: none;
-  height: 60px;
-  line-height: 15px;
+  float: none;
+  box-sizing: border-box;
+  margin: 0;
+  width: calc((100% - 24px) / 3);
+  height: 64px;
+  overflow: hidden;
+  border: 1px solid var(--mio-border-light);
+  border-radius: 12px !important;
+  background: var(--mio-glass-light) !important;
+  line-height: 16px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+  transform: none;
   transition:
-    box-shadow 0.3s ease-in-out,
-    border-color 0.3s ease-in-out;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 
-/* 关闭主题默认的整块底色扩张动画，保持相关推荐卡片的透明效果 */
+/* 关闭 Butterfly 默认的彩色扩张层，保持标签卡片的中性外观 */
 #article-container .flink-list > .flink-list-item::before {
-  background: transparent !important;
-  transform: none !important;
+  display: none !important;
 }
 
 
-/* 与文章页“相关推荐”卡片使用相同的柔和悬浮光晕 */
-#article-container .flink-list > .flink-list-item:hover {
-  box-shadow:
-    0 0 8px 0 rgba(232, 237, 250, 0.60),
-    0 2px 4px 0 rgba(232, 237, 250, 0.50);
+#article-container .flink-list > .flink-list-item:hover,
+#article-container .flink-list > .flink-list-item:focus-within {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(10, 12, 18, 0.28) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px);
+}
+
+
+#article-container .flink-list > .flink-list-item:active {
+  transform: translateY(0);
+}
+
+
+#article-container .flink-list > .flink-list-item > a {
+  display: block;
+  height: 100%;
+  color: var(--font-color) !important;
+  text-decoration: none !important;
 }
 
 
 #article-container .flink-list > .flink-list-item .flink-item-icon {
-  margin: 9px 10px;
-  width: 42px;
-  height: 42px;
+  margin: 13px 10px 13px 13px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
 }
 
 
-/* 取消 Butterfly 默认的悬浮收起图标，避免卡片内容左右跳动 */
-#article-container .flink-list > .flink-list-item:hover .flink-item-icon {
-  margin-left: 10px;
-  width: 42px;
+/* 取消 Butterfly 默认的悬浮收起图标，避免文字与图标左右跳动 */
+#article-container .flink-list > .flink-list-item:hover .flink-item-icon,
+#article-container .flink-list > .flink-list-item:focus-within .flink-item-icon {
+  margin-left: 13px;
+  width: 36px;
 }
 
 
 #article-container .flink-list > .flink-list-item .flink-item-name {
-  padding: 8px 10px 0 0;
-  height: 30px;
-  font-size: 1.1em;
+  padding: 9px 10px 0 0;
+  height: 31px;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 
 #article-container .flink-list > .flink-list-item .flink-item-desc {
-  padding: 3px 10px 7px 0;
-  height: 30px;
-  font-size: 0.85em;
+  padding: 1px 10px 8px 0;
+  height: 27px;
+  font-size: 0.8rem;
+  opacity: 0.78;
+}
+
+
+html[data-theme="dark"] #article-container .flink-list > .flink-list-item {
+  border-color: var(--mio-border-dark);
+  background: var(--mio-glass-dark) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.22);
+}
+
+
+html[data-theme="dark"] #article-container .flink-list > .flink-list-item:hover,
+html[data-theme="dark"] #article-container .flink-list > .flink-list-item:focus-within {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(18, 20, 26, 0.62) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+
+@media (max-width: 1024px) {
+  #article-container .flink-list > .flink-list-item {
+    width: calc((100% - 12px) / 2) !important;
+  }
+}
+
+
+@media (max-width: 600px) {
+  #article-container .flink-list {
+    gap: 9px;
+    padding: 8px 0;
+  }
+
+
+  #article-container .flink-list > .flink-list-item {
+    width: 100% !important;
+  }
 }
 
 
@@ -2048,13 +2149,25 @@ html[data-theme="dark"] .mio-update-heatmap {
 
 
 .mio-heatmap-year-control select {
-  padding: 6px 28px 6px 10px;
-  background: rgba(20, 35, 52, 0.32);
+  box-sizing: border-box;
+  min-width: 104px;
+  padding: 6px 30px;
   border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 9px;
+  appearance: none;
+  -webkit-appearance: none;
+  /* 自定义三角可避免原生箭头紧贴按钮右边缘。 */
+  background-color: rgba(10, 12, 18, 0.18);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.25 6 6.25 11 1.25' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 10px 7px;
   color: var(--font-color);
   font-family: "JetBrains Mono", Consolas, monospace;
   font-size: 0.94em;
+  text-align: left;
+  text-align-last: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
   outline: none;
   cursor: pointer;
   backdrop-filter: blur(10px);
@@ -2070,14 +2183,22 @@ html[data-theme="dark"] .mio-update-heatmap {
 
 
 html[data-theme="dark"] .mio-heatmap-year-control select {
-  background: rgba(5, 6, 8, 0.54);
+  background-color: rgba(5, 6, 8, 0.36);
   border-color: rgba(255, 255, 255, 0.18);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
 }
 
 
 .mio-heatmap-year-control option {
-  background: #223044;
-  color: #f5f7fa;
+  background: #64748b;
+  color: #fff;
+  text-align: left;
+}
+
+
+html[data-theme="dark"] .mio-heatmap-year-control option {
+  background: #1e293b;
+  color: #f8fafc;
 }
 
 
@@ -2280,5 +2401,565 @@ html[data-theme="dark"] .mio-heatmap-cell.level-4 {
 
   .mio-heatmap-scroll {
     margin-right: -4px;
+  }
+}
+
+
+/* =========================
+   35. 分类页：经典分类 / 知识库目录切换
+   ========================= */
+
+/* 右上角浏览方式选择框；仅出现在 /categories/ 分类总览页。 */
+.mio-category-view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+
+.mio-category-view-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--font-color);
+  font-size: 0.9em;
+}
+
+
+.mio-category-view-toolbar label i {
+  color: var(--theme-color);
+}
+
+
+#mio-category-view {
+  min-width: 132px;
+  box-sizing: border-box;
+  padding: 7px 32px;
+  border: 1px solid rgba(71, 85, 105, 0.28);
+  border-radius: 9px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  /* 使用留有 13px 右侧间距的统一白色下拉三角。 */
+  background-color: rgba(10, 12, 18, 0.18);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.25 6 6.25 11 1.25' fill='none' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 10px 7px;
+  color: var(--font-color);
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.1);
+  font: inherit;
+  font-size: 0.86em;
+  text-align: left;
+  text-align-last: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+
+#mio-category-view:focus {
+  border-color: var(--theme-color);
+  box-shadow: 0 0 0 3px rgba(73, 177, 245, 0.18);
+}
+
+
+html[data-theme="dark"] #mio-category-view {
+  border-color: rgba(255, 255, 255, 0.16);
+  background-color: rgba(15, 23, 42, 0.38);
+  color: var(--font-color);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+}
+
+
+/* 原生下拉菜单不能使用 backdrop-filter，改用低饱和蓝灰底确保清晰。 */
+#mio-category-view option {
+  background: #64748b;
+  color: #fff;
+  text-align: left;
+}
+
+
+html[data-theme="dark"] #mio-category-view option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+
+/* 自定义圆角玻璃下拉菜单：同时服务分类视图和热力图年份。 */
+.mio-glass-select {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 132px;
+  color: var(--font-color);
+  font-size: inherit;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+
+.mio-heatmap-year-control .mio-glass-select {
+  width: 104px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 0.94em;
+}
+
+
+/* 保留原生 select 的值和 change 事件，但不再显示浏览器方正菜单。 */
+.mio-glass-select-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+
+.mio-glass-select-trigger {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 14px 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 10px;
+  outline: none;
+  background: rgba(10, 12, 18, 0.18);
+  color: var(--font-color);
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.1);
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  text-shadow: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.mio-heatmap-year-control .mio-glass-select-trigger {
+  min-height: 33px;
+  padding-left: 10px;
+}
+
+
+.mio-glass-select-value {
+  overflow: hidden;
+  flex: 1 1 auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.mio-glass-select-arrow {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin: -4px 3px 0 10px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.86;
+  transform: rotate(45deg);
+  transition: margin-top 0.2s ease, transform 0.2s ease;
+}
+
+
+.mio-glass-select.is-open .mio-glass-select-arrow {
+  margin-top: 4px;
+  transform: rotate(225deg);
+}
+
+
+.mio-glass-select-trigger:hover,
+.mio-glass-select-trigger:focus-visible,
+.mio-glass-select.is-open .mio-glass-select-trigger {
+  border-color: rgba(73, 177, 245, 0.72);
+  background: rgba(10, 12, 18, 0.25);
+  box-shadow: 0 0 0 3px rgba(73, 177, 245, 0.14), 0 7px 18px rgba(15, 23, 42, 0.14);
+}
+
+
+.mio-glass-select-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  right: 0;
+  box-sizing: border-box;
+  min-width: 100%;
+  padding: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 13px;
+  background: rgba(71, 85, 105, 0.76);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.24);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+
+.mio-glass-select-menu[hidden] {
+  display: none !important;
+}
+
+
+.mio-glass-select-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  margin: 0;
+  padding: 7px 28px 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.58);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+
+.mio-glass-select-option + .mio-glass-select-option {
+  margin-top: 3px;
+}
+
+
+.mio-glass-select-option:hover,
+.mio-glass-select-option:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+
+.mio-glass-select-option.is-selected {
+  background: rgba(73, 177, 245, 0.3);
+  font-weight: 600;
+}
+
+
+.mio-glass-select-option.is-selected::after {
+  position: absolute;
+  right: 10px;
+  content: "✓";
+  color: #bde7ff;
+  font-weight: 700;
+}
+
+
+html[data-theme="dark"] .mio-glass-select {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+}
+
+
+html[data-theme="dark"] .mio-glass-select-trigger {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(15, 23, 42, 0.38);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+
+html[data-theme="dark"] .mio-glass-select-trigger:hover,
+html[data-theme="dark"] .mio-glass-select-trigger:focus-visible,
+html[data-theme="dark"] .mio-glass-select.is-open .mio-glass-select-trigger {
+  border-color: rgba(73, 177, 245, 0.62);
+  background: rgba(15, 23, 42, 0.48);
+}
+
+
+html[data-theme="dark"] .mio-glass-select-menu {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.82);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+
+/* hidden 属性必须优先于视图本身的布局规则。 */
+.mio-category-view[hidden] {
+  display: none !important;
+}
+
+
+.mio-knowledge-tree,
+.mio-knowledge-children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+
+.mio-knowledge-tree {
+  display: grid;
+  gap: 12px;
+}
+
+
+.mio-knowledge-node {
+  margin: 0;
+}
+
+
+.mio-knowledge-tree > .mio-knowledge-node {
+  overflow: hidden;
+  border: 1px solid rgba(71, 85, 105, 0.2);
+  border-radius: 13px;
+  background: rgba(203, 213, 225, 0.24);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+
+html[data-theme="dark"] .mio-knowledge-tree > .mio-knowledge-node {
+  border-color: rgba(255, 255, 255, 0.11);
+  background: rgba(15, 23, 42, 0.38);
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.2);
+}
+
+
+.mio-knowledge-details > summary {
+  list-style: none;
+}
+
+
+.mio-knowledge-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+
+.mio-knowledge-summary {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  color: var(--font-color);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+
+.mio-knowledge-tree > .mio-knowledge-node > .mio-knowledge-details > .mio-knowledge-summary {
+  min-height: 48px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-radius: 0;
+  font-weight: 700;
+}
+
+
+.mio-knowledge-summary:hover {
+  background: rgba(73, 177, 245, 0.12);
+}
+
+
+html[data-theme="dark"] .mio-knowledge-summary:hover {
+  background: rgba(73, 177, 245, 0.16);
+}
+
+
+/* CSS 三角形随 details 的 open 状态旋转。 */
+.mio-knowledge-arrow {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  margin-right: 10px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid currentColor;
+  opacity: 0.72;
+  transition: transform 0.2s ease;
+}
+
+
+.mio-knowledge-details[open] > .mio-knowledge-summary .mio-knowledge-arrow {
+  transform: rotate(90deg);
+}
+
+
+.mio-knowledge-summary.is-leaf .mio-knowledge-arrow {
+  visibility: hidden;
+}
+
+
+.mio-knowledge-folder {
+  width: 1.35em;
+  margin-right: 7px;
+  color: #e6a23c;
+  text-align: center;
+}
+
+
+.mio-knowledge-details[open] > .mio-knowledge-summary .mio-knowledge-folder::before {
+  content: "\f07c";
+}
+
+
+.mio-knowledge-category-link {
+  min-width: 0;
+  color: inherit;
+}
+
+
+.mio-knowledge-category-link:hover,
+.mio-knowledge-post a:hover {
+  color: var(--theme-color);
+}
+
+
+.mio-knowledge-count {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.13);
+  color: var(--card-meta);
+  font-size: 0.74em;
+  font-weight: 500;
+}
+
+
+.mio-knowledge-children {
+  position: relative;
+  margin: 0 12px 9px 26px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+
+html[data-theme="dark"] .mio-knowledge-children {
+  border-left-color: rgba(255, 255, 255, 0.14);
+}
+
+
+.mio-knowledge-post {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+
+.mio-knowledge-post:hover {
+  background: rgba(73, 177, 245, 0.09);
+}
+
+
+.mio-knowledge-post > i {
+  flex: 0 0 1.2em;
+  color: var(--card-meta);
+  text-align: center;
+}
+
+
+.mio-knowledge-post > a {
+  overflow: hidden;
+  flex: 1 1 auto;
+  color: var(--font-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.mio-knowledge-post > time {
+  flex: 0 0 auto;
+  color: var(--card-meta);
+  font-size: 0.74em;
+}
+
+
+@media (max-width: 768px) {
+  .mio-category-view-toolbar {
+    margin-bottom: 16px;
+  }
+
+
+  .mio-category-view-toolbar label span {
+    display: none;
+  }
+
+
+  #mio-category-view {
+    min-width: 124px;
+  }
+
+
+  .mio-knowledge-children {
+    margin-right: 7px;
+    margin-left: 18px;
+    padding-left: 8px;
+  }
+
+
+  .mio-knowledge-summary,
+  .mio-knowledge-post {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+
+  .mio-knowledge-post > time {
+    display: none;
+  }
+}
+
+
+/* =========================================================
+   36. 文章页固定导航的长标题防重叠
+
+   实际安全宽度由 nav-title-fit.js 根据居中菜单的左边界写入。
+   CSS 负责允许 Flex 子项收缩，并把超出的标题显示为省略号。
+   ========================================================= */
+
+#nav #blog-info {
+  min-width: 0;
+  overflow: hidden;
+}
+
+
+#nav #blog-info > a {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+#page-header.nav-fixed #nav #blog-info > .nav-page-title {
+  display: block;
+}
+
+
+#nav .nav-page-title > .site-name:first-child,
+#nav .nav-site-title > .site-name {
+  display: block;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* 只有真正的移动端才解除桌面标题安全宽度。 */
+@media (max-width: 768px) {
+  #nav.hide-menu #blog-info {
+    max-width: none !important;
   }
 }

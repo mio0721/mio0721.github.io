@@ -1,0 +1,557 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：状态、输入、输出与反馈 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：状态、输入、输出与反馈">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-02T12:37:00.000Z">
+<meta property="article:modified_time" content="2026-06-02T12:48:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="DeLaN">
+<meta property="article:tag" content="Observer">
+<meta property="article:tag" content="反馈控制">
+<meta property="article:tag" content="控制系统">
+<meta property="article:tag" content="状态空间">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：状态、输入、输出与反馈",
+  "url": "https://mio0721.github.io/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-02T12:37:00.000Z",
+  "dateModified": "2026-06-02T12:48:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：状态、输入、输出与反馈',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260902-25"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">30</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">66</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：状态、输入、输出与反馈</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：状态、输入、输出与反馈</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-02T12:37:00.000Z" title="发表于 2026-06-02 20:37:00">2026-06-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-02T12:48:00.000Z" title="更新于 2026-06-02 20:48:00">2026-06-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：状态、输入、输出与反馈"><a href="#控制系统基础：状态、输入、输出与反馈" class="headerlink" title="控制系统基础：状态、输入、输出与反馈"></a>控制系统基础：状态、输入、输出与反馈</h1><p>控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。</p>
+<p>这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。</p>
+<h2 id="控制到底是在做什么"><a href="#控制到底是在做什么" class="headerlink" title="控制到底是在做什么"></a>控制到底是在做什么</h2><p>控制最核心的问题可以概括成一句话：</p>
+<blockquote>
+<p>我希望系统达到某个目标，那么现在应该给它什么输入？</p>
+</blockquote>
+<p>例如，机械臂的期望关节位置为：</p>
+<p>$$<br>q_d<br>$$</p>
+<p>实际位置为：</p>
+<p>$$<br>q<br>$$</p>
+<p>控制器需要根据目标和当前状态计算控制输入：</p>
+<p>$$<br>\tau<br>$$</p>
+<p>基本结构为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">期望位置 q_d</span><br><span class="line">      │</span><br><span class="line">      ↓</span><br><span class="line">  ┌─────────┐</span><br><span class="line">  │  控制器  │</span><br><span class="line">  └─────────┘</span><br><span class="line">      │ 控制输入 τ</span><br><span class="line">      ↓</span><br><span class="line">  ┌─────────┐</span><br><span class="line">  │  机器人  │</span><br><span class="line">  └─────────┘</span><br><span class="line">      │</span><br><span class="line">      ↓</span><br><span class="line">   实际位置 q</span><br></pre></td></tr></table></figure>
+
+<p>因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。</p>
+<h2 id="什么是系统"><a href="#什么是系统" class="headerlink" title="什么是系统"></a>什么是系统</h2><p>系统可以理解成一个具有自身运动规律的对象，例如汽车、电机、无人机、机械臂或连续体机器人。给系统不同的输入，它会产生不同的运动。</p>
+<p>控制理论中经常写成：</p>
+<p>$$<br>\dot{x}&#x3D;f(x,u)<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$x$ 是系统状态；</li>
+<li>$u$ 是控制输入；</li>
+<li>$\dot{x}$ 是状态的变化速度；</li>
+<li>$f$ 是系统自身的运动规律。</li>
+</ul>
+<p>这个式子表达的是：当前状态 $x$ 和当前输入 $u$ 共同决定系统接下来怎样变化。</p>
+<h2 id="什么是状态"><a href="#什么是状态" class="headerlink" title="什么是状态"></a>什么是状态</h2><p>状态通常记为 $x$，它是一组能够描述系统当前情况，并足以帮助预测之后运动的变量。</p>
+<p>例如一个运动的小车。只知道：</p>
+<p>$$<br>p&#x3D;10\ \mathrm{m}<br>$$</p>
+<p>并不足以预测下一时刻的位置，因为小车可能停在原地，也可能正以不同速度向前或向后运动。因此还需要速度 $v$，可以把状态定义为：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>p\<br>v<br>\end{bmatrix}<br>$$</p>
+<h3 id="为什么机器人常用位置和速度作为状态"><a href="#为什么机器人常用位置和速度作为状态" class="headerlink" title="为什么机器人常用位置和速度作为状态"></a>为什么机器人常用位置和速度作为状态</h3><p>机器人动力学通常是二阶微分方程：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$q$ 是广义位置；</li>
+<li>$\dot q$ 是广义速度；</li>
+<li>$\ddot q$ 是广义加速度；</li>
+<li>$M(q)$ 是惯性矩阵；</li>
+<li>$C(q,\dot q)\dot q$ 是科氏力和离心力项；</li>
+<li>$g(q)$ 是重力项；</li>
+<li>$\tau$ 是广义控制力。</li>
+</ul>
+<p>为了把它写成一阶状态空间形式，可以定义：</p>
+<p>$$<br>x_1&#x3D;q,\qquad x_2&#x3D;\dot q<br>$$</p>
+<p>于是：</p>
+<p>$$<br>\dot x_1&#x3D;x_2<br>$$</p>
+<p>并且：</p>
+<p>$$<br>\dot x_2&#x3D;ddot q<br>&#x3D;M^{-1}(q)\left[\tau-C(q,\dot q)\dot q-g(q)\right]<br>$$</p>
+<p>最终用：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\<br>\dot q<br>\end{bmatrix}<br>$$</p>
+<p>就能把二阶机器人动力学改写成 $\dot{x}&#x3D;f(x,u)$。论文中出现 $x_1&#x3D;q$、$x_2&#x3D;\dot q$ 时，通常就是在做这一步转换。</p>
+<h2 id="什么是输入"><a href="#什么是输入" class="headerlink" title="什么是输入"></a>什么是输入</h2><p>输入通常记为 $u$，表示我们能够主动施加给系统的作用。</p>
+<table>
+<thead>
+<tr>
+<th>系统</th>
+<th>可能的输入</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>汽车</td>
+<td>驱动力、转向角</td>
+</tr>
+<tr>
+<td>电机</td>
+<td>电压、电流</td>
+</tr>
+<tr>
+<td>刚性机械臂</td>
+<td>关节力矩</td>
+</tr>
+<tr>
+<td>无人机</td>
+<td>电机推力</td>
+</tr>
+<tr>
+<td>绳驱机器人</td>
+<td>绳索张力</td>
+</tr>
+</tbody></table>
+<p>对于机械臂，经常有：</p>
+<p>$$<br>u&#x3D;\tau<br>$$</p>
+<p>因此系统方程可以写成：</p>
+<p>$$<br>\dot{x}&#x3D;f(x,\tau)<br>$$</p>
+<h3 id="连续体机器人中的广义力和张力"><a href="#连续体机器人中的广义力和张力" class="headerlink" title="连续体机器人中的广义力和张力"></a>连续体机器人中的广义力和张力</h3><p>对于绳驱连续体机器人，控制器可能先计算期望广义力 $\tau_d$，但执行器真正能产生的是绳索张力 $T$。二者之间还需要张力分配，例如：</p>
+<p>$$<br>B(q)T\approx\tau_d<br>$$</p>
+<p>整个过程可以理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">轨迹控制器</span><br><span class="line">    │</span><br><span class="line">    ↓</span><br><span class="line">期望广义力 τ_d</span><br><span class="line">    │</span><br><span class="line">    ↓</span><br><span class="line">张力分配器</span><br><span class="line">    │</span><br><span class="line">    ↓</span><br><span class="line">绳索张力 T</span><br><span class="line">    │</span><br><span class="line">    ↓</span><br><span class="line">连续体机器人</span><br></pre></td></tr></table></figure>
+
+<p>因此，控制器输出的控制量和执行器最终使用的物理量不一定相同。</p>
+<h2 id="什么是输出"><a href="#什么是输出" class="headerlink" title="什么是输出"></a>什么是输出</h2><p>输出通常记为 $y$，表示实际能够测量或者关心的系统信息，一般写成：</p>
+<p>$$<br>y&#x3D;h(x)<br>$$</p>
+<p>例如，系统真实状态为：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\<br>\dot q<br>\end{bmatrix}<br>$$</p>
+<p>但传感器只能测量位置 $q$，那么输出就是：</p>
+<p>$$<br>y&#x3D;q<br>$$</p>
+<p>这说明状态 $x$ 和输出 $y$ 不一定相同。系统真实具有位置和速度，但传感器可能只能测到位置。不能直接测量的速度或其他状态，就可能需要通过状态观测器进行估计。</p>
+<p>三个核心变量可以概括为：</p>
+<p>$$<br>\boxed{x&#x3D;\text{系统现在是什么情况}}<br>$$</p>
+<p>$$<br>\boxed{u&#x3D;\text{我给系统什么作用}}<br>$$</p>
+<p>$$<br>\boxed{y&#x3D;\text{我实际测到了什么}}<br>$$</p>
+<h2 id="目标值与跟踪误差"><a href="#目标值与跟踪误差" class="headerlink" title="目标值与跟踪误差"></a>目标值与跟踪误差</h2><p>控制系统通常希望机器人按照给定目标运动，例如期望位置、速度和加速度：</p>
+<p>$$<br>q_d,\qquad \dot q_d,\qquad \ddot q_d<br>$$</p>
+<p>如果目标随时间变化，$q_d(t)$ 就是一条期望轨迹。控制任务是让：</p>
+<p>$$<br>q(t)\rightarrow q_d(t)<br>$$</p>
+<p>定义跟踪误差：</p>
+<p>$$<br>e&#x3D;q-q_d<br>$$</p>
+<p>也有文献使用 $e&#x3D;q_d-q$。两种定义都可以，但后续控制律的符号必须与误差定义保持一致。</p>
+<p>轨迹跟踪最基本的目标就是：</p>
+<p>$$<br>\boxed{e(t)\rightarrow0}<br>$$</p>
+<h2 id="开环、闭环与反馈"><a href="#开环、闭环与反馈" class="headerlink" title="开环、闭环与反馈"></a>开环、闭环与反馈</h2><h3 id="开环控制"><a href="#开环控制" class="headerlink" title="开环控制"></a>开环控制</h3><p>开环控制给出输入后，不根据实际输出继续修正：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">目标 → 控制器 → 电机</span><br></pre></td></tr></table></figure>
+
+<p>例如控制器认为给电机 $3\ \mathrm{V}$ 就能转到 $30^\circ$，于是直接输出这个电压。但受到摩擦、负载、模型误差和外部扰动影响，实际位置可能只有 $25^\circ$。由于实际位置没有反馈回来，控制器并不知道误差已经产生。</p>
+<h3 id="闭环控制"><a href="#闭环控制" class="headerlink" title="闭环控制"></a>闭环控制</h3><p>闭环控制会把实际输出重新送回控制器：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">             ┌────────────────┐</span><br><span class="line">             │                │</span><br><span class="line">q_d → 控制器 → 机器人 → q ────┘</span><br></pre></td></tr></table></figure>
+
+<p>控制器不断比较 $q_d$ 与 $q$，根据误差调整控制输入。</p>
+<p>反馈就是把系统实际发生的情况重新告诉控制器，让控制器能够继续修正。随着位置逐渐接近目标，误差也逐渐趋近于零。</p>
+<h2 id="最简单的反馈控制器"><a href="#最简单的反馈控制器" class="headerlink" title="最简单的反馈控制器"></a>最简单的反馈控制器</h2><h3 id="P-控制"><a href="#P-控制" class="headerlink" title="P 控制"></a>P 控制</h3><p>如果定义 $e&#x3D;q-q_d$，可以设计：</p>
+<p>$$<br>\tau&#x3D;-K_pe,\qquad K_p&gt;0<br>$$</p>
+<p>当 $q&gt;q_d$ 时，误差 $e&gt;0$，于是 $\tau&lt;0$，控制器会把系统往相反方向推。</p>
+<p>P 控制可以直观理解为：偏得越多，就纠正得越用力。</p>
+<h3 id="PD-控制"><a href="#PD-控制" class="headerlink" title="PD 控制"></a>PD 控制</h3><p>只看位置误差还不够。机器人可能已经接近目标，但仍在高速冲向目标，如果不及时减速就会越过目标。</p>
+<p>因此可以加入误差变化率：</p>
+<p>$$<br>\boxed{\tau&#x3D;-K_pe-K_d\dot e}<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$K_p$ 决定位置纠偏强度；</li>
+<li>$K_d$ 提供速度阻尼。</li>
+</ul>
+<p>可以简单理解为，P 关心“现在偏了多少”，D 关心“现在冲得有多快”。</p>
+<h2 id="为什么还需要动力学补偿"><a href="#为什么还需要动力学补偿" class="headerlink" title="为什么还需要动力学补偿"></a>为什么还需要动力学补偿</h2><p>真实机器人动力学可能写成：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)+d&#x3D;\tau<br>$$</p>
+<p>其中 $d$ 可能包含外部扰动、摩擦、未建模动力学、参数误差和绳索弹性误差。</p>
+<p>如果只使用简单 PD，反馈控制器既要让机器人正常运动，又要克服自身动力学、纠正误差并对抗扰动，负担会比较大。</p>
+<p>如果能够通过模型提前计算完成目标运动所需的名义控制力 $\tau_{\text{model}}$，再用反馈控制处理剩余误差，就可以写成：</p>
+<p>$$<br>\boxed{<br>\tau&#x3D;	au_{\text{model}}+\tau_{\text{feedback}}<br>}<br>$$</p>
+<p>这就是模型前馈补偿与反馈纠偏的组合。</p>
+<h2 id="DeLaN-在控制系统中的位置"><a href="#DeLaN-在控制系统中的位置" class="headerlink" title="DeLaN 在控制系统中的位置"></a>DeLaN 在控制系统中的位置</h2><p>DeLaN 用于学习机器人动力学。它可以根据 $q$、$\dot q$ 和 $\ddot q$ 预测相应的广义力：</p>
+<p>$$<br>\hat\tau_\theta<br>$$</p>
+<p>这个预测值可以作为名义动力学补偿项。例如 DeLaN 与 PD 组合：</p>
+<p>$$<br>\tau&#x3D;\hat\tau_\theta-K_pe-K_d\dot e<br>$$</p>
+<p>其中，$\hat\tau_\theta$ 负责提供正常运动所需的大部分控制力，PD 反馈负责在实际运动偏离目标时继续纠正。</p>
+<p>模型并不等于控制器。如果真实机器人需要 $10\ \mathrm{Nm}$，而模型只预测出 $9\ \mathrm{Nm}$，完全依靠模型就会产生跟踪误差。加入反馈控制后，模型负责尽量算准，反馈控制则在模型存在误差时兜底。</p>
+<h2 id="观测器在做什么"><a href="#观测器在做什么" class="headerlink" title="观测器在做什么"></a>观测器在做什么</h2><p>观测器和控制器解决的是不同问题：</p>
+<ul>
+<li>控制器回答“现在应该给机器人什么输入”；</li>
+<li>观测器回答“系统现在处于什么状态，或者存在多大的未知扰动”。</li>
+</ul>
+<p>当速度 $\dot q$ 或扰动 $d$ 无法直接测量时，观测器可以给出估计：</p>
+<p>$$<br>\hat{\dot q},\qquad \hat d<br>$$</p>
+<p>观测器输出的是估计信息，而不是直接驱动机器人的控制量。</p>
+<h3 id="扰动观测与补偿"><a href="#扰动观测与补偿" class="headerlink" title="扰动观测与补偿"></a>扰动观测与补偿</h3><p>对于含有未知扰动 $d$ 的系统，如果观测器能够得到：</p>
+<p>$$<br>\hat d\approx d<br>$$</p>
+<p>就可以在控制输入中加入扰动补偿：</p>
+<p>$$<br>\boxed{<br>\tau&#x3D;	au_{\text{model}}-\hat d+\tau_{\text{feedback}}<br>}<br>$$</p>
+<p>这三个部分分别负责正常动力学、未知扰动补偿和剩余误差纠偏。</p>
+<p>控制器和观测器之间的关系可以表示为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">期望轨迹 q_d</span><br><span class="line">     │</span><br><span class="line">     ↓</span><br><span class="line">┌─────────┐</span><br><span class="line">│  控制器  │←──────────┐</span><br><span class="line">└─────────┘           │</span><br><span class="line">     │ τ              │ x_hat、d_hat</span><br><span class="line">     ↓                │</span><br><span class="line">┌─────────┐      ┌─────────┐</span><br><span class="line">│  机器人  │─ y →│  观测器  │</span><br><span class="line">└─────────┘      └─────────┘</span><br></pre></td></tr></table></figure>
+
+<p>观测器告诉控制器现在发生了什么，控制器再根据这些信息决定接下来做什么。</p>
+<h2 id="模型、观测器和控制器的区别"><a href="#模型、观测器和控制器的区别" class="headerlink" title="模型、观测器和控制器的区别"></a>模型、观测器和控制器的区别</h2><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>主要解决的问题</th>
+<th>常见输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>动力学模型</td>
+<td>正常情况下系统需要多少力</td>
+<td>$\hat\tau$</td>
+</tr>
+<tr>
+<td>Observer</td>
+<td>哪些状态或扰动无法直接获得</td>
+<td>$\hat x,\hat d$</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>现在应该给系统什么控制输入</td>
+<td>$u,\tau$</td>
+</tr>
+<tr>
+<td>稳定性分析</td>
+<td>为什么系统最终不会发散</td>
+<td>稳定性结论</td>
+</tr>
+</tbody></table>
+<p>常见方法也可以按照这个结构分类：</p>
+<ul>
+<li>动力学模型：Euler–Lagrange、DeLaN、部分 Neural ODE、SINDy；</li>
+<li>控制器：P、PI、PD、PID、SMC、TSMC、FTSMC；</li>
+<li>观测器：DOB、NDOB、ESO、NESO、ADO；</li>
+<li>稳定性分析：Lyapunov 稳定、渐近稳定、有限时间稳定和固定时间稳定。</li>
+</ul>
+<h2 id="如何拆解复杂控制律"><a href="#如何拆解复杂控制律" class="headerlink" title="如何拆解复杂控制律"></a>如何拆解复杂控制律</h2><p>以后遇到复杂控制律，例如：</p>
+<p>$$<br>\tau&#x3D;<br>M(q)a_r+C(q,\dot q)v_r+g(q)<br>-\hat d<br>-K_1s-K_2|s|^\alpha\operatorname{sign}(s)<br>$$</p>
+<p>不必一开始就研究所有细节，可以先把它拆成三部分。</p>
+<p>模型补偿：</p>
+<p>$$<br>M(q)a_r+C(q,\dot q)v_r+g(q)<br>$$</p>
+<p>扰动补偿：</p>
+<p>$$<br>-\hat d<br>$$</p>
+<p>反馈控制：</p>
+<p>$$<br>-K_1s-K_2|s|^\alpha\operatorname{sign}(s)<br>$$</p>
+<p>也就是：</p>
+<p>$$<br>\boxed{<br>\text{控制输入}<br>&#x3D;\text{模型补偿}<br>+\text{扰动补偿}<br>+\text{反馈纠偏}<br>}<br>$$</p>
+<p>例如：</p>
+<p>$$<br>\tau&#x3D;\hat\tau_\theta-K_s\tanh(\Phi^{-1}s)<br>$$</p>
+<p>可以看成 DeLaN 动力学补偿与 SMC 鲁棒反馈的组合。如果再加入扰动观测器：</p>
+<p>$$<br>\tau&#x3D;\hat\tau_\theta-\hat d-K_s\tanh(\Phi^{-1}s)<br>$$</p>
+<p>则形成 DeLaN、Observer 和 SMC 三部分组合的结构。</p>
+<h2 id="整体关系"><a href="#整体关系" class="headerlink" title="整体关系"></a>整体关系</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">机器人控制系统</span><br><span class="line">│</span><br><span class="line">├── 系统 / 被控对象</span><br><span class="line">│   └── 机器人自身动力学</span><br><span class="line">│</span><br><span class="line">├── 动力学模型</span><br><span class="line">│   ├── Euler–Lagrange</span><br><span class="line">│   └── DeLaN</span><br><span class="line">│</span><br><span class="line">├── 状态 / 扰动估计</span><br><span class="line">│   ├── DOB / NDOB</span><br><span class="line">│   └── ESO / NESO / ADO</span><br><span class="line">│</span><br><span class="line">├── 控制器</span><br><span class="line">│   ├── PD / PID</span><br><span class="line">│   └── SMC / TSMC / FTSMC</span><br><span class="line">│</span><br><span class="line">└── 稳定性分析</span><br><span class="line">    └── Lyapunov</span><br></pre></td></tr></table></figure>
+
+<h2 id="核心公式整理"><a href="#核心公式整理" class="headerlink" title="核心公式整理"></a>核心公式整理</h2><p>系统状态方程：</p>
+<p>$$<br>\dot x&#x3D;f(x,u)<br>$$</p>
+<p>输出方程：</p>
+<p>$$<br>y&#x3D;h(x)<br>$$</p>
+<p>机器人状态：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\<br>\dot q<br>\end{bmatrix}<br>$$</p>
+<p>机器人动力学：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau<br>$$</p>
+<p>跟踪误差和控制目标：</p>
+<p>$$<br>e&#x3D;q-q_d,\qquad e(t)\rightarrow0<br>$$</p>
+<p>PD 控制：</p>
+<p>$$<br>\tau&#x3D;-K_pe-K_d\dot e<br>$$</p>
+<p>模型与反馈：</p>
+<p>$$<br>\tau&#x3D;\tau_{\text{model}}+\tau_{\text{feedback}}<br>$$</p>
+<p>模型、观测器与反馈：</p>
+<p>$$<br>\tau&#x3D;\tau_{\text{model}}-\hat d+\tau_{\text{feedback}}<br>$$</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这一课最需要分清的是各个模块的职责：</p>
+<ol>
+<li>系统描述被控对象本身怎样运动；</li>
+<li>状态 $x$ 描述系统当前的情况；</li>
+<li>输入 $u$ 是主动施加给系统的作用；</li>
+<li>输出 $y$ 是实际能够测量或关心的信息；</li>
+<li>反馈把实际运行情况重新告诉控制器；</li>
+<li>控制器根据目标和当前状态计算控制输入；</li>
+<li>动力学模型估计正常运动需要的作用力；</li>
+<li>观测器估计不能直接测量的状态或未知扰动。</li>
+</ol>
+<p>后续再学习 DeLaN、滑模控制和扰动观测器时，可以先判断它属于模型、控制器还是观测器，再继续分析具体公式。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/">https://mio0721.github.io/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F/">控制系统</a><a class="post-meta__tags" href="/tags/%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4/">状态空间</a><a class="post-meta__tags" href="/tags/%E5%8F%8D%E9%A6%88%E6%8E%A7%E5%88%B6/">反馈控制</a><a class="post-meta__tags" href="/tags/DeLaN/">DeLaN</a><a class="post-meta__tags" href="/tags/Observer/">Observer</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/03/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/1.CAN%20%E6%80%BB%E7%BA%BF%E5%9F%BA%E7%A1%80/" title="CAN 总线基础：从 USB2CAN 到达妙电机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">CAN 总线基础：从 USB2CAN 到达妙电机</div></div><div class="info-2"><div class="info-item-1">CAN 总线基础：从 USB2CAN 到达妙电机最近开始使用达妙 DM-J4310 电机，同时也接触到了 USB 转 CAN 模块、CANH、CANL 和 CAN ID 等概念。 这篇先不深入 CAN 的底层时序，而是从实际设备出发，梳理 CAN 总线在电机控制系统中承担的作用。 整个系统是怎么连接的目前使用的设备主要包括：  电脑 USB2CAN 模块 达妙 DM-J4310 电机 电机电源 CAN 通信线  它们之间的关系可以先理解成： 12345678910电脑  │ USB  ↓USB2CAN  │ CANH / CANL  ↓达妙电机  │  ↓电机执行动作  电脑通常不能直接产生 CAN 总线上的电气信号，因此需要 USB2CAN 作为转换设备。 上位机程序先通过 USB 把命令交给 USB2CAN，再由 USB2CAN 将其转换成 CAN 报文并发送到总线上。 CAN 是什么CAN 的全称是： 1Controller Area Network  中文一般称为控制器局域网。它是一种适合控制器之间交换数据的通信方式，常见于汽车、机器人、工业设备和电机控制系统。 例如，一...</div></div></div></a><a class="pagination-related" href="/2025/01/26/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/6.GitHub%20Pages%20%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%BA%90%E7%A0%81%E5%A4%87%E4%BB%BD/" title="Hexo GitHub Pages 部署与源码备份"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hexo GitHub Pages 部署与源码备份</div></div><div class="info-2"><div class="info-item-1">Hexo GitHub Pages 部署与源码备份Hexo 部署到 GitHub Pages 时，公开仓库中通常只有生成后的 HTML、CSS 和 JavaScript。 真正用于编辑博客的内容还包括： 1234567source/themes/scripts/_config.yml_config.butterfly.ymlpackage.jsonpackage-lock.json  如果只保留 Pages 仓库，换电脑以后无法直接恢复完整的博客开发环境。 因此可以把“网站源码”和“部署结果”分别保存到两个仓库。  两个仓库的作用可以使用下面的结构： 12homepage-source      私有仓库，保存 Hexo 源码mio0721.github.io    公开仓库，保存生成后的网页  两个仓库的作用不同： 1234567编辑 Markdown 和配置        ↓提交 homepage-source        ↓Hexo 生成 public        ↓部署到 mio0721.github.io  源码仓库可以设为私有，Pages 仓库保持公开。  不需要...</div></div></div></a></nav></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
