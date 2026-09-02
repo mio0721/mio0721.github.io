@@ -1,0 +1,474 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：状态空间方程 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：状态空间方程上一课中的传递函数从系统外部描述输入与输出的关系。这一课转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：状态空间方程">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：状态空间方程上一课中的传递函数从系统外部描述输入与输出的关系。这一课转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-07T13:18:00.000Z">
+<meta property="article:modified_time" content="2026-06-07T13:29:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="ESO">
+<meta property="article:tag" content="Observer">
+<meta property="article:tag" content="控制系统">
+<meta property="article:tag" content="状态方程">
+<meta property="article:tag" content="状态空间">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：状态空间方程",
+  "url": "https://mio0721.github.io/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-07T13:18:00.000Z",
+  "dateModified": "2026-06-07T13:29:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：状态空间方程',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260902-28"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">33</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">76</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：状态空间方程</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：状态空间方程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-07T13:18:00.000Z" title="发表于 2026-06-07 21:18:00">2026-06-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-07T13:29:00.000Z" title="更新于 2026-06-07 21:29:00">2026-06-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：状态空间方程"><a href="#控制系统基础：状态空间方程" class="headerlink" title="控制系统基础：状态空间方程"></a>控制系统基础：状态空间方程</h1><p>上一课中的传递函数从系统外部描述输入与输出的关系。这一课转向系统内部，理解控制论文中最常见的：</p>
+<p>$$<br>\dot{x}&#x3D;Ax+Bu<br>$$</p>
+<p>$$<br>y&#x3D;Cx+Du<br>$$</p>
+<p>核心过程是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">高阶微分方程</span><br><span class="line">      ↓</span><br><span class="line">选择状态变量</span><br><span class="line">      ↓</span><br><span class="line">拆成多个一阶方程</span><br><span class="line">      ↓</span><br><span class="line">写成状态空间形式</span><br></pre></td></tr></table></figure>
+
+<h2 id="状态空间关注系统内部"><a href="#状态空间关注系统内部" class="headerlink" title="状态空间关注系统内部"></a>状态空间关注系统内部</h2><p>传递函数：</p>
+<p>$$<br>G(s)&#x3D;\frac{Y(s)}{U(s)}<br>$$</p>
+<p>主要回答输入经过系统后会形成什么输出，但不会直接展开系统内部有哪些变量。</p>
+<p>状态空间方法会显式记录系统内部状态。例如运动小车可以定义：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>p\<br>v<br>\end{bmatrix}<br>$$</p>
+<p>其中 $p$ 是位置，$v$ 是速度。状态空间关注的是：</p>
+<p>$$<br>\boxed{\text{系统内部状态如何随时间演化}}<br>$$</p>
+<h2 id="什么是状态"><a href="#什么是状态" class="headerlink" title="什么是状态"></a>什么是状态</h2><p>状态是一组足以描述系统当前动态情况，并能结合未来输入确定之后运动的变量。</p>
+<p>假设两辆小车都位于：</p>
+<p>$$<br>p&#x3D;10\ \mathrm{m}<br>$$</p>
+<p>其中一辆静止，另一辆以 $20\ \mathrm{m&#x2F;s}$ 向前运动。虽然位置相同，它们下一时刻的位置显然不同。因此只知道位置并不足够，还需要速度：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>p\<br>v<br>\end{bmatrix}<br>$$</p>
+<p>状态并不是把所有能想到的物理量都塞进向量，而是选择一组充分且尽量简洁的变量。</p>
+<h2 id="为什么把高阶方程改成一阶方程"><a href="#为什么把高阶方程改成一阶方程" class="headerlink" title="为什么把高阶方程改成一阶方程"></a>为什么把高阶方程改成一阶方程</h2><p>现代控制理论通常使用统一的一阶形式：</p>
+<p>$$<br>\dot{x}&#x3D;f(x,u)<br>$$</p>
+<p>高阶微分方程可以通过增加状态变量，转换成多个一阶方程。</p>
+<p>例如：</p>
+<p>$$<br>\ddot q&#x3D;u<br>$$</p>
+<p>定义：</p>
+<p>$$<br>x_1&#x3D;q,\qquad x_2&#x3D;\dot q<br>$$</p>
+<p>于是：</p>
+<p>$$<br>\dot x_1&#x3D;x_2<br>$$</p>
+<p>$$<br>\dot x_2&#x3D;u<br>$$</p>
+<p>写成矩阵形式：</p>
+<h1 id="begin-bmatrix-dot-x-1-dot-x-2-end-bmatrix"><a href="#begin-bmatrix-dot-x-1-dot-x-2-end-bmatrix" class="headerlink" title="$$\begin{bmatrix}\dot x_1\\dot x_2\end{bmatrix}"></a>$$<br>\begin{bmatrix}<br>\dot x_1\<br>\dot x_2<br>\end{bmatrix}</h1><p>\begin{bmatrix}<br>0&amp;1\<br>0&amp;0<br>\end{bmatrix}<br>\begin{bmatrix}<br>x_1\<br>x_2<br>\end{bmatrix}<br>+<br>\begin{bmatrix}<br>0\<br>1<br>\end{bmatrix}u<br>$$</p>
+<p>这就是：</p>
+<p>$$<br>\dot{x}&#x3D;Ax+Bu<br>$$</p>
+<h2 id="质量—弹簧—阻尼系统"><a href="#质量—弹簧—阻尼系统" class="headerlink" title="质量—弹簧—阻尼系统"></a>质量—弹簧—阻尼系统</h2><p>考虑：</p>
+<p>$$<br>m\ddot x+b\dot x+kx&#x3D;F<br>$$</p>
+<p>选择状态：</p>
+<p>$$<br>x_1&#x3D;x,\qquad x_2&#x3D;\dot x<br>$$</p>
+<p>第一条状态方程为：</p>
+<p>$$<br>\dot x_1&#x3D;x_2<br>$$</p>
+<p>由原方程得到：</p>
+<p>$$<br>\ddot x&#x3D;-\frac{k}{m}x-\frac{b}{m}\dot x+\frac{1}{m}F<br>$$</p>
+<p>因此：</p>
+<p>$$<br>\dot x_2&#x3D;-\frac{k}{m}x_1-\frac{b}{m}x_2+\frac{1}{m}F<br>$$</p>
+<p>矩阵形式为：</p>
+<h1 id="boxed-begin-bmatrix-dot-x-1-dot-x-2-end-bmatrix"><a href="#boxed-begin-bmatrix-dot-x-1-dot-x-2-end-bmatrix" class="headerlink" title="$$\boxed{\begin{bmatrix}\dot x_1\\dot x_2\end{bmatrix}"></a>$$<br>\boxed{<br>\begin{bmatrix}<br>\dot x_1\<br>\dot x_2<br>\end{bmatrix}</h1><p>\begin{bmatrix}<br>0&amp;1\<br>-\frac{k}{m}&amp;-\frac{b}{m}<br>\end{bmatrix}<br>\begin{bmatrix}<br>x_1\<br>x_2<br>\end{bmatrix}<br>+<br>\begin{bmatrix}<br>0\<br>\frac{1}{m}<br>\end{bmatrix}F<br>}<br>$$</p>
+<h2 id="A-、-B-、-C-、-D-分别是什么"><a href="#A-、-B-、-C-、-D-分别是什么" class="headerlink" title="$A$、$B$、$C$、$D$ 分别是什么"></a>$A$、$B$、$C$、$D$ 分别是什么</h2><p>线性时不变系统的标准形式为：</p>
+<p>$$<br>\boxed{\dot{x}&#x3D;Ax+Bu}<br>$$</p>
+<p>$$<br>\boxed{y&#x3D;Cx+Du}<br>$$</p>
+<p>各矩阵的作用可以概括为：</p>
+<table>
+<thead>
+<tr>
+<th>矩阵</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$A$</td>
+<td>状态自身如何相互影响和演化</td>
+</tr>
+<tr>
+<td>$B$</td>
+<td>控制输入如何影响状态变化</td>
+</tr>
+<tr>
+<td>$C$</td>
+<td>从状态中选择或组合出测量输出</td>
+</tr>
+<tr>
+<td>$D$</td>
+<td>输入是否直接影响当前输出</td>
+</tr>
+</tbody></table>
+<h3 id="状态方程"><a href="#状态方程" class="headerlink" title="状态方程"></a>状态方程</h3><p>$$<br>\dot{x}&#x3D;Ax+Bu<br>$$</p>
+<p>描述系统内部状态怎样变化。其中 $Ax$ 是系统自身的动态，$Bu$ 是外部输入造成的影响。</p>
+<h3 id="输出方程"><a href="#输出方程" class="headerlink" title="输出方程"></a>输出方程</h3><p>$$<br>y&#x3D;Cx+Du<br>$$</p>
+<p>描述传感器或研究者能看到什么。</p>
+<p>如果状态为：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>p\<br>v<br>\end{bmatrix}<br>$$</p>
+<p>但只能测量位置，那么：</p>
+<p>$$<br>y&#x3D;<br>\begin{bmatrix}<br>1&amp;0<br>\end{bmatrix}x<br>$$</p>
+<p>此时：</p>
+<p>$$<br>C&#x3D;\begin{bmatrix}1&amp;0\end{bmatrix},\qquad D&#x3D;0<br>$$</p>
+<blockquote>
+<p>状态和输出不一定相同。系统内部可以同时具有位置和速度，但传感器可能只直接测得位置。</p>
+</blockquote>
+<h2 id="状态变量并不只有一种选法"><a href="#状态变量并不只有一种选法" class="headerlink" title="状态变量并不只有一种选法"></a>状态变量并不只有一种选法</h2><p>同一个系统可以选择不同的状态变量，只要它们包含足以描述系统动态的信息，并且不同选择之间可以通过可逆变换联系。</p>
+<p>机械系统最常见的选择是：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\<br>\dot q<br>\end{bmatrix}<br>$$</p>
+<p>原因是机械动力学通常以位置和速度为基本变量，传感器和控制目标也经常围绕它们设计。</p>
+<h2 id="机器人动力学的非线性状态空间形式"><a href="#机器人动力学的非线性状态空间形式" class="headerlink" title="机器人动力学的非线性状态空间形式"></a>机器人动力学的非线性状态空间形式</h2><p>机器人动力学通常写成：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau<br>$$</p>
+<p>定义：</p>
+<p>$$<br>x_1&#x3D;q,\qquad x_2&#x3D;\dot q<br>$$</p>
+<p>则：</p>
+<p>$$<br>\dot x_1&#x3D;x_2<br>$$</p>
+<p>$$<br>\dot x_2&#x3D;<br>M^{-1}(x_1)<br>\left[<br>\tau-C(x_1,x_2)x_2-g(x_1)<br>\right]<br>$$</p>
+<p>因此可以统一写成：</p>
+<p>$$<br>\boxed{\dot{x}&#x3D;f(x,u)}<br>$$</p>
+<p>这里通常不能直接写成固定的 $Ax+Bu$，因为 $M$、$C$ 和 $g$ 都会随状态变化。这是非线性状态空间模型。</p>
+<h2 id="线性系统与非线性系统"><a href="#线性系统与非线性系统" class="headerlink" title="线性系统与非线性系统"></a>线性系统与非线性系统</h2><p>线性系统常写为：</p>
+<p>$$<br>\dot{x}&#x3D;Ax+Bu<br>$$</p>
+<p>非线性系统常写为：</p>
+<p>$$<br>\dot{x}&#x3D;f(x,u)<br>$$</p>
+<p>很多机器人系统本质上是非线性的，但可以在某个工作点附近线性化：</p>
+<p>$$<br>\delta\dot{x}&#x3D;A\delta x+B\delta u<br>$$</p>
+<p>这样就能在局部范围内使用线性控制和稳定性分析工具。</p>
+<h2 id="状态维度和矩阵尺寸"><a href="#状态维度和矩阵尺寸" class="headerlink" title="状态维度和矩阵尺寸"></a>状态维度和矩阵尺寸</h2><p>若：</p>
+<p>$$<br>x\in\mathbb{R}^{n},\qquad<br>u\in\mathbb{R}^{m},\qquad<br>y\in\mathbb{R}^{p}<br>$$</p>
+<p>那么：</p>
+<p>$$<br>A\in\mathbb{R}^{n\times n}<br>$$</p>
+<p>$$<br>B\in\mathbb{R}^{n\times m}<br>$$</p>
+<p>$$<br>C\in\mathbb{R}^{p\times n}<br>$$</p>
+<p>$$<br>D\in\mathbb{R}^{p\times m}<br>$$</p>
+<p>根据输入和输出数量，系统还可以分为：</p>
+<ul>
+<li>SISO：单输入、单输出；</li>
+<li>SIMO：单输入、多输出；</li>
+<li>MISO：多输入、单输出；</li>
+<li>MIMO：多输入、多输出。</li>
+</ul>
+<p>多自由度机器人通常天然属于 MIMO 系统，这也是状态空间方法更方便的原因之一。</p>
+<h2 id="为什么观测器需要状态空间"><a href="#为什么观测器需要状态空间" class="headerlink" title="为什么观测器需要状态空间"></a>为什么观测器需要状态空间</h2><p>如果部分状态无法直接测量，可以利用系统模型、已知输入和测量输出估计状态。</p>
+<p>经典线性观测器常写成：</p>
+<p>$$<br>\dot{\hat{x}}<br>&#x3D;A\hat{x}+Bu+L(y-\hat{y})<br>$$</p>
+<p>$$<br>\hat{y}&#x3D;C\hat{x}<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$\hat{x}$ 是状态估计；</li>
+<li>$y-\hat{y}$ 是输出估计误差；</li>
+<li>$L$ 是观测器增益。</li>
+</ul>
+<p>它的基本思想是：先让模型预测状态，再利用真实测量修正预测。</p>
+<h2 id="ESO-为什么扩张状态"><a href="#ESO-为什么扩张状态" class="headerlink" title="ESO 为什么扩张状态"></a>ESO 为什么扩张状态</h2><p>扩张状态观测器会把未知扰动、模型误差等合并成总扰动，并把它当作额外状态。</p>
+<p>例如：</p>
+<p>$$<br>\ddot y&#x3D;f(y,\dot y,t)+bu<br>$$</p>
+<p>可以定义：</p>
+<p>$$<br>x_1&#x3D;y,\qquad<br>x_2&#x3D;\dot y,\qquad<br>x_3&#x3D;f<br>$$</p>
+<p>这里 $x_3$ 就是扩张状态。ESO 的目标不仅是估计位置和速度，还要在线估计总扰动。</p>
+<p>因此，Observer、ESO 和 NESO 并不是脱离状态空间单独出现的算法，它们都依赖“状态如何演化、输出如何产生”这套表达。</p>
+<h2 id="连续时间与离散时间"><a href="#连续时间与离散时间" class="headerlink" title="连续时间与离散时间"></a>连续时间与离散时间</h2><p>连续时间状态空间模型为：</p>
+<p>$$<br>\dot{x}(t)&#x3D;Ax(t)+Bu(t)<br>$$</p>
+<p>数字控制器按照采样周期运行，更常使用离散形式：</p>
+<p>$$<br>x_{k+1}&#x3D;A_dx_k+B_du_k<br>$$</p>
+<p>$$<br>y_k&#x3D;C_dx_k+D_du_k<br>$$</p>
+<p>这里 $k$ 表示第 $k$ 个采样时刻。实际机器人控制程序中的“读取传感器—计算控制量—发送指令”循环，本质上就是离散时间更新。</p>
+<h2 id="状态空间与控制器的关系"><a href="#状态空间与控制器的关系" class="headerlink" title="状态空间与控制器的关系"></a>状态空间与控制器的关系</h2><p>系统动力学描述对象本身：</p>
+<p>$$<br>\dot{x}&#x3D;f(x,u)<br>$$</p>
+<p>输出方程描述能够测到什么：</p>
+<p>$$<br>y&#x3D;h(x,u)<br>$$</p>
+<p>控制律描述如何根据目标和状态计算输入：</p>
+<p>$$<br>u&#x3D;\pi(x,x_d)<br>$$</p>
+<p>三者不能混为一谈。状态空间是系统模型的表达语言，状态反馈、滑模控制或其他控制器是在这个模型基础上设计输入的方法。</p>
+<h2 id="本课小结"><a href="#本课小结" class="headerlink" title="本课小结"></a>本课小结</h2><p>需要记住：</p>
+<ul>
+<li>状态是一组足以描述系统当前动态情况的变量；</li>
+<li>高阶微分方程可以通过增加状态变量改写成一阶方程组；</li>
+<li>$A$ 描述状态自身动态，$B$ 描述输入影响；</li>
+<li>$C$ 描述输出如何从状态产生，$D$ 描述输入的直接通道；</li>
+<li>机器人通常采用 $x&#x3D;[q,\dot q]^T$；</li>
+<li>非线性机器人更常写为 $\dot{x}&#x3D;f(x,u)$；</li>
+<li>观测器利用模型、输入和输出估计无法直接测量的状态。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/">https://mio0721.github.io/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F/">控制系统</a><a class="post-meta__tags" href="/tags/%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4/">状态空间</a><a class="post-meta__tags" href="/tags/Observer/">Observer</a><a class="post-meta__tags" href="/tags/%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B/">状态方程</a><a class="post-meta__tags" href="/tags/ESO/">ESO</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/" title="控制系统基础：一阶系统的时域响应"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">控制系统基础：一阶系统的时域响应</div></div><div class="info-2"><div class="info-item-1">控制系统基础：一阶系统的时域响应前面几课主要讨论系统公式如何建立。这一课开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}\text{系统输出随时间的变化过程}}$$ 例如给机器人一个目标位置，位置 $q(t)$ 从初始值逐渐接近目标值，这条随时间变化的曲线就是时域响应。 实际分析时通常关心：  响应是否足够快； 是否发生振荡或超调； 多久进入稳定状态； 最终能否达到目标； 是否存在稳态误差。  什么是一阶系统标准一阶传递函数为： $$\boxed{G(s)&#x3D;\frac{K}{Ts+1}}$$ 其中：  $K$ 是系统增益； $T$ 是时间常数； 分母关于 $s$ 的最高次数为 1，因此称为一阶系统。  对应的时间域微分方程为： $$T\dot y(t)+y(t)&#x3D;Ku(t)$$ 它只包含输...</div></div></div></a><a class="pagination-related" href="/2026/06/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/2.%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E3%80%81%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2%E4%B8%8E%E4%BC%A0%E9%80%92%E5%87%BD%E6%95%B0/" title="控制系统基础：微分方程、拉普拉斯变换与传递函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：微分方程、拉普拉斯变换与传递函数</div></div><div class="info-2"><div class="info-item-1">控制系统基础：微分方程、拉普拉斯变换与传递函数上一课从状态、输入、输出和反馈出发，建立了控制系统最基本的结构。 这一课继续回答一个常见问题：控制教材为什么会从系统运动的微分方程，突然变成 $G(s)$ 这样的传递函数？ 核心逻辑是： 123456789物理系统    ↓微分方程    ↓拉普拉斯变换    ↓传递函数    ↓输入—输出关系  动态系统为什么使用微分方程假设质量为 $m$ 的小车受到外力 $F(t)$。根据牛顿第二定律： $$F&#x3D;ma$$ 又因为： $$a&#x3D;\ddot{x}$$ 所以： $$m\ddot{x}&#x3D;F$$ 外力并不会让位置立刻等于某个值，而是先改变加速度，再逐渐影响速度和位置： $$F\rightarrow\ddot{x}\rightarrow\dot{x}\rightarrow x$$ 因此，微分方程是描述动态系统随时间演化的自然工具。 质量—弹簧—阻尼系统考虑一个受到外力 $F(t)$ 的质量块。弹簧力为： $$F_k&#x3D;-kx$$ 阻尼力为： $$F_b&#x3D;-b\dot{x}$$ 根据牛顿第二定律： ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/" title="控制系统基础：状态、输入、输出与反馈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-02</div><div class="info-item-2">控制系统基础：状态、输入、输出与反馈</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为： $$q_d$$ 实际位置为： $$q$$ 控制器需要根据目标和当前状态计算控制输入： $$\tau$$ 基本结构为： 1234567891011121314期望位置 q_d      │      ↓  ┌─────────┐  │  控制器  │  └─────────┘      │ 控制输入 τ      ↓  ┌─────────┐  │  机器人  │  └─────────┘      │      ↓   实际位置 q  因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。 什么是系统系统可以理解成一个具有自身运动规律的...</div></div></div></a><a class="pagination-related" href="/2026/06/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/2.%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E3%80%81%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2%E4%B8%8E%E4%BC%A0%E9%80%92%E5%87%BD%E6%95%B0/" title="控制系统基础：微分方程、拉普拉斯变换与传递函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-05</div><div class="info-item-2">控制系统基础：微分方程、拉普拉斯变换与传递函数</div></div><div class="info-2"><div class="info-item-1">控制系统基础：微分方程、拉普拉斯变换与传递函数上一课从状态、输入、输出和反馈出发，建立了控制系统最基本的结构。 这一课继续回答一个常见问题：控制教材为什么会从系统运动的微分方程，突然变成 $G(s)$ 这样的传递函数？ 核心逻辑是： 123456789物理系统    ↓微分方程    ↓拉普拉斯变换    ↓传递函数    ↓输入—输出关系  动态系统为什么使用微分方程假设质量为 $m$ 的小车受到外力 $F(t)$。根据牛顿第二定律： $$F&#x3D;ma$$ 又因为： $$a&#x3D;\ddot{x}$$ 所以： $$m\ddot{x}&#x3D;F$$ 外力并不会让位置立刻等于某个值，而是先改变加速度，再逐渐影响速度和位置： $$F\rightarrow\ddot{x}\rightarrow\dot{x}\rightarrow x$$ 因此，微分方程是描述动态系统随时间演化的自然工具。 质量—弹簧—阻尼系统考虑一个受到外力 $F(t)$ 的质量块。弹簧力为： $$F_k&#x3D;-kx$$ 阻尼力为： $$F_b&#x3D;-b\dot{x}$$ 根据牛顿第二定律： ...</div></div></div></a><a class="pagination-related" href="/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/" title="控制系统基础：一阶系统的时域响应"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-10</div><div class="info-item-2">控制系统基础：一阶系统的时域响应</div></div><div class="info-2"><div class="info-item-1">控制系统基础：一阶系统的时域响应前面几课主要讨论系统公式如何建立。这一课开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}\text{系统输出随时间的变化过程}}$$ 例如给机器人一个目标位置，位置 $q(t)$ 从初始值逐渐接近目标值，这条随时间变化的曲线就是时域响应。 实际分析时通常关心：  响应是否足够快； 是否发生振荡或超调； 多久进入稳定状态； 最终能否达到目标； 是否存在稳态误差。  什么是一阶系统标准一阶传递函数为： $$\boxed{G(s)&#x3D;\frac{K}{Ts+1}}$$ 其中：  $K$ 是系统增益； $T$ 是时间常数； 分母关于 $s$ 的最高次数为 1，因此称为一阶系统。  对应的时间域微分方程为： $$T\dot y(t)+y(t)&#x3D;Ku(t)$$ 它只包含输...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

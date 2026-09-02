@@ -1237,6 +1237,50 @@ html[data-theme="dark"]
 
 
 /* =========================================================
+   23.1 Markdown 引用块
+
+   Markdown 中以 > 开头的段落会生成 blockquote。
+   Butterfly 日间默认背景只有约 0.1 的透明遮罩，而夜间默认使用
+   实色 #2c2c2c，导致两个主题的层次完全不同。这里仅统一文章正文
+   和日志详情页，保留主题色左边线，并增加真正的毛玻璃背景。
+   ========================================================= */
+
+:is(#post, #body-wrap.type-log-entry)
+#article-container blockquote:not(.pullquote) {
+  padding: 12px 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-left: 4px solid #49b1f5 !important;
+  border-radius: 10px;
+  color: var(--font-color);
+  backdrop-filter: blur(10px) saturate(115%);
+  -webkit-backdrop-filter: blur(10px) saturate(115%);
+}
+
+
+/* 日间提高遮罩浓度，避免引用文字直接陷进明亮背景图 */
+html:not([data-theme="dark"])
+:is(#post, #body-wrap.type-log-entry)
+#article-container blockquote:not(.pullquote) {
+  background: rgba(39, 49, 61, 0.42) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.58);
+  box-shadow: 0 4px 14px rgba(10, 18, 28, 0.12);
+}
+
+
+/* 夜间取消默认实色背景，改为能透出底图的深色玻璃 */
+html[data-theme="dark"]
+:is(#post, #body-wrap.type-log-entry)
+#article-container blockquote:not(.pullquote) {
+  border-color: rgba(255, 255, 255, 0.10);
+  border-left-color: #2f6f9f !important;
+  background: rgba(18, 20, 26, 0.42) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================================
    23.1 日间代码块使用深蓝灰主题
 
    Butterfly 通过下列 CSS 变量统一控制代码块背景、工具栏、

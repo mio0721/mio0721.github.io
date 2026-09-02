@@ -1,0 +1,513 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：一阶系统的时域响应 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：一阶系统的时域响应前面几课主要讨论系统公式如何建立。这一课开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}\t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：一阶系统的时域响应">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：一阶系统的时域响应前面几课主要讨论系统公式如何建立。这一课开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}\t">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-10T12:52:00.000Z">
+<meta property="article:modified_time" content="2026-06-10T13:03:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="一阶系统">
+<meta property="article:tag" content="控制系统">
+<meta property="article:tag" content="时域响应">
+<meta property="article:tag" content="时间常数">
+<meta property="article:tag" content="稳态误差">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：一阶系统的时域响应",
+  "url": "https://mio0721.github.io/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-10T12:52:00.000Z",
+  "dateModified": "2026-06-10T13:03:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：一阶系统的时域响应',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260902-28"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">33</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">76</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：一阶系统的时域响应</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：一阶系统的时域响应</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-10T12:52:00.000Z" title="发表于 2026-06-10 20:52:00">2026-06-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-10T13:03:00.000Z" title="更新于 2026-06-10 21:03:00">2026-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：一阶系统的时域响应"><a href="#控制系统基础：一阶系统的时域响应" class="headerlink" title="控制系统基础：一阶系统的时域响应"></a>控制系统基础：一阶系统的时域响应</h1><p>前面几课主要讨论系统公式如何建立。这一课开始观察系统真正运动起来以后，输出会怎样随时间变化。</p>
+<p>核心主线是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">一阶系统</span><br><span class="line">    ↓</span><br><span class="line">阶跃输入</span><br><span class="line">    ↓</span><br><span class="line">响应曲线</span><br><span class="line">    ↓</span><br><span class="line">瞬态与稳态</span><br><span class="line">    ↓</span><br><span class="line">时间常数与稳态误差</span><br></pre></td></tr></table></figure>
+
+<h2 id="什么是时域响应"><a href="#什么是时域响应" class="headerlink" title="什么是时域响应"></a>什么是时域响应</h2><p>时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。</p>
+<p>因此：</p>
+<h1 id="boxed-text-时域响应"><a href="#boxed-text-时域响应" class="headerlink" title="$$\boxed{\text{时域响应}"></a>$$<br>\boxed{<br>\text{时域响应}</h1><p>\text{系统输出随时间的变化过程}<br>}<br>$$</p>
+<p>例如给机器人一个目标位置，位置 $q(t)$ 从初始值逐渐接近目标值，这条随时间变化的曲线就是时域响应。</p>
+<p>实际分析时通常关心：</p>
+<ul>
+<li>响应是否足够快；</li>
+<li>是否发生振荡或超调；</li>
+<li>多久进入稳定状态；</li>
+<li>最终能否达到目标；</li>
+<li>是否存在稳态误差。</li>
+</ul>
+<h2 id="什么是一阶系统"><a href="#什么是一阶系统" class="headerlink" title="什么是一阶系统"></a>什么是一阶系统</h2><p>标准一阶传递函数为：</p>
+<p>$$<br>\boxed{G(s)&#x3D;\frac{K}{Ts+1}}<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$K$ 是系统增益；</li>
+<li>$T$ 是时间常数；</li>
+<li>分母关于 $s$ 的最高次数为 1，因此称为一阶系统。</li>
+</ul>
+<p>对应的时间域微分方程为：</p>
+<p>$$<br>T\dot y(t)+y(t)&#x3D;Ku(t)<br>$$</p>
+<p>它只包含输出的一阶导数，所以同样可以从微分方程角度理解“一阶”。</p>
+<h2 id="K-和-T-分别决定什么"><a href="#K-和-T-分别决定什么" class="headerlink" title="$K$ 和 $T$ 分别决定什么"></a>$K$ 和 $T$ 分别决定什么</h2><p>对于：</p>
+<p>$$<br>G(s)&#x3D;\frac{K}{Ts+1}<br>$$</p>
+<p>$K$ 主要影响最终输出幅值，$T$ 主要影响系统响应速度。</p>
+<p>可以先记成：</p>
+<p>$$<br>\boxed{K\rightarrow\text{最终到哪里}}<br>$$</p>
+<p>$$<br>\boxed{T\rightarrow\text{多快到那里}}<br>$$</p>
+<p>这两个结论针对标准稳定一阶系统成立，面对更复杂的闭环系统时仍需结合完整传递函数判断。</p>
+<h2 id="什么是阶跃输入"><a href="#什么是阶跃输入" class="headerlink" title="什么是阶跃输入"></a>什么是阶跃输入</h2><p>单位阶跃输入定义为：</p>
+<p>$$<br>u(t)&#x3D;<br>\begin{cases}<br>0,&amp;t&lt;0\<br>1,&amp;t\ge 0<br>\end{cases}<br>$$</p>
+<p>其拉普拉斯变换为：</p>
+<p>$$<br>U(s)&#x3D;\frac{1}{s}<br>$$</p>
+<p>阶跃输入表示目标在某一时刻突然从一个值切换到另一个值。例如位置目标从 0 变成 1 rad，或速度目标从 0 变成 $1\ \mathrm{m&#x2F;s}$。</p>
+<p>控制理论常使用阶跃输入，是因为它简单、清晰，并且能同时暴露系统的响应速度、超调、振荡和稳态误差。</p>
+<h2 id="一阶系统的阶跃响应"><a href="#一阶系统的阶跃响应" class="headerlink" title="一阶系统的阶跃响应"></a>一阶系统的阶跃响应</h2><p>对标准一阶系统：</p>
+<p>$$<br>G(s)&#x3D;\frac{K}{Ts+1}<br>$$</p>
+<p>施加单位阶跃输入：</p>
+<p>$$<br>U(s)&#x3D;\frac{1}{s}<br>$$</p>
+<p>输出为：</p>
+<p>$$<br>Y(s)&#x3D;G(s)U(s)<br>&#x3D;\frac{K}{s(Ts+1)}<br>$$</p>
+<p>做部分分式分解：</p>
+<p>$$<br>Y(s)&#x3D;K\left(\frac{1}{s}-\frac{T}{Ts+1}\right)<br>$$</p>
+<p>反拉普拉斯变换得到：</p>
+<p>$$<br>\boxed{<br>y(t)&#x3D;K\left(1-e^{-t&#x2F;T}\right),\qquad t\ge0<br>}<br>$$</p>
+<p>若 $K&#x3D;1$，则：</p>
+<p>$$<br>y(t)&#x3D;1-e^{-t&#x2F;T}<br>$$</p>
+<p>系统不会立即跳到最终值，而是沿指数曲线逐渐接近它。</p>
+<h2 id="为什么响应不是瞬间完成"><a href="#为什么响应不是瞬间完成" class="headerlink" title="为什么响应不是瞬间完成"></a>为什么响应不是瞬间完成</h2><p>真实系统通常包含惯性、能量储存或传递过程。例如：</p>
+<ul>
+<li>质量块无法瞬间改变速度；</li>
+<li>电容电压无法瞬间完成充电；</li>
+<li>温度无法瞬间升高；</li>
+<li>电机转速无法瞬间达到目标。</li>
+</ul>
+<p>一阶模型中的时间常数 $T$，正是在描述这种渐变过程的时间尺度。</p>
+<h2 id="瞬态和稳态"><a href="#瞬态和稳态" class="headerlink" title="瞬态和稳态"></a>瞬态和稳态</h2><p>系统刚接收到输入后，输出仍在明显变化的阶段称为瞬态过程。</p>
+<p>当输出逐渐接近固定值，只剩很小变化时，就进入稳态。</p>
+<p>对于单位阶跃响应：</p>
+<p>$$<br>y(t)&#x3D;K\left(1-e^{-t&#x2F;T}\right)<br>$$</p>
+<p>当 $t\rightarrow\infty$ 时：</p>
+<p>$$<br>e^{-t&#x2F;T}\rightarrow0<br>$$</p>
+<p>因此稳态值为：</p>
+<p>$$<br>\boxed{y(\infty)&#x3D;K}<br>$$</p>
+<p>瞬态性能主要描述过程快不快、是否振荡；稳态性能则描述最终准不准。两者不能混为一谈。</p>
+<h2 id="时间常数为什么对应-63-2"><a href="#时间常数为什么对应-63-2" class="headerlink" title="时间常数为什么对应 63.2%"></a>时间常数为什么对应 63.2%</h2><p>令：</p>
+<p>$$<br>t&#x3D;T<br>$$</p>
+<p>代入单位增益阶跃响应：</p>
+<p>$$<br>y(T)&#x3D;1-e^{-1}<br>$$</p>
+<p>因为：</p>
+<p>$$<br>e^{-1}\approx0.368<br>$$</p>
+<p>所以：</p>
+<p>$$<br>\boxed{y(T)\approx0.632}<br>$$</p>
+<p>即经过一个时间常数，输出达到最终变化量的约 $63.2%$。</p>
+<p>常见时间点如下：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th align="right">达到最终值的比例</th>
+<th align="right">剩余误差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$T$</td>
+<td align="right">$63.2%$</td>
+<td align="right">$36.8%$</td>
+</tr>
+<tr>
+<td>$2T$</td>
+<td align="right">$86.5%$</td>
+<td align="right">$13.5%$</td>
+</tr>
+<tr>
+<td>$3T$</td>
+<td align="right">$95.0%$</td>
+<td align="right">$5.0%$</td>
+</tr>
+<tr>
+<td>$4T$</td>
+<td align="right">$98.2%$</td>
+<td align="right">$1.8%$</td>
+</tr>
+<tr>
+<td>$5T$</td>
+<td align="right">$99.3%$</td>
+<td align="right">$0.7%$</td>
+</tr>
+</tbody></table>
+<h2 id="为什么-T-越小响应越快"><a href="#为什么-T-越小响应越快" class="headerlink" title="为什么 $T$ 越小响应越快"></a>为什么 $T$ 越小响应越快</h2><p>响应中的指数项为：</p>
+<p>$$<br>e^{-t&#x2F;T}<br>$$</p>
+<p>当 $T$ 较小时，同样的时间 $t$ 会产生更大的 $t&#x2F;T$，指数项衰减更快，输出也就更快接近最终值。</p>
+<p>例如两个系统：</p>
+<p>$$<br>G_1(s)&#x3D;\frac{1}{s+1}<br>$$</p>
+<p>$$<br>G_2(s)&#x3D;\frac{1}{0.2s+1}<br>$$</p>
+<p>对应时间常数分别为：</p>
+<p>$$<br>T_1&#x3D;1,\qquad T_2&#x3D;0.2<br>$$</p>
+<p>因此 $G_2(s)$ 的响应更快。</p>
+<h2 id="调节时间"><a href="#调节时间" class="headerlink" title="调节时间"></a>调节时间</h2><p>调节时间是输出进入并持续保持在指定误差带内所需要的时间。</p>
+<p>常见近似为：</p>
+<p>$$<br>t_s\approx3T\qquad(5%\text{误差带})<br>$$</p>
+<p>$$<br>t_s\approx4T\qquad(2%\text{误差带})<br>$$</p>
+<p>工程上有时也会使用 $5T$ 作为基本完成响应的保守估计。</p>
+<h2 id="极点与时间常数"><a href="#极点与时间常数" class="headerlink" title="极点与时间常数"></a>极点与时间常数</h2><p>一阶系统分母为：</p>
+<p>$$<br>Ts+1<br>$$</p>
+<p>令分母为零：</p>
+<p>$$<br>Ts+1&#x3D;0<br>$$</p>
+<p>得到极点：</p>
+<p>$$<br>\boxed{s&#x3D;-\frac{1}{T}}<br>$$</p>
+<p>所以时间常数和极点是同一个动态特征的两种表达：</p>
+<ul>
+<li>$T$ 越小，极点越靠左；</li>
+<li>极点越靠左，指数响应衰减越快；</li>
+<li>若 $T&lt;0$，极点位于右半平面，响应会增长而不是衰减。</li>
+</ul>
+<h2 id="标准一阶系统会不会超调"><a href="#标准一阶系统会不会超调" class="headerlink" title="标准一阶系统会不会超调"></a>标准一阶系统会不会超调</h2><p>当 $K&gt;0$、$T&gt;0$ 且初始值为零时：</p>
+<p>$$<br>y(t)&#x3D;K\left(1-e^{-t&#x2F;T}\right)<br>$$</p>
+<p>这是单调趋近 $K$ 的指数曲线，不会超过最终值，因此标准稳定一阶系统没有超调。</p>
+<p>如果实验中的响应出现明显超调或振荡，通常说明系统至少包含二阶动态、时延、非线性或控制器引入的额外动态。</p>
+<h2 id="稳态误差"><a href="#稳态误差" class="headerlink" title="稳态误差"></a>稳态误差</h2><p>若参考输入为 $r(t)$，输出为 $y(t)$，误差为：</p>
+<p>$$<br>e(t)&#x3D;r(t)-y(t)<br>$$</p>
+<p>稳态误差定义为：</p>
+<p>$$<br>\boxed{e_{ss}&#x3D;\lim_{t\to\infty}e(t)}<br>$$</p>
+<p>对于幅值为 $A$ 的阶跃输入，标准一阶系统的稳态输出为：</p>
+<p>$$<br>y(\infty)&#x3D;KA<br>$$</p>
+<p>所以相对于输入目标的稳态误差为：</p>
+<p>$$<br>e_{ss}&#x3D;A-KA&#x3D;A(1-K)<br>$$</p>
+<p>当 $K&#x3D;1$ 时，输出最终达到目标；当 $K\ne1$ 时，即使响应很快，也可能存在稳态偏差。</p>
+<h2 id="响应快和跟踪准是两个指标"><a href="#响应快和跟踪准是两个指标" class="headerlink" title="响应快和跟踪准是两个指标"></a>响应快和跟踪准是两个指标</h2><p>一个系统可能很快到达错误的稳态值，也可能最终很准确但响应非常慢。</p>
+<p>因此分析响应曲线时至少要分别观察：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">瞬态性能：多久接近目标，是否超调、振荡</span><br><span class="line">稳态性能：最终是否达到目标，误差还剩多少</span><br></pre></td></tr></table></figure>
+
+<p>不能只看曲线“最后差不多到了”，也不能只看它“起步很快”。</p>
+<h2 id="如何阅读一条响应曲线"><a href="#如何阅读一条响应曲线" class="headerlink" title="如何阅读一条响应曲线"></a>如何阅读一条响应曲线</h2><p>面对控制实验中的时间响应图，可以按下面的顺序观察：</p>
+<ol>
+<li>确认参考输入和输出分别是什么；</li>
+<li>读取初始值与最终值；</li>
+<li>判断响应是单调、超调还是振荡；</li>
+<li>估计上升时间和调节时间；</li>
+<li>检查稳态误差；</li>
+<li>观察噪声、抖动或控制饱和；</li>
+<li>比较不同方法时确保使用相同坐标尺度和实验条件。</li>
+</ol>
+<h2 id="一阶模型与机器人控制"><a href="#一阶模型与机器人控制" class="headerlink" title="一阶模型与机器人控制"></a>一阶模型与机器人控制</h2><p>完整机器人动力学往往不是一阶系统，但一阶模型仍然经常出现在局部环节中，例如：</p>
+<ul>
+<li>电机电流内环的近似动态；</li>
+<li>速度环的闭环近似；</li>
+<li>传感器低通滤波；</li>
+<li>执行器响应；</li>
+<li>温度和电气子系统；</li>
+<li>某些高阶系统中的主导极点近似。</li>
+</ul>
+<p>因此，时间常数不仅是教材中的参数，也是判断传感器、执行器和控制回路速度是否匹配的重要指标。</p>
+<h2 id="为什么快不一定总是更好"><a href="#为什么快不一定总是更好" class="headerlink" title="为什么快不一定总是更好"></a>为什么快不一定总是更好</h2><p>减小时间常数意味着更快的响应，但实际控制系统还会受到以下限制：</p>
+<ul>
+<li>执行器最大电流或力矩；</li>
+<li>采样频率与计算延迟；</li>
+<li>传感器噪声；</li>
+<li>未建模高频动态；</li>
+<li>机械结构柔性；</li>
+<li>控制输入变化率。</li>
+</ul>
+<p>过度追求速度可能导致控制输入过大、噪声放大，甚至激发未建模振动。工程设计需要在响应速度、稳定裕度、控制能量和鲁棒性之间折中。</p>
+<h2 id="本课小结"><a href="#本课小结" class="headerlink" title="本课小结"></a>本课小结</h2><p>标准一阶系统为：</p>
+<p>$$<br>G(s)&#x3D;\frac{K}{Ts+1}<br>$$</p>
+<p>单位阶跃响应为：</p>
+<p>$$<br>y(t)&#x3D;K\left(1-e^{-t&#x2F;T}\right)<br>$$</p>
+<p>需要记住：</p>
+<ul>
+<li>$K$ 主要决定最终值；</li>
+<li>$T$ 主要决定响应速度；</li>
+<li>一个时间常数后达到最终变化量的约 $63.2%$；</li>
+<li>约 $4T$ 后进入 $2%$ 误差带；</li>
+<li>极点为 $-1&#x2F;T$；</li>
+<li>标准稳定一阶系统单调响应，没有超调；</li>
+<li>瞬态性能与稳态性能需要分开评价。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/">https://mio0721.github.io/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F/">控制系统</a><a class="post-meta__tags" href="/tags/%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F/">一阶系统</a><a class="post-meta__tags" href="/tags/%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/">时域响应</a><a class="post-meta__tags" href="/tags/%E6%97%B6%E9%97%B4%E5%B8%B8%E6%95%B0/">时间常数</a><a class="post-meta__tags" href="/tags/%E7%A8%B3%E6%80%81%E8%AF%AF%E5%B7%AE/">稳态误差</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/03/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/1.CAN%20%E6%80%BB%E7%BA%BF%E5%9F%BA%E7%A1%80/" title="CAN 总线基础：从 USB2CAN 到达妙电机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">CAN 总线基础：从 USB2CAN 到达妙电机</div></div><div class="info-2"><div class="info-item-1">CAN 总线基础：从 USB2CAN 到达妙电机最近开始使用达妙 DM-J4310 电机，同时也接触到了 USB 转 CAN 模块、CANH、CANL 和 CAN ID 等概念。 这篇先不深入 CAN 的底层时序，而是从实际设备出发，梳理 CAN 总线在电机控制系统中承担的作用。 整个系统是怎么连接的目前使用的设备主要包括：  电脑 USB2CAN 模块 达妙 DM-J4310 电机 电机电源 CAN 通信线  它们之间的关系可以先理解成： 12345678910电脑  │ USB  ↓USB2CAN  │ CANH / CANL  ↓达妙电机  │  ↓电机执行动作  电脑通常不能直接产生 CAN 总线上的电气信号，因此需要 USB2CAN 作为转换设备。 上位机程序先通过 USB 把命令交给 USB2CAN，再由 USB2CAN 将其转换成 CAN 报文并发送到总线上。 CAN 是什么CAN 的全称是： 1Controller Area Network  中文一般称为控制器局域网。它是一种适合控制器之间交换数据的通信方式，常见于汽车、机器人、工业设备和电机控制系统。 例如，一...</div></div></div></a><a class="pagination-related" href="/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/" title="控制系统基础：状态空间方程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：状态空间方程</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态空间方程上一课中的传递函数从系统外部描述输入与输出的关系。这一课转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{Y(s)}{U(s)}$$ 主要回答输入经过系统后会形成什么输出，但不会直接展开系统内部有哪些变量。 状态空间方法会显式记录系统内部状态。例如运动小车可以定义： $$x&#x3D;\begin{bmatrix}p\v\end{bmatrix}$$ 其中 $p$ 是位置，$v$ 是速度。状态空间关注的是： $$\boxed{\text{系统内部状态如何随时间演化}}$$ 什么是状态状态是一组足以描述系统当前动态情况，并能结合未来输入确定之后运动的变量。 假设两辆小车都位于： $$p&#x3D;10\ \mathrm{m}$$ 其中一辆静止，另一辆以 $20\ \mathrm{m&#x2F;...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/" title="控制系统基础：状态、输入、输出与反馈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-02</div><div class="info-item-2">控制系统基础：状态、输入、输出与反馈</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为： $$q_d$$ 实际位置为： $$q$$ 控制器需要根据目标和当前状态计算控制输入： $$\tau$$ 基本结构为： 1234567891011121314期望位置 q_d      │      ↓  ┌─────────┐  │  控制器  │  └─────────┘      │ 控制输入 τ      ↓  ┌─────────┐  │  机器人  │  └─────────┘      │      ↓   实际位置 q  因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。 什么是系统系统可以理解成一个具有自身运动规律的...</div></div></div></a><a class="pagination-related" href="/2026/06/05/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/2.%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E3%80%81%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2%E4%B8%8E%E4%BC%A0%E9%80%92%E5%87%BD%E6%95%B0/" title="控制系统基础：微分方程、拉普拉斯变换与传递函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-05</div><div class="info-item-2">控制系统基础：微分方程、拉普拉斯变换与传递函数</div></div><div class="info-2"><div class="info-item-1">控制系统基础：微分方程、拉普拉斯变换与传递函数上一课从状态、输入、输出和反馈出发，建立了控制系统最基本的结构。 这一课继续回答一个常见问题：控制教材为什么会从系统运动的微分方程，突然变成 $G(s)$ 这样的传递函数？ 核心逻辑是： 123456789物理系统    ↓微分方程    ↓拉普拉斯变换    ↓传递函数    ↓输入—输出关系  动态系统为什么使用微分方程假设质量为 $m$ 的小车受到外力 $F(t)$。根据牛顿第二定律： $$F&#x3D;ma$$ 又因为： $$a&#x3D;\ddot{x}$$ 所以： $$m\ddot{x}&#x3D;F$$ 外力并不会让位置立刻等于某个值，而是先改变加速度，再逐渐影响速度和位置： $$F\rightarrow\ddot{x}\rightarrow\dot{x}\rightarrow x$$ 因此，微分方程是描述动态系统随时间演化的自然工具。 质量—弹簧—阻尼系统考虑一个受到外力 $F(t)$ 的质量块。弹簧力为： $$F_k&#x3D;-kx$$ 阻尼力为： $$F_b&#x3D;-b\dot{x}$$ 根据牛顿第二定律： ...</div></div></div></a><a class="pagination-related" href="/2026/06/07/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/" title="控制系统基础：状态空间方程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="info-item-2">控制系统基础：状态空间方程</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态空间方程上一课中的传递函数从系统外部描述输入与输出的关系。这一课转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{Y(s)}{U(s)}$$ 主要回答输入经过系统后会形成什么输出，但不会直接展开系统内部有哪些变量。 状态空间方法会显式记录系统内部状态。例如运动小车可以定义： $$x&#x3D;\begin{bmatrix}p\v\end{bmatrix}$$ 其中 $p$ 是位置，$v$ 是速度。状态空间关注的是： $$\boxed{\text{系统内部状态如何随时间演化}}$$ 什么是状态状态是一组足以描述系统当前动态情况，并能结合未来输入确定之后运动的变量。 假设两辆小车都位于： $$p&#x3D;10\ \mathrm{m}$$ 其中一辆静止，另一辆以 $20\ \mathrm{m&#x2F;...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260901-4"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
