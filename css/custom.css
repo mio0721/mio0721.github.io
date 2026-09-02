@@ -3007,3 +3007,79 @@ html[data-theme="dark"] .mio-knowledge-children {
     max-width: none !important;
   }
 }
+
+
+/* =========================================================
+   37. MathJax 公式横向滚动
+
+   Butterfly 默认给所有 mjx-container 设置 overflow-x: auto，
+   行内公式也因此可能出现一条很短的浏览器滚动槽。
+
+   - 行内公式：作为普通文字显示，不创建滚动容器。
+   - 独立公式：过宽时仍可用触摸板或手指横向滑动，
+     但隐藏滚动条本身，避免它出现在公式下方。
+   ========================================================= */
+
+#article-container mjx-container:not([display]) {
+  overflow: visible !important;
+  padding-bottom: 0 !important;
+  max-width: none;
+  scrollbar-width: none;
+}
+
+
+#article-container mjx-container:not([display])::-webkit-scrollbar {
+  display: none;
+}
+
+
+#article-container mjx-container[display] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(55, 72, 92, 0.42) rgba(55, 72, 92, 0.10);
+  -webkit-overflow-scrolling: touch;
+}
+
+
+#article-container mjx-container[display]::-webkit-scrollbar {
+  display: block;
+  height: 4px;
+}
+
+
+#article-container mjx-container[display]::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(55, 72, 92, 0.10);
+}
+
+
+#article-container mjx-container[display]::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(55, 72, 92, 0.42);
+}
+
+
+#article-container mjx-container[display]::-webkit-scrollbar-thumb:hover {
+  background: rgba(55, 72, 92, 0.60);
+}
+
+
+html[data-theme="dark"] #article-container mjx-container[display] {
+  scrollbar-color: rgba(190, 205, 220, 0.34) rgba(190, 205, 220, 0.08);
+}
+
+
+html[data-theme="dark"] #article-container mjx-container[display]::-webkit-scrollbar-track {
+  background: rgba(190, 205, 220, 0.08);
+}
+
+
+html[data-theme="dark"] #article-container mjx-container[display]::-webkit-scrollbar-thumb {
+  background: rgba(190, 205, 220, 0.34);
+}
+
+
+html[data-theme="dark"] #article-container mjx-container[display]::-webkit-scrollbar-thumb:hover {
+  background: rgba(190, 205, 220, 0.52);
+}
