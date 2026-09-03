@@ -62,8 +62,6 @@ html:not([data-theme="dark"]) #web_bg::before {
  * 0.3 较柔和，0.4 明显变暗，0.5 以上会很暗。
  */
 
-html[data-theme="dark"] #page-header::before,
-html[data-theme="dark"] .full_page #page-header::before,
 html[data-theme="dark"] #web_bg::before {
   background: rgba(0, 0, 0, 0.4) !important;
   background-color: rgba(0, 0, 0, 0.4) !important;
@@ -77,9 +75,42 @@ html[data-theme="dark"] #web_bg::before {
    ========================================================= */
 
 #web_bg {
+  /*
+   * 全站只保留这一层背景。固定元素本身已经能让图片随页面保持不动，
+   * 不再使用 iPad Safari 容易出现裁切跳变的 background-attachment: fixed。
+   */
+  position: fixed !important;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100lvh !important;
+  background-attachment: scroll !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+
   /* 防止主题或其他插件再改变背景层的透明度/滤镜 */
   opacity: 1 !important;
   filter: none !important;
+}
+
+
+/*
+ * 首页原本会再绘制一张相同图片，并按头图高度重新执行 cover。
+ * 改为透明后，首屏与下滑区域共同透出 #web_bg，不再切换裁切基准。
+ */
+#page-header.full_page {
+  background-image: none !important;
+  background-color: transparent !important;
+  background-attachment: scroll !important;
+}
+
+
+/* 夜间暗色遮罩已经由 #web_bg 统一提供，避免首页首屏重复变暗。 */
+#page-header.full_page::before {
+  background: transparent !important;
+  background-color: transparent !important;
+  opacity: 0 !important;
 }
 
 

@@ -47,21 +47,11 @@ function applyPageBackground(backgroundImages) {
 
   const pageBackground = postTopImg || postCover || randomImage;
 
-  /* 顶部 Banner */
-  const pageHeader = document.querySelector("#page-header");
-
   /*
-   * 只有首页拥有独立大头图。
-   * 文章、归档、标签和分类页的顶部已改为透明，直接透出 #web_bg。
+   * 整站只使用 #web_bg 这一层背景。
+   * 首页头图保持透明并透出它，避免 iPad 滚动前后由两个容器分别
+   * 执行 cover，造成画面突然切换到另一种裁切比例。
    */
-  if (pageHeader && pageHeader.classList.contains("full_page")) {
-    pageHeader.style.backgroundImage = `url("${randomImage}")`;
-    pageHeader.style.backgroundSize = "cover";
-    pageHeader.style.backgroundPosition = "center";
-    pageHeader.style.backgroundRepeat = "no-repeat";
-  }
-
-  /* 整站背景 */
   const webBg = document.querySelector("#web_bg");
 
   if (webBg) {
@@ -69,7 +59,7 @@ function applyPageBackground(backgroundImages) {
     webBg.style.backgroundSize = "cover";
     webBg.style.backgroundPosition = "center";
     webBg.style.backgroundRepeat = "no-repeat";
-    webBg.style.backgroundAttachment = "fixed";
+    webBg.style.backgroundAttachment = "scroll";
 
     /*
      * 保存当前真实背景路径，供右下角“鉴赏模式”按钮显示图片 ID。
