@@ -337,7 +337,6 @@
 <p>控制律先补偿 $\hat d$，鲁棒项只需要处理估计误差 $\tilde d$：</p>
 <p>$$<br>\tau<br>{}&#x3D;{}<br>\tau_{\mathrm{nom}}-\hat d<br>-K\operatorname{sat}(s&#x2F;\phi)<br>$$</p>
 <p>如果 Observer 能显著减小并界定 $\tilde d$，就有机会降低 $K$，从而减轻抖振与执行器负担。但这依赖观测器带宽、噪声、估计误差界和闭环耦合，不能只看模块数量。</p>
-<p>DeLaN + SMC 的逻辑相似：学习模型减小名义动力学残差，鲁棒项处理剩余误差。DeLaN、Observer 和 SMC 分别对应名义模型、扰动估计和鲁棒反馈。</p>
 <h2 id="Adaptive-SMC"><a href="#Adaptive-SMC" class="headerlink" title="Adaptive SMC"></a>Adaptive SMC</h2><p>固定鲁棒增益面临两难：</p>
 <ul>
 <li>$K$ 太小，可能无法覆盖实际扰动；</li>
@@ -412,7 +411,7 @@
 </tr>
 <tr>
 <td>名义模型或扰动补偿不足</td>
-<td>DeLaN、Observer 与鲁棒反馈协同</td>
+<td>PINN、Observer 与鲁棒反馈协同</td>
 </tr>
 </tbody></table>
 <p>这些方法解决的问题并不相同。判断一个新 SMC 是否真正改进了系统，必须同时检查滑模面、到达律、控制连续性、Lyapunov 结论和实验代价，不能只根据算法名称中的缩写下结论。</p>
