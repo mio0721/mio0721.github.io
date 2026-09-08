@@ -1,0 +1,495 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：二阶系统的时域响应 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：二阶系统的时域响应上一章讨论了一阶系统如何沿指数曲线逐渐接近目标。现在继续研究二阶系统，并解释机械系统和机器人为什么经常出现振荡、超调以及“响应很快，却容易冲过目标”的现象。 核心主线是： 1234567891011二阶系统    ↓自然频率 ωn 与阻尼比 ζ    ↓极点位置    ↓欠阻尼、临界阻尼与过阻尼    ↓上升时间、超调量与调节时间    ↓PD 控制和机器人轨迹响应">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：二阶系统的时域响应">
+<meta property="og:url" content="https://mio0721.github.io/2026/05/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/5.%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：二阶系统的时域响应上一章讨论了一阶系统如何沿指数曲线逐渐接近目标。现在继续研究二阶系统，并解释机械系统和机器人为什么经常出现振荡、超调以及“响应很快，却容易冲过目标”的现象。 核心主线是： 1234567891011二阶系统    ↓自然频率 ωn 与阻尼比 ζ    ↓极点位置    ↓欠阻尼、临界阻尼与过阻尼    ↓上升时间、超调量与调节时间    ↓PD 控制和机器人轨迹响应">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-05-26T11:37:00.000Z">
+<meta property="article:modified_time" content="2026-05-26T11:48:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="PD控制">
+<meta property="article:tag" content="二阶系统">
+<meta property="article:tag" content="控制系统">
+<meta property="article:tag" content="时域响应">
+<meta property="article:tag" content="自然频率">
+<meta property="article:tag" content="超调">
+<meta property="article:tag" content="阻尼比">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：二阶系统的时域响应",
+  "url": "https://mio0721.github.io/2026/05/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/5.%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-05-26T11:37:00.000Z",
+  "dateModified": "2026-05-26T11:48:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/05/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/5.%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：二阶系统的时域响应',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260907-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">42</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">122</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：二阶系统的时域响应</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：二阶系统的时域响应</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-26T11:37:00.000Z" title="发表于 2026-05-26 19:37:00">2026-05-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-26T11:48:00.000Z" title="更新于 2026-05-26 19:48:00">2026-05-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：二阶系统的时域响应"><a href="#控制系统基础：二阶系统的时域响应" class="headerlink" title="控制系统基础：二阶系统的时域响应"></a>控制系统基础：二阶系统的时域响应</h1><p>上一章讨论了一阶系统如何沿指数曲线逐渐接近目标。现在继续研究二阶系统，并解释机械系统和机器人为什么经常出现振荡、超调以及“响应很快，却容易冲过目标”的现象。</p>
+<p>核心主线是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">二阶系统</span><br><span class="line">    ↓</span><br><span class="line">自然频率 ωn 与阻尼比 ζ</span><br><span class="line">    ↓</span><br><span class="line">极点位置</span><br><span class="line">    ↓</span><br><span class="line">欠阻尼、临界阻尼与过阻尼</span><br><span class="line">    ↓</span><br><span class="line">上升时间、超调量与调节时间</span><br><span class="line">    ↓</span><br><span class="line">PD 控制和机器人轨迹响应</span><br></pre></td></tr></table></figure>
+
+<h2 id="什么是二阶系统"><a href="#什么是二阶系统" class="headerlink" title="什么是二阶系统"></a>什么是二阶系统</h2><p>传递函数分母关于 $s$ 的最高次数为 2 时，称为二阶系统。例如：</p>
+<p>$$<br>G(s)&#x3D;\frac{1}{s^2+3s+2}<br>$$</p>
+<p>它的分母最高次为 $s^2$，因此是一个二阶系统。</p>
+<p>从微分方程看，经典的质量—弹簧—阻尼系统满足：</p>
+<p>$$<br>m\ddot{x}+b\dot{x}+kx&#x3D;F<br>$$</p>
+<p>其中最高阶导数是 $\ddot{x}$。在零初始条件下进行拉普拉斯变换：</p>
+<p>$$<br>ms^2X(s)+bsX(s)+kX(s)&#x3D;F(s)<br>$$</p>
+<p>于是输入力到位移的传递函数为：</p>
+<p>$$<br>\frac{X(s)}{F(s)}<br>{}&#x3D;{}<br>\frac{1}{ms^2+bs+k}<br>$$</p>
+<p>机械系统的基本动力学来自 $F&#x3D;ma$，加速度本身就是位置的二阶导数，所以机械系统天然容易表现出二阶动态。机器人关节模型：</p>
+<p>$$<br>J\ddot{q}+b\dot{q}+kq&#x3D;\tau<br>$$</p>
+<p>以及更一般的机器人动力学：</p>
+<p>$$<br>M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g(q)&#x3D;\tau<br>$$</p>
+<p>都包含 $\ddot{q}$。这也是二阶系统分析对机器人控制十分重要的原因。</p>
+<h2 id="标准二阶系统"><a href="#标准二阶系统" class="headerlink" title="标准二阶系统"></a>标准二阶系统</h2><p>经典标准二阶系统写成：</p>
+<p>$$<br>\boxed{<br>G(s)<br>{}&#x3D;{}<br>\frac{\omega_n^2}<br>{s^2+2\zeta\omega_ns+\omega_n^2}<br>}<br>$$</p>
+<p>其中：</p>
+<ul>
+<li>$\omega_n$ 是自然频率（Natural Frequency）；</li>
+<li>$\zeta$ 是阻尼比（Damping Ratio）。</li>
+</ul>
+<p>可以先建立两个直觉：</p>
+<p>$$<br>\boxed{\omega_n\rightarrow\text{系统天然响应有多快}}<br>$$</p>
+<p>$$<br>\boxed{\zeta\rightarrow\text{系统的阻尼程度}}<br>$$</p>
+<p>将质量—弹簧—阻尼系统的传递函数分子、分母同时除以 $m$：</p>
+<p>$$<br>G(s)<br>{}&#x3D;{}<br>\frac{\frac{1}{m}}<br>{s^2+\frac{b}{m}s+\frac{k}{m}}<br>$$</p>
+<p>与标准分母比较，可以得到：</p>
+<p>$$<br>\boxed{\omega_n&#x3D;\sqrt{\frac{k}{m}}}<br>$$</p>
+<p>$$<br>\boxed{\zeta&#x3D;\frac{b}{2\sqrt{km}}}<br>$$</p>
+<p>这两个公式把抽象参数和真实物理量联系起来：刚度 $k$ 增大，系统通常回弹得更快；质量 $m$ 增大，惯性更强；阻尼 $b$ 增大，则系统更不容易持续振荡。</p>
+<h2 id="自然频率与阻尼比"><a href="#自然频率与阻尼比" class="headerlink" title="自然频率与阻尼比"></a>自然频率与阻尼比</h2><p>先考虑没有阻尼的机械系统：</p>
+<p>$$<br>m\ddot{x}+kx&#x3D;0<br>$$</p>
+<p>它会以自身质量和刚度决定的频率来回振荡，其自然频率为：</p>
+<p>$$<br>\omega_n&#x3D;\sqrt{\frac{k}{m}}<br>$$</p>
+<p>自然频率可以理解为系统依靠自身物理性质，天然倾向于以多快的速度运动或振荡。$\omega_n$ 越大，系统的时间尺度通常越短，但它并不能单独决定是否超调。</p>
+<p>阻尼则是一种阻碍运动并消耗能量的作用，例如摩擦、空气阻力、液压阻尼以及控制器中的速度反馈。机械模型里的阻尼力通常写成：</p>
+<p>$$<br>F_b&#x3D;-b\dot{x}<br>$$</p>
+<p>它与运动方向相反，可以把阻尼理解为系统中的“刹车”。阻尼比 $\zeta$ 是无量纲参数，用于衡量实际阻尼相对于临界阻尼的大小。</p>
+<h2 id="四种典型阻尼状态"><a href="#四种典型阻尼状态" class="headerlink" title="四种典型阻尼状态"></a>四种典型阻尼状态</h2><p>二阶系统会随着阻尼比变化表现出完全不同的运动特征：</p>
+<table>
+<thead>
+<tr>
+<th>阻尼比</th>
+<th>类型</th>
+<th>主要表现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$\zeta&#x3D;0$</td>
+<td>无阻尼</td>
+<td>持续振荡，振幅不衰减</td>
+</tr>
+<tr>
+<td>$0&lt;\zeta&lt;1$</td>
+<td>欠阻尼</td>
+<td>有超调，振荡逐渐衰减</td>
+</tr>
+<tr>
+<td>$\zeta&#x3D;1$</td>
+<td>临界阻尼</td>
+<td>不振荡，无振荡条件下响应较快</td>
+</tr>
+<tr>
+<td>$\zeta&gt;1$</td>
+<td>过阻尼</td>
+<td>不振荡，但响应较慢</td>
+</tr>
+</tbody></table>
+<h3 id="无阻尼"><a href="#无阻尼" class="headerlink" title="无阻尼"></a>无阻尼</h3><p>当 $\zeta&#x3D;0$ 时，系统极点为：</p>
+<p>$$<br>s&#x3D;\pm j\omega_n<br>$$</p>
+<p>极点没有实部，响应包含 $\sin(\omega_nt)$ 或 $\cos(\omega_nt)$。由于系统没有能量耗散机制，动能和弹性势能不断转换，振幅不会自行减小。</p>
+<h3 id="欠阻尼"><a href="#欠阻尼" class="headerlink" title="欠阻尼"></a>欠阻尼</h3><p>当 $0&lt;\zeta&lt;1$ 时，系统响应较快，但通常会越过目标并产生逐渐衰减的振荡。此时极点是一对共轭复数：</p>
+<p>$$<br>s<br>{}&#x3D;{}<br>-\zeta\omega_n<br>\pm<br>j\omega_n\sqrt{1-\zeta^2}<br>$$</p>
+<p>实部 $-\zeta\omega_n$ 产生指数衰减，虚部产生正弦振荡，因此响应可以理解成：</p>
+<p>$$<br>\boxed{<br>\text{欠阻尼响应}<br>{}&#x3D;{}<br>\text{衰减包络}\times\text{振荡}<br>}<br>$$</p>
+<p>欠阻尼系统真正的振荡角频率称为阻尼自然频率：</p>
+<p>$$<br>\boxed{\omega_d&#x3D;\omega_n\sqrt{1-\zeta^2}}<br>$$</p>
+<p>由于 $0&lt;\zeta&lt;1$，因此 $\omega_d&lt;\omega_n$。</p>
+<h3 id="临界阻尼"><a href="#临界阻尼" class="headerlink" title="临界阻尼"></a>临界阻尼</h3><p>当 $\zeta&#x3D;1$ 时，分母为：</p>
+<p>$$<br>s^2+2\omega_ns+\omega_n^2&#x3D;(s+\omega_n)^2<br>$$</p>
+<p>系统具有两个相同的负实极点 $s&#x3D;-\omega_n$。它不产生欠阻尼式振荡，并且通常是在“不振荡”的条件下到达目标较快的一类响应。</p>
+<h3 id="过阻尼"><a href="#过阻尼" class="headerlink" title="过阻尼"></a>过阻尼</h3><p>当 $\zeta&gt;1$ 时，系统具有两个不同的负实极点。它不会振荡，也通常不会产生超调，但较慢的实极点会限制整体响应速度。</p>
+<p>阻尼并不是越大越好：阻尼太小容易超调和振荡，阻尼太大会使运动迟缓。工程设计需要在速度与平稳性之间折中，$\zeta\approx0.7$ 是经典二阶系统中常见的经验区域，但不是所有机器人系统都必须采用的固定值。</p>
+<h2 id="二阶系统的时域指标"><a href="#二阶系统的时域指标" class="headerlink" title="二阶系统的时域指标"></a>二阶系统的时域指标</h2><p>观察一条二阶响应曲线时，常用以下指标描述动态性能：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">上升时间 tr</span><br><span class="line">    → 多快接近目标</span><br><span class="line"></span><br><span class="line">峰值时间 tp</span><br><span class="line">    → 多久第一次到达最高点</span><br><span class="line"></span><br><span class="line">最大超调 Mp</span><br><span class="line">    → 第一次冲过目标多少</span><br><span class="line"></span><br><span class="line">调节时间 ts</span><br><span class="line">    → 多久进入误差带并不再离开</span><br><span class="line"></span><br><span class="line">稳态误差 ess</span><br><span class="line">    → 最终距离目标还差多少</span><br></pre></td></tr></table></figure>
+
+<h3 id="最大超调量"><a href="#最大超调量" class="headerlink" title="最大超调量"></a>最大超调量</h3><p>设系统稳态值为 $y_{\mathrm{ss}}$，响应最大值为 $y_{\max}$，百分比最大超调量为：</p>
+<p>$$<br>\boxed{<br>M_p<br>{}&#x3D;{}<br>\frac{y_{\max}-y_{\mathrm{ss}}}{y_{\mathrm{ss}}}<br>\times100%<br>}<br>$$</p>
+<p>对于标准欠阻尼二阶系统：</p>
+<p>$$<br>\boxed{<br>M_p<br>{}&#x3D;{}<br>e^{-\frac{\zeta\pi}{\sqrt{1-\zeta^2}}}<br>\times100%<br>}<br>$$</p>
+<p>从公式可以看出，在标准欠阻尼条件下，$\zeta$ 增大时，超调量通常减小。</p>
+<h3 id="峰值时间"><a href="#峰值时间" class="headerlink" title="峰值时间"></a>峰值时间</h3><p>欠阻尼响应第一次到达最大值所需的时间称为峰值时间：</p>
+<p>$$<br>\boxed{<br>t_p<br>{}&#x3D;{}<br>\frac{\pi}{\omega_d}<br>{}&#x3D;{}<br>\frac{\pi}{\omega_n\sqrt{1-\zeta^2}}<br>}<br>$$</p>
+<p>$\omega_d$ 越大，系统越早到达第一个峰值。</p>
+<h3 id="调节时间"><a href="#调节时间" class="headerlink" title="调节时间"></a>调节时间</h3><p>调节时间表示系统进入稳态值附近的误差带，并且之后不再离开该范围所需要的时间。欠阻尼响应的振荡包络大致按照：</p>
+<p>$$<br>e^{-\zeta\omega_nt}<br>$$</p>
+<p>衰减，所以 $\zeta\omega_n$ 决定了振荡消失的主要速度。按 2% 误差带，常用近似为：</p>
+<p>$$<br>\boxed{t_s\approx\frac{4}{\zeta\omega_n}}<br>$$</p>
+<p>按 5% 误差带则常近似为：</p>
+<p>$$<br>t_s\approx\frac{3}{\zeta\omega_n}<br>$$</p>
+<p>这些近似主要针对标准欠阻尼二阶系统。进入明显过阻尼区域后，不能继续机械套用它们判断响应速度。</p>
+<h2 id="从极点理解振荡与衰减"><a href="#从极点理解振荡与衰减" class="headerlink" title="从极点理解振荡与衰减"></a>从极点理解振荡与衰减</h2><p>欠阻尼极点可以写成：</p>
+<p>$$<br>s&#x3D;-\zeta\omega_n\pm j\omega_d<br>$$</p>
+<p>其中：</p>
+<p>$$<br>\boxed{\text{实部}\rightarrow\text{衰减速度}}<br>$$</p>
+<p>$$<br>\boxed{\text{虚部}\rightarrow\text{振荡频率}}<br>$$</p>
+<p>若极点为 $s&#x3D;-a\pm jb$，响应中会出现 $e^{-at}\sin(bt)$。只要 $a&gt;0$，极点实部就是负数，指数项最终会衰减到零；如果极点进入右半平面，例如 $s&#x3D;1\pm2j$，响应中将出现 $e^t\sin(2t)$，振荡幅度反而不断增大。</p>
+<p>对于多个稳定极点，离虚轴最近的极点通常衰减最慢，并主导长期响应。例如：</p>
+<p>$$<br>s_1&#x3D;-1,\qquad s_2&#x3D;-10<br>$$</p>
+<p>$e^{-10t}$ 很快消失，而 $e^{-t}$ 仍会持续一段时间，因此 $s_1&#x3D;-1$ 是这组极点中的主导极点。</p>
+<h2 id="一个完整计算例子"><a href="#一个完整计算例子" class="headerlink" title="一个完整计算例子"></a>一个完整计算例子</h2><p>给定系统：</p>
+<p>$$<br>G(s)&#x3D;\frac{25}{s^2+4s+25}<br>$$</p>
+<p>与标准分母 $s^2+2\zeta\omega_ns+\omega_n^2$ 比较：</p>
+<p>$$<br>\omega_n^2&#x3D;25<br>$$</p>
+<p>因此：</p>
+<p>$$<br>\boxed{\omega_n&#x3D;5\ \mathrm{rad&#x2F;s}}<br>$$</p>
+<p>再由：</p>
+<p>$$<br>2\zeta\omega_n&#x3D;4<br>$$</p>
+<p>得到：</p>
+<p>$$<br>\boxed{\zeta&#x3D;0.4}<br>$$</p>
+<p>因为 $0&lt;0.4&lt;1$，所以系统属于欠阻尼。其阻尼自然频率为：</p>
+<p>$$<br>\omega_d<br>{}&#x3D;{}<br>5\sqrt{1-0.4^2}<br>\approx4.58\ \mathrm{rad&#x2F;s}<br>$$</p>
+<p>峰值时间约为：</p>
+<p>$$<br>t_p<br>{}&#x3D;{}<br>\frac{\pi}{4.58}<br>\approx0.686\ \mathrm{s}<br>$$</p>
+<p>按 2% 误差带估算调节时间：</p>
+<p>$$<br>t_s<br>{}\approx{}<br>\frac{4}{0.4\times5}<br>{}&#x3D;{}<br>2\ \mathrm{s}<br>$$</p>
+<p>最大超调约为：</p>
+<p>$$<br>\boxed{M_p\approx25%}<br>$$</p>
+<p>如果系统稳态值为 1，那么第一次峰值大约会达到 1.25。</p>
+<h2 id="PD-控制如何改变二阶响应"><a href="#PD-控制如何改变二阶响应" class="headerlink" title="PD 控制如何改变二阶响应"></a>PD 控制如何改变二阶响应</h2><p>考虑一个简单质量系统：</p>
+<p>$$<br>m\ddot{q}&#x3D;u<br>$$</p>
+<p>目标为 $q_d&#x3D;0$，采用 PD 控制律：</p>
+<p>$$<br>u&#x3D;-K_pq-K_d\dot{q}<br>$$</p>
+<p>代入系统并整理：</p>
+<p>$$<br>m\ddot{q}+K_d\dot{q}+K_pq&#x3D;0<br>$$</p>
+<p>两边同时除以 $m$：</p>
+<p>$$<br>\ddot{q}<br>+\frac{K_d}{m}\dot{q}<br>+\frac{K_p}{m}q<br>&#x3D;0<br>$$</p>
+<p>与标准二阶形式比较：</p>
+<p>$$<br>\ddot{q}+2\zeta\omega_n\dot{q}+\omega_n^2q&#x3D;0<br>$$</p>
+<p>可以得到：</p>
+<p>$$<br>\boxed{\omega_n&#x3D;\sqrt{\frac{K_p}{m}}}<br>$$</p>
+<p>$$<br>\boxed{\zeta&#x3D;\frac{K_d}{2\sqrt{mK_p}}}<br>$$</p>
+<p>这说明 $K_p$ 主要影响拉回目标的力度和响应速度，$K_d$ 主要提供阻尼并抑制超调。</p>
+<p>如果只增加 $K_p$ 而不相应调整 $K_d$，虽然 $\omega_n$ 增大，但阻尼比可能下降：</p>
+<p>$$<br>K_p\uparrow<br>\quad\Longrightarrow\quad<br>\omega_n\uparrow,<br>\qquad<br>\zeta\downarrow<br>$$</p>
+<p>系统就可能从“响应更快”逐渐变成“超调更明显甚至发生振荡”。另一方面，$K_d$ 过大也可能让响应变慢，并放大速度测量噪声。因此 PD 参数并不是越大越好。</p>
+<p>例如 $m&#x3D;1$，希望闭环系统满足 $\omega_n&#x3D;5$、$\zeta&#x3D;0.7$，则：</p>
+<p>$$<br>K_p&#x3D;m\omega_n^2&#x3D;25<br>$$</p>
+<p>$$<br>K_d&#x3D;2m\zeta\omega_n&#x3D;7<br>$$</p>
+<p>于是可以选择：</p>
+<p>$$<br>u&#x3D;-25q-7\dot{q}<br>$$</p>
+<p>这里的参数不是单纯试出来的，而是根据期望的闭环二阶动态设计得到的。</p>
+<h2 id="与机器人轨迹跟踪的联系"><a href="#与机器人轨迹跟踪的联系" class="headerlink" title="与机器人轨迹跟踪的联系"></a>与机器人轨迹跟踪的联系</h2><p>真实机器人通常跟踪连续变化的轨迹 $q_d(t)$，而不只是单位阶跃，但二阶系统中的超调、振荡、滞后和调节时间仍然有意义，特别是在启动、轨迹拐点、快速变化、突加扰动以及控制器切换附近。</p>
+<p>定义跟踪误差：</p>
+<p>$$<br>e&#x3D;q-q_d<br>$$</p>
+<p>可以先规定理想误差动力学：</p>
+<p>$$<br>\boxed{<br>\ddot{e}<br>+2\zeta\omega_n\dot{e}<br>+\omega_n^2e<br>&#x3D;0<br>}<br>$$</p>
+<p>这表示希望误差像一个稳定二阶系统一样衰减，并通过 $\zeta$ 与 $\omega_n$ 决定收敛速度和超调程度。后续的计算力矩控制等方法，会结合机器人动力学反推出实现这种误差动态所需的控制输入。</p>
+<p>机器人控制不能只追求更快的响应。过大的闭环带宽和控制增益可能带来：</p>
+<ul>
+<li>力矩或电流过大；</li>
+<li>执行器饱和；</li>
+<li>噪声放大与高频振动；</li>
+<li>结构共振；</li>
+<li>控制输入不平滑。</li>
+</ul>
+<p>对于绳驱机器人，还需要考虑张力非负、张力上下限、张力变化率、绳索弹性以及驱动器能力。控制性能应当同时观察跟踪误差、超调、调节时间、控制输入和约束激活情况，而不能只比较一个 RMSE。</p>
+<h2 id="与滑模控制的提前联系"><a href="#与滑模控制的提前联系" class="headerlink" title="与滑模控制的提前联系"></a>与滑模控制的提前联系</h2><p>滑模控制常定义滑模变量：</p>
+<p>$$<br>s&#x3D;\dot{e}+\lambda e<br>$$</p>
+<p>当系统到达滑模面 $s&#x3D;0$ 后：</p>
+<p>$$<br>\dot{e}+\lambda e&#x3D;0<br>$$</p>
+<p>其解为：</p>
+<p>$$<br>e(t)&#x3D;e(0)e^{-\lambda t}<br>$$</p>
+<p>只要 $\lambda&gt;0$，误差就会按照上一课的一阶指数规律趋于零。这也说明一阶系统、二阶系统、误差动力学与后续控制方法并不是彼此孤立的知识。</p>
+<h2 id="本课小结"><a href="#本课小结" class="headerlink" title="本课小结"></a>本课小结</h2><p>标准二阶系统为：</p>
+<p>$$<br>G(s)<br>{}&#x3D;{}<br>\frac{\omega_n^2}{s^2+2\zeta\omega_ns+\omega_n^2}<br>$$</p>
+<p>其中 $\omega_n$ 主要描述响应的时间尺度，$\zeta$ 主要描述阻尼程度。欠阻尼系统会产生衰减振荡和超调，临界阻尼处在振荡与不振荡的边界，过阻尼系统虽然平稳但通常较慢。</p>
+<p>从极点角度看，实部主要决定衰减速度，虚部主要决定振荡频率；从 PD 控制角度看，$K_p$ 主要改变响应速度，$K_d$ 主要提供阻尼。控制器设计的本质之一，就是通过改变闭环极点来塑造期望的系统动态。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/05/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/5.%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/">https://mio0721.github.io/2026/05/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/5.%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F/">控制系统</a><a class="post-meta__tags" href="/tags/%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/">时域响应</a><a class="post-meta__tags" href="/tags/%E4%BA%8C%E9%98%B6%E7%B3%BB%E7%BB%9F/">二阶系统</a><a class="post-meta__tags" href="/tags/%E9%98%BB%E5%B0%BC%E6%AF%94/">阻尼比</a><a class="post-meta__tags" href="/tags/%E8%87%AA%E7%84%B6%E9%A2%91%E7%8E%87/">自然频率</a><a class="post-meta__tags" href="/tags/%E8%B6%85%E8%B0%83/">超调</a><a class="post-meta__tags" href="/tags/PD%E6%8E%A7%E5%88%B6/">PD控制</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/30/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/6.%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%9F%BA%E7%A1%80/" title="控制系统基础：稳定性基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">控制系统基础：稳定性基础</div></div><div class="info-2"><div class="info-item-1">控制系统基础：稳定性基础上一章从二阶系统的极点讨论了振荡与衰减。现在进一步回答控制理论最基本的问题：系统受到扰动以后会不会失控，以及“稳定”是否一定意味着状态最终回到目标。 核心主线是： 123456789平衡点    ↓稳定    ↓渐近稳定    ↓指数稳定    ↓极点与闭环误差  从扰动理解稳定性可以把稳定与不稳定想象成碗底和山顶上的小球。碗底的小球受到轻微扰动后仍停留在附近，并可能在摩擦作用下重新回到底部；山顶的小球只要偏离一点，就会越滚越远。 因此，稳定性首先关心的是： $$\boxed{\text{系统受到小扰动以后，状态或误差会不会失控}}$$ 例如机器人原本位于目标位置 $q&#x3D;q_d$，受到外力后变成 $q&#x3D;q_d+0.01$。稳定的闭环系统不会让这一点小误差无限放大，而不稳定系统可能使误差不断增长。 平衡点稳定性通常围绕平衡点（Equilibrium Point）讨论。对于自治系统： $$\dot{x}&#x3D;f(x)$$ 如果状态 $x&#x3D;x_e$ 满足： $$\boxed{f(x_e)&#x3D;0}$$ 那么 $\dot{...</div></div></div></a><a class="pagination-related" href="/2026/05/25/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/" title="控制系统基础：一阶系统的时域响应"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：一阶系统的时域响应</div></div><div class="info-2"><div class="info-item-1">控制系统基础：一阶系统的时域响应前面主要讨论系统公式如何建立。现在开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}{}&#x3D;{}\text{系统输出随时间的变化过程}}$$ 例如给机器人一个目标位置，位置 $q(t)$ 从初始值逐渐接近目标值，这条随时间变化的曲线就是时域响应。 实际分析时通常关心：  响应是否足够快； 是否发生振荡或超调； 多久进入稳定状态； 最终能否达到目标； 是否存在稳态误差。  什么是一阶系统标准一阶传递函数为： $$\boxed{G(s)&#x3D;\frac{K}{Ts+1}}$$ 其中：  $K$ 是系统增益； $T$ 是时间常数； 分母关于 $s$ 的最高次数为 1，因此称为一阶系统。  对应的时间域微分方程为： $$T\dot y(t)+y(t)&#x3D;Ku(t)$...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/25/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/4.%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%97%B6%E5%9F%9F%E5%93%8D%E5%BA%94/" title="控制系统基础：一阶系统的时域响应"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-25</div><div class="info-item-2">控制系统基础：一阶系统的时域响应</div></div><div class="info-2"><div class="info-item-1">控制系统基础：一阶系统的时域响应前面主要讨论系统公式如何建立。现在开始观察系统真正运动起来以后，输出会怎样随时间变化。 核心主线是： 123456789一阶系统    ↓阶跃输入    ↓响应曲线    ↓瞬态与稳态    ↓时间常数与稳态误差  什么是时域响应时域就是以时间 $t$ 为横轴研究系统，响应则是系统接受输入后输出的变化过程。 因此： $$\boxed{\text{时域响应}{}&#x3D;{}\text{系统输出随时间的变化过程}}$$ 例如给机器人一个目标位置，位置 $q(t)$ 从初始值逐渐接近目标值，这条随时间变化的曲线就是时域响应。 实际分析时通常关心：  响应是否足够快； 是否发生振荡或超调； 多久进入稳定状态； 最终能否达到目标； 是否存在稳态误差。  什么是一阶系统标准一阶传递函数为： $$\boxed{G(s)&#x3D;\frac{K}{Ts+1}}$$ 其中：  $K$ 是系统增益； $T$ 是时间常数； 分母关于 $s$ 的最高次数为 1，因此称为一阶系统。  对应的时间域微分方程为： $$T\dot y(t)+y(t)&#x3D;Ku(t)$...</div></div></div></a><a class="pagination-related" href="/2026/06/06/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/8.P%E3%80%81PI%E3%80%81PD%E3%80%81PID%20%E6%8E%A7%E5%88%B6/" title="控制系统基础：P、PI、PD 与 PID 控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="info-item-2">控制系统基础：P、PI、PD 与 PID 控制</div></div><div class="info-2"><div class="info-item-1">控制系统基础：P、PI、PD 与 PID 控制前几章节讨论了时域响应、闭环极点和稳定性。本章把这些概念放回最经典的反馈控制器中，理解 P、I、D 分别观察什么，以及它们如何改变稳态误差、响应速度、超调和振荡。 核心主线是： 123456789跟踪误差 e    ↓P：当前误差I：累计误差D：误差变化速度    ↓P、PI、PD、PID    ↓闭环动态与工程权衡  从跟踪误差开始设机器人目标位置为 $q_d$，实际位置为 $q$，定义误差： $$e&#x3D;q-q_d$$ 控制器根据误差计算控制输入，希望最终实现： $$\boxed{e(t)\rightarrow0}$$ 最直接的想法是：偏得越多，就用越大的力把系统拉回来。这就是比例控制。 P：比例控制P 是 Proportional，即比例控制。采用上面的误差定义，可以设计： $$\boxed{u&#x3D;-K_pe,qquad K_p&gt;0}$$ 负号使控制作用与误差方向相反。如果定义改成 $e&#x3D;q_d-q$，控制律通常会写成 $u&#x3D;K_pe$。所以控制律的符号必须结合误差定义判断，不能脱离上下文...</div></div></div></a><a class="pagination-related" href="/2026/05/22/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/" title="控制系统基础：状态空间方程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-22</div><div class="info-item-2">控制系统基础：状态空间方程</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态空间方程传递函数从系统外部描述输入与输出的关系。现在转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{Y(s)}{U(s)}$$ 主要回答输入经过系统后会形成什么输出，但不会直接展开系统内部有哪些变量。 状态空间方法会显式记录系统内部状态。例如运动小车可以定义： $$x&#x3D;\begin{bmatrix}p\\v\end{bmatrix}$$ 其中 $p$ 是位置，$v$ 是速度。状态空间关注的是： $$\boxed{\text{系统内部状态如何随时间演化}}$$ 什么是状态状态是一组足以描述系统当前动态情况，并能结合未来输入确定之后运动的变量。 假设两辆小车都位于： $$p&#x3D;10\ \mathrm{m}$$ 其中一辆静止，另一辆以 $20\ \mathrm{m&#x2F;s}$ 向...</div></div></div></a><a class="pagination-related" href="/2026/05/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/" title="控制系统基础：状态、输入、输出与反馈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-17</div><div class="info-item-2">控制系统基础：状态、输入、输出与反馈</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为： $$q_d$$ 实际位置为： $$q$$ 控制器需要根据目标和当前状态计算控制输入： $$\tau$$ 基本结构为： 1234567891011121314期望位置 q_d      │      ↓  ┌─────────┐  │  控制器  │  └─────────┘      │ 控制输入 τ      ↓  ┌─────────┐  │  机器人  │  └─────────┘      │      ↓   实际位置 q  因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。 什么是系统系统可以理解成一个具有自身运动规律的...</div></div></div></a><a class="pagination-related" href="/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/7.Lyapunov%20%E7%A8%B3%E5%AE%9A%E6%80%A7%E7%90%86%E8%AE%BA/" title="控制系统基础：Lyapunov 稳定性理论"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-02</div><div class="info-item-2">控制系统基础：Lyapunov 稳定性理论</div></div><div class="info-2"><div class="info-item-1">控制系统基础：Lyapunov 稳定性理论上一章介绍了平衡点、渐近稳定和指数稳定，也说明线性系统可以通过极点判断稳定性。但机器人动力学通常是非线性的，很难用一组固定极点描述全部工作范围。 Lyapunov 方法的核心是不必先求出完整的 $x(t)$，而是寻找一个类似能量的标量函数，并判断它沿系统轨迹如何变化。 1234567891011平衡点    ↓构造 Lyapunov 函数 V(x)    ↓判断 V 是否正定    ↓计算 V̇    ↓判断 V̇ 的符号    ↓推出闭环稳定性与收敛性质  为什么需要 Lyapunov 方法线性系统： $$\dot{x}&#x3D;Ax$$ 可以通过矩阵 $A$ 的特征值判断稳定性。但机器人通常满足： $$M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g(q)&#x3D;\tau$$ 写成状态空间后得到 $\dot{x}&#x3D;f(x,u)$，其中质量矩阵、科氏项和重力项都会随状态变化，没有一个固定的 $A$ 矩阵可以覆盖整个系统。 Lyapunov 方法借用了机械能下降的直觉。碗里的小球存在摩擦时，总机械能会不...</div></div></div></a><a class="pagination-related" href="/2026/05/20/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/2.%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E3%80%81%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E5%8F%98%E6%8D%A2%E4%B8%8E%E4%BC%A0%E9%80%92%E5%87%BD%E6%95%B0/" title="控制系统基础：微分方程、拉普拉斯变换与传递函数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-20</div><div class="info-item-2">控制系统基础：微分方程、拉普拉斯变换与传递函数</div></div><div class="info-2"><div class="info-item-1">控制系统基础：微分方程、拉普拉斯变换与传递函数上一章从状态、输入、输出和反馈出发，建立了控制系统最基本的结构。 这一章继续回答一个常见问题：控制教材为什么会从系统运动的微分方程，突然变成 $G(s)$ 这样的传递函数？ 核心逻辑是： 123456789物理系统    ↓微分方程    ↓拉普拉斯变换    ↓传递函数    ↓输入—输出关系  动态系统为什么使用微分方程假设质量为 $m$ 的小车受到外力 $F(t)$。根据牛顿第二定律： $$F&#x3D;ma$$ 又因为： $$a&#x3D;\ddot{x}$$ 所以： $$m\ddot{x}&#x3D;F$$ 外力并不会让位置立刻等于某个值，而是先改变加速度，再逐渐影响速度和位置： $$F\rightarrow\ddot{x}\rightarrow\dot{x}\rightarrow x$$ 因此，微分方程是描述动态系统随时间演化的自然工具。 质量—弹簧—阻尼系统考虑一个受到外力 $F(t)$ 的质量块。弹簧力为： $$F_k&#x3D;-kx$$ 阻尼力为： $$F_b&#x3D;-b\dot{x}$$ 根据牛顿第二定律： ...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260903-1"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：滑模控制 SMC 从零推导 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：滑模控制 SMC 从零推导计算力矩控制能够在模型准确时得到理想误差动态，但真实机器人总会存在参数偏差、外部扰动和未建模动态。滑模控制（Sliding Mode Control，SMC）在名义补偿之外加入到达与鲁棒机制，使系统状态被推向预先设计的滑模面。 SMC 的核心并不是单独一个 sign 函数，而是三部分： $$\boxed{\text{滑模面}+\text{到达机制}+\tex">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：滑模控制 SMC 从零推导">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/12/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/11.%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6%20SMC%20%E4%BB%8E%E9%9B%B6%E6%8E%A8%E5%AF%BC/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：滑模控制 SMC 从零推导计算力矩控制能够在模型准确时得到理想误差动态，但真实机器人总会存在参数偏差、外部扰动和未建模动态。滑模控制（Sliding Mode Control，SMC）在名义补偿之外加入到达与鲁棒机制，使系统状态被推向预先设计的滑模面。 SMC 的核心并不是单独一个 sign 函数，而是三部分： $$\boxed{\text{滑模面}+\text{到达机制}+\tex">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-12T13:17:00.000Z">
+<meta property="article:modified_time" content="2026-06-12T13:28:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="DeLaN">
+<meta property="article:tag" content="SMC">
+<meta property="article:tag" content="到达律">
+<meta property="article:tag" content="抖振">
+<meta property="article:tag" content="滑模控制">
+<meta property="article:tag" content="滑模面">
+<meta property="article:tag" content="鲁棒控制">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：滑模控制 SMC 从零推导",
+  "url": "https://mio0721.github.io/2026/06/12/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/11.%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6%20SMC%20%E4%BB%8E%E9%9B%B6%E6%8E%A8%E5%AF%BC/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-12T13:17:00.000Z",
+  "dateModified": "2026-06-12T13:28:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/12/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/11.%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6%20SMC%20%E4%BB%8E%E9%9B%B6%E6%8E%A8%E5%AF%BC/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：滑模控制 SMC 从零推导',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260907-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">42</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">122</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：滑模控制 SMC 从零推导</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：滑模控制 SMC 从零推导</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-12T13:17:00.000Z" title="发表于 2026-06-12 21:17:00">2026-06-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-12T13:28:00.000Z" title="更新于 2026-06-12 21:28:00">2026-06-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：滑模控制-SMC-从零推导"><a href="#控制系统基础：滑模控制-SMC-从零推导" class="headerlink" title="控制系统基础：滑模控制 SMC 从零推导"></a>控制系统基础：滑模控制 SMC 从零推导</h1><p>计算力矩控制能够在模型准确时得到理想误差动态，但真实机器人总会存在参数偏差、外部扰动和未建模动态。滑模控制（Sliding Mode Control，SMC）在名义补偿之外加入到达与鲁棒机制，使系统状态被推向预先设计的滑模面。</p>
+<p>SMC 的核心并不是单独一个 sign 函数，而是三部分：</p>
+<p>$$<br>\boxed{<br>\text{滑模面}<br>+\text{到达机制}<br>+\text{滑动阶段的误差动态}<br>}<br>$$</p>
+<h2 id="为什么计算力矩之后还需要-SMC"><a href="#为什么计算力矩之后还需要-SMC" class="headerlink" title="为什么计算力矩之后还需要 SMC"></a>为什么计算力矩之后还需要 SMC</h2><p>设真实机器人动力学为：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau+d<br>$$</p>
+<p>$d$ 表示满足一定假设的总扰动。若只用不完全准确的名义模型，闭环误差会受到模型残差和外部扰动驱动，无法再严格保持理想二阶动态。</p>
+<p>SMC 的思路不是要求名义模型绝对准确，而是设计一个误差组合 $s$，再使用鲁棒控制项保证它朝 $s&#x3D;0$ 运动。</p>
+<h2 id="什么是滑模面"><a href="#什么是滑模面" class="headerlink" title="什么是滑模面"></a>什么是滑模面</h2><p>单自由度轨迹跟踪误差定义为：</p>
+<p>$$<br>e&#x3D;q-q_d<br>$$</p>
+<p>经典线性滑模变量为：</p>
+<p>$$<br>\boxed{s&#x3D;\dot e+\lambda e,\qquad\lambda&gt;0}<br>$$</p>
+<p>在状态空间 $(e,\dot e)$ 中，方程 $s&#x3D;0$ 表示一条直线；多维系统中则形成更高维的超平面，因此称为滑模面。</p>
+<p>滑模面的意义需要先令 $s&#x3D;0$ 才能看清：</p>
+<p>$$<br>\dot e+\lambda e&#x3D;0<br>$$</p>
+<p>其解为：</p>
+<p>$$<br>e(t)&#x3D;e(0)e^{-\lambda t}<br>$$</p>
+<p>只要 $\lambda&gt;0$，误差就指数趋于零。因此 $s&#x3D;0$ 不是随意选择的几何平面，而是代表一组稳定的一阶误差动态。</p>
+<h2 id="到达阶段与滑动阶段"><a href="#到达阶段与滑动阶段" class="headerlink" title="到达阶段与滑动阶段"></a>到达阶段与滑动阶段</h2><p>SMC 的运动过程分为两个阶段：</p>
+<ol>
+<li>到达阶段（Reaching Phase）：系统初始时通常有 $s\neq0$，控制器把状态推向滑模面；</li>
+<li>滑动阶段（Sliding Phase）：到达 $s&#x3D;0$ 后，系统沿滑模面运动，误差按照 $\dot e+\lambda e&#x3D;0$ 衰减。</li>
+</ol>
+<p>因此 SMC 有两层目标：</p>
+<p>$$<br>s\rightarrow0<br>$$</p>
+<p>以及在 $s&#x3D;0$ 上：</p>
+<p>$$<br>e\rightarrow0<br>$$</p>
+<p>只证明 $s$ 朝零运动，还需要检查所选滑模面本身是否能保证误差稳定。</p>
+<h2 id="为什么要求-s-dot-s"><a href="#为什么要求-s-dot-s" class="headerlink" title="为什么要求 $s\dot s&lt;0$"></a>为什么要求 $s\dot s&lt;0$</h2><p>如果 $s&gt;0$，要朝零运动就需要 $\dot s&lt;0$；如果 $s&lt;0$，则需要 $\dot s&gt;0$。两种情况都满足：</p>
+<p>$$<br>\boxed{s\dot s&lt;0,\qquad s\neq0}<br>$$</p>
+<p>选择 Lyapunov 函数：</p>
+<p>$$<br>V&#x3D;\frac12s^2<br>$$</p>
+<p>便有：</p>
+<p>$$<br>\dot V&#x3D;s\dot s<br>$$</p>
+<p>所以到达条件 $s\dot s&lt;0$ 正是 $\dot V&lt;0$ 的一维形式。</p>
+<h2 id="到达律"><a href="#到达律" class="headerlink" title="到达律"></a>到达律</h2><p>到达律直接规定 $s$ 应该怎样接近零。经典选择是：</p>
+<p>$$<br>\boxed{\dot s&#x3D;-K\operatorname{sign}(s),\qquad K&gt;0}<br>$$</p>
+<p>sign 函数为：</p>
+<p>$$<br>\operatorname{sign}(s)&#x3D;<br>\begin{cases}<br>1,&amp;s&gt;0\\<br>0,&amp;s&#x3D;0\\<br>-1,&amp;s&lt;0<br>\end{cases}<br>$$</p>
+<p>当 $s&gt;0$ 时，$\dot s&#x3D;-K$；当 $s&lt;0$ 时，$\dot s&#x3D;K$，两侧都指向原点。理想情况下的到达时间为：</p>
+<p>$$<br>\boxed{T&#x3D;\frac{|s(0)|}{K}}<br>$$</p>
+<p>因此 sign 到达律能够使 $s$ 在有限时间内到达滑模面。需要注意的是，经典线性滑模面上的误差 $e$ 仍按指数规律渐近衰减，“$s$ 有限时间到达”和“$e$ 有限时间归零”不是同一个结论。</p>
+<h2 id="从动力学推导单自由度-SMC"><a href="#从动力学推导单自由度-SMC" class="headerlink" title="从动力学推导单自由度 SMC"></a>从动力学推导单自由度 SMC</h2><p>考虑单自由度机器人：</p>
+<p>$$<br>m(q)\ddot q+h(q,\dot q)&#x3D;\tau+d<br>$$</p>
+<p>其中 $h$ 汇总速度相关项与重力。定义：</p>
+<p>$$<br>e&#x3D;q-q_d,\qquad s&#x3D;\dot e+\lambda e<br>$$</p>
+<p>对 $s$ 求导：</p>
+<p>$$<br>\dot s&#x3D;\ddot q-\ddot q_d+\lambda\dot e<br>$$</p>
+<p>定义参考加速度：</p>
+<p>$$<br>\boxed{a_r&#x3D;\ddot q_d-\lambda\dot e}<br>$$</p>
+<p>于是：</p>
+<p>$$<br>\dot s&#x3D;\ddot q-a_r<br>$$</p>
+<p>由动力学得到：</p>
+<p>$$<br>\ddot q&#x3D;m(q)^{-1}\left[\tau+d-h(q,\dot q)\right]<br>$$</p>
+<p>先忽略扰动，希望在滑模面上保持 $\dot s&#x3D;0$，可以选择等效控制：</p>
+<p>$$<br>\boxed{\tau_{\mathrm{eq}}&#x3D;m(q)a_r+h(q,\dot q)}<br>$$</p>
+<p>它负责名义动力学补偿和理想滑模运动。但等效项本身只在模型准确且已经位于滑模面时成立，还需要切换项负责到达和鲁棒性：</p>
+<p>$$<br>\boxed{\tau_{\mathrm{sw}}&#x3D;-K\operatorname{sign}(s)}<br>$$</p>
+<p>完整控制律为：</p>
+<p>$$<br>\boxed{<br>\tau<br>{}&#x3D;{}<br>\tau_{\mathrm{eq}}+\tau_{\mathrm{sw}}<br>{}&#x3D;{}<br>m(q)a_r+h(q,\dot q)-K\operatorname{sign}(s)<br>}<br>$$</p>
+<p>代回动力学后：</p>
+<p>$$<br>m(q)\dot s&#x3D;d-K\operatorname{sign}(s)<br>$$</p>
+<p>选择 $V&#x3D;s^2&#x2F;2$，若 $m(q)$ 有已知正下界，并且扰动满足 $|d|\leq d_{\max}$，就可以对 $\dot V$ 做最坏情况估计。采用与动力学尺度一致的 Lyapunov 函数或对质量上下界进行处理后，典型条件可归结为：</p>
+<p>$$<br>\boxed{K&gt;d_{\max}}<br>$$</p>
+<p>此时鲁棒项能够压过假设范围内的匹配扰动，使 $s$ 继续朝零运动。</p>
+<h2 id="匹配扰动的限制"><a href="#匹配扰动的限制" class="headerlink" title="匹配扰动的限制"></a>匹配扰动的限制</h2><p>经典 SMC 最容易处理与控制输入通过同一通道进入系统的匹配扰动。上式中的 $\tau$ 和 $d$ 都直接作用在广义力通道，因此切换控制可以与扰动竞争。</p>
+<p>如果不确定性通过其他状态方程或不可控方向进入，就属于非匹配扰动，经典证明不能直接套用。SMC 的鲁棒性依赖具体结构、扰动界和可控性，不是对任何未知作用都天然有效。</p>
+<h2 id="多自由度机器人中的滑模变量"><a href="#多自由度机器人中的滑模变量" class="headerlink" title="多自由度机器人中的滑模变量"></a>多自由度机器人中的滑模变量</h2><p>对 $n$ 自由度机器人，定义：</p>
+<p>$$<br>e&#x3D;q-q_d<br>$$</p>
+<p>$$<br>\boxed{s&#x3D;\dot e+\Lambda e}<br>$$</p>
+<p>其中 $\Lambda$ 通常为正定矩阵。也可以定义参考速度：</p>
+<p>$$<br>\boxed{\dot q_r&#x3D;\dot q_d-\Lambda e}<br>$$</p>
+<p>于是：</p>
+<p>$$<br>s&#x3D;\dot q-\dot q_r<br>$$</p>
+<p>对参考速度求导：</p>
+<p>$$<br>\ddot q_r&#x3D;\ddot q_d-\Lambda\dot e<br>$$</p>
+<p>这里的参考加速度与计算力矩控制中的 $a_r&#x3D;\ddot q_d-K_d\dot e-K_pe$ 不完全相同，阅读公式时必须先检查作者对 $s$、$\dot q_r$ 和 $\ddot q_r$ 的定义。</p>
+<h2 id="多自由度-SMC-控制律"><a href="#多自由度-SMC-控制律" class="headerlink" title="多自由度 SMC 控制律"></a>多自由度 SMC 控制律</h2><p>机器人动力学为：</p>
+<p>$$<br>M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau+d<br>$$</p>
+<p>一种经典控制结构是：</p>
+<p>$$<br>\boxed{<br>\tau<br>{}&#x3D;{}<br>M(q)\ddot q_r<br>+C(q,\dot q)\dot q_r<br>+g(q)<br>-K\operatorname{sign}(s)<br>}<br>$$</p>
+<p>其中前三项为名义等效控制，最后一项负责到达和鲁棒性。</p>
+<p>多自由度机械系统常选择：</p>
+<p>$$<br>\boxed{V&#x3D;\frac12s^TM(q)s}<br>$$</p>
+<p>由于 $M(q)$ 正定，$V$ 对 $s$ 正定。利用机器人动力学的结构性质：</p>
+<p>$$<br>\dot M(q)-2C(q,\dot q)<br>$$</p>
+<p>为斜对称矩阵，可以在求 $\dot V$ 时消去一组交叉项。最终常得到类似：</p>
+<p>$$<br>\dot V<br>\leq<br>-\sum_i\left(K_i-d_{i,\max}\right)|s_i|<br>$$</p>
+<p>如果每个增益都大于对应扰动界，则 $\dot V&lt;0$。这就是多自由度机器人 SMC 稳定性证明的典型骨架。</p>
+<p>不同文献对 $C$ 的定义、扰动符号和控制律形式可能不同，推导时应从自己的动力学约定重新计算，而不是只复制最后公式。</p>
+<h2 id="等效控制与切换控制"><a href="#等效控制与切换控制" class="headerlink" title="等效控制与切换控制"></a>等效控制与切换控制</h2><p>SMC 可以从功能上拆成：</p>
+<p>$$<br>\boxed{\tau&#x3D;\tau_{\mathrm{eq}}+\tau_{\mathrm{sw}}}<br>$$</p>
+<ul>
+<li>$\tau_{\mathrm{eq}}$：补偿名义动力学，使理想系统保持在滑模面上；</li>
+<li>$\tau_{\mathrm{sw}}$：把系统推向滑模面，并压制满足假设的扰动。</li>
+</ul>
+<p>有些实现会省略或合并某些项，可能是使用了简化模型、不同参考变量，或将部分动力学吸收到学习模型中。判断时应检查推导，而不是只看变量名字。</p>
+<h2 id="sign-与抖振"><a href="#sign-与抖振" class="headerlink" title="sign 与抖振"></a>sign 与抖振</h2><p>理想 sign 函数在 $s&#x3D;0$ 两侧瞬间切换。真实控制器具有有限采样频率、时延和执行器带宽，无法实现无限快切换，状态会在滑模面附近反复穿越，形成高频控制抖动（Chattering）。</p>
+<p>抖振不仅让曲线难看，还可能造成：</p>
+<ul>
+<li>电机电流与力矩高频变化；</li>
+<li>绳张力快速抖动；</li>
+<li>结构振动和磨损；</li>
+<li>未建模高频模态被激发；</li>
+<li>噪声和离散误差被放大。</li>
+</ul>
+<p>常见平滑替代是：</p>
+<p>$$<br>\tau_{\mathrm{sw}}&#x3D;-K\tanh(s&#x2F;\phi)<br>$$</p>
+<p>$|s|$ 远大于 $\phi$ 时，$\tanh(s&#x2F;\phi)$ 接近 sign；在原点附近：</p>
+<p>$$<br>\tanh(s&#x2F;\phi)\approx\frac{s}{\phi}<br>$$</p>
+<p>控制变成连续的近似线性反馈。$\phi$ 越小越接近 sign，但更容易保留高频切换；$\phi$ 越大越平滑，但边界层和稳态误差范围可能增大。</p>
+<p>使用 tanh 或 sat 后，原点附近的控制强度随 $s$ 减小，严格的有限时间到达和理想滑模不变性通常会转化为渐近收敛或边界层内最终有界。论文中应准确说明得到的性质，而不能直接沿用理想 sign 的全部结论。</p>
+<h2 id="DeLaN-与-SMC-如何配合"><a href="#DeLaN-与-SMC-如何配合" class="headerlink" title="DeLaN 与 SMC 如何配合"></a>DeLaN 与 SMC 如何配合</h2><p>学习型名义模型可以承担等效控制中的动力学补偿：</p>
+<p>$$<br>\tau<br>{}&#x3D;{}<br>\hat\tau_\theta(q,\dot q,\ddot q_r)<br>-K_s\tanh(\Phi^{-1}s)<br>$$</p>
+<p>这里：</p>
+<ul>
+<li>$\hat\tau_\theta$ 估计理想滑模运动所需的名义广义力；</li>
+<li>$K_s$ 决定鲁棒反馈强度；</li>
+<li>$\Phi$ 决定边界层尺度；</li>
+<li>$s$ 表示偏离滑模面的程度。</li>
+</ul>
+<p>DeLaN 输出是否能严格等同于某个解析 $\tau_{\mathrm{eq}}$，取决于它的输入、训练目标和动力学约定。更稳妥的说法是：它承担学习型名义动力学补偿角色。</p>
+<p>如果学习模型减小了残差，SMC 需要覆盖的不确定性可能变小，从而有机会降低 $K_s$，减少控制抖动和执行器负担。但这条链需要通过残差界、增益条件和对照实验验证。</p>
+<h2 id="Observer-与鲁棒项"><a href="#Observer-与鲁棒项" class="headerlink" title="Observer 与鲁棒项"></a>Observer 与鲁棒项</h2><p>若扰动观测器给出 $\hat d$，控制律可以写成：</p>
+<p>$$<br>\tau<br>{}&#x3D;{}<br>\hat\tau_\theta-\hat d<br>-K_s\tanh(\Phi^{-1}s)<br>$$</p>
+<p>Observer 补偿可估计的低频扰动，SMC 处理剩余估计误差和快速不确定性。Observer 并不会自动取代鲁棒反馈，除非能够对估计误差给出足够强的界和收敛保证。</p>
+<p>模块越多也不意味着创新越大。需要说明每个模块改变了闭环中的哪一项，以及它是否带来了可验证的理论或工程改善。</p>
+<h2 id="阅读-SMC-公式的顺序"><a href="#阅读-SMC-公式的顺序" class="headerlink" title="阅读 SMC 公式的顺序"></a>阅读 SMC 公式的顺序</h2><p>面对一篇滑模控制论文，可以按以下顺序检查：</p>
+<ol>
+<li>写清楚系统动力学和扰动进入通道；</li>
+<li>找到误差定义及正负号约定；</li>
+<li>找到滑模变量 $s$；</li>
+<li>令 $s&#x3D;0$，检查滑动阶段的误差动态是否稳定；</li>
+<li>找到到达律或切换项；</li>
+<li>区分名义等效控制与鲁棒控制；</li>
+<li>检查 Lyapunov 函数是否正定；</li>
+<li>检查 $\dot V$ 最终是负定、半负定还是仅能保证最终有界；</li>
+<li>区分证明的是 $s$ 收敛还是 $e$ 收敛；</li>
+<li>核对有限时间、渐近和边界层结论是否与实际连续化实现一致。</li>
+</ol>
+<h2 id="本课小结"><a href="#本课小结" class="headerlink" title="本课小结"></a>本课小结</h2><p>经典 SMC 从稳定的滑模面开始：</p>
+<p>$$<br>s&#x3D;\dot e+\lambda e<br>$$</p>
+<p>等效控制负责名义动力学与理想滑动，切换控制负责到达和对匹配有界扰动的鲁棒性：</p>
+<p>$$<br>\tau&#x3D;\tau_{\mathrm{eq}}-K\operatorname{sign}(s)<br>$$</p>
+<p>$s\dot s&lt;0$ 是 Lyapunov 到达条件，理想 sign 可以使 $s$ 有限时间到达滑模面；但线性滑模面上的误差通常仍是指数渐近收敛。</p>
+<p>实际系统中的不连续切换会引起抖振，tanh 和 sat 可以平滑控制，却通常牺牲严格理想滑模性质。名义学习模型、Observer 与鲁棒项可以协同减小各自负担，但每一项都需要明确的闭环作用和验证依据。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/12/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/11.%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6%20SMC%20%E4%BB%8E%E9%9B%B6%E6%8E%A8%E5%AF%BC/">https://mio0721.github.io/2026/06/12/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/11.%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6%20SMC%20%E4%BB%8E%E9%9B%B6%E6%8E%A8%E5%AF%BC/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DeLaN/">DeLaN</a><a class="post-meta__tags" href="/tags/%E6%BB%91%E6%A8%A1%E6%8E%A7%E5%88%B6/">滑模控制</a><a class="post-meta__tags" href="/tags/SMC/">SMC</a><a class="post-meta__tags" href="/tags/%E6%BB%91%E6%A8%A1%E9%9D%A2/">滑模面</a><a class="post-meta__tags" href="/tags/%E5%88%B0%E8%BE%BE%E5%BE%8B/">到达律</a><a class="post-meta__tags" href="/tags/%E9%B2%81%E6%A3%92%E6%8E%A7%E5%88%B6/">鲁棒控制</a><a class="post-meta__tags" href="/tags/%E6%8A%96%E6%8C%AF/">抖振</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/06/14/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/12.SMC%20%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E6%94%B9%E8%BF%9B/" title="控制系统基础：SMC 的问题与改进"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">控制系统基础：SMC 的问题与改进</div></div><div class="info-2"><div class="info-item-1">控制系统基础：SMC 的问题与改进经典滑模控制能够对匹配的有界扰动建立鲁棒性，但它仍面临抖振、到达阶段、线性滑模面误差仅渐近收敛，以及鲁棒增益依赖扰动上界等问题。 TSMC、FTSMC、NTSMC、Integral SMC、RITSMC 和 AITSMC 等名称虽然很多，本质上通常是在修改以下一个或多个部分：  滑模面怎样设计； 到达律怎样设计； 鲁棒增益怎样选择； sign 如何平滑或替换； 是否加入积分、自适应或 Observer。  经典 SMC 的基准经典线性滑模面为： $$s&#x3D;\dot e+\lambda e$$ 控制律常拆成： $$\tau&#x3D;\tau_{\mathrm{eq}}-K\operatorname{sign}(s)$$ 它可以使 $s$ 在有限时间内到达滑模面；但当 $s&#x3D;0$ 时，误差满足： $$\dot e+\lambda e&#x3D;0$$ 所以 $e$ 通常按照指数规律渐近趋于零。后续改进需要明确是在改善“$s$ 如何到达滑模面”，还是在改变“到达后 $e$ 如何归零”。 问题一：抖振sign 函数在零点不连续： $$...</div></div></div></a><a class="pagination-related" href="/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/10.%E8%AF%AF%E5%B7%AE%E5%8A%A8%E5%8A%9B%E5%AD%A6%E4%B8%8E%E8%AE%A1%E7%AE%97%E5%8A%9B%E7%9F%A9%E6%8E%A7%E5%88%B6/" title="控制系统基础：误差动力学与计算力矩控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：误差动力学与计算力矩控制</div></div><div class="info-2"><div class="info-item-1">控制系统基础：误差动力学与计算力矩控制前面说明了机器人动力学各项的含义。这一章进一步回答“控制律从哪里来”：先规定希望误差怎样变化，再通过逆动力学反推出实现这种闭环行为所需的控制力。 核心过程是： $$\text{期望轨迹}\longrightarrow\text{误差动力学}\longrightarrow\text{参考加速度}\longrightarrow\text{逆动力学}\longrightarrow\text{控制力矩}$$ 从轨迹跟踪误差开始设期望轨迹为 $q_d(t)$，实际状态为 $q(t)$，定义： $$\boxed{e&#x3D;q-q_d}$$ 对时间求导： $$\dot e&#x3D;\dot q-\dot q_d$$ 再求一次导数： $$\ddot e&#x3D;\ddot q-\ddot q_d$$ 位置误差说明当前偏离多少，速度误差说明是否以相同速度运动，加速度误差则直接与动力学和控制输入相连。 轨迹跟踪真正需要设计的不是某一时刻的控制量，而是整个闭环误差随时间如何演化，这就是误差动力学。 主动规定期望误差动力学可以希望误差满足稳定二阶系统： $$...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/14/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/12.SMC%20%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E6%94%B9%E8%BF%9B/" title="控制系统基础：SMC 的问题与改进"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-14</div><div class="info-item-2">控制系统基础：SMC 的问题与改进</div></div><div class="info-2"><div class="info-item-1">控制系统基础：SMC 的问题与改进经典滑模控制能够对匹配的有界扰动建立鲁棒性，但它仍面临抖振、到达阶段、线性滑模面误差仅渐近收敛，以及鲁棒增益依赖扰动上界等问题。 TSMC、FTSMC、NTSMC、Integral SMC、RITSMC 和 AITSMC 等名称虽然很多，本质上通常是在修改以下一个或多个部分：  滑模面怎样设计； 到达律怎样设计； 鲁棒增益怎样选择； sign 如何平滑或替换； 是否加入积分、自适应或 Observer。  经典 SMC 的基准经典线性滑模面为： $$s&#x3D;\dot e+\lambda e$$ 控制律常拆成： $$\tau&#x3D;\tau_{\mathrm{eq}}-K\operatorname{sign}(s)$$ 它可以使 $s$ 在有限时间内到达滑模面；但当 $s&#x3D;0$ 时，误差满足： $$\dot e+\lambda e&#x3D;0$$ 所以 $e$ 通常按照指数规律渐近趋于零。后续改进需要明确是在改善“$s$ 如何到达滑模面”，还是在改变“到达后 $e$ 如何归零”。 问题一：抖振sign 函数在零点不连续： $$...</div></div></div></a><a class="pagination-related" href="/2026/06/02/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/7.Lyapunov%20%E7%A8%B3%E5%AE%9A%E6%80%A7%E7%90%86%E8%AE%BA/" title="控制系统基础：Lyapunov 稳定性理论"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-02</div><div class="info-item-2">控制系统基础：Lyapunov 稳定性理论</div></div><div class="info-2"><div class="info-item-1">控制系统基础：Lyapunov 稳定性理论上一章介绍了平衡点、渐近稳定和指数稳定，也说明线性系统可以通过极点判断稳定性。但机器人动力学通常是非线性的，很难用一组固定极点描述全部工作范围。 Lyapunov 方法的核心是不必先求出完整的 $x(t)$，而是寻找一个类似能量的标量函数，并判断它沿系统轨迹如何变化。 1234567891011平衡点    ↓构造 Lyapunov 函数 V(x)    ↓判断 V 是否正定    ↓计算 V̇    ↓判断 V̇ 的符号    ↓推出闭环稳定性与收敛性质  为什么需要 Lyapunov 方法线性系统： $$\dot{x}&#x3D;Ax$$ 可以通过矩阵 $A$ 的特征值判断稳定性。但机器人通常满足： $$M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g(q)&#x3D;\tau$$ 写成状态空间后得到 $\dot{x}&#x3D;f(x,u)$，其中质量矩阵、科氏项和重力项都会随状态变化，没有一个固定的 $A$ 矩阵可以覆盖整个系统。 Lyapunov 方法借用了机械能下降的直觉。碗里的小球存在摩擦时，总机械能会不...</div></div></div></a><a class="pagination-related" href="/2026/05/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/" title="控制系统基础：状态、输入、输出与反馈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-17</div><div class="info-item-2">控制系统基础：状态、输入、输出与反馈</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为： $$q_d$$ 实际位置为： $$q$$ 控制器需要根据目标和当前状态计算控制输入： $$\tau$$ 基本结构为： 1234567891011121314期望位置 q_d      │      ↓  ┌─────────┐  │  控制器  │  └─────────┘      │ 控制输入 τ      ↓  ┌─────────┐  │  机器人  │  └─────────┘      │      ↓   实际位置 q  因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。 什么是系统系统可以理解成一个具有自身运动规律的...</div></div></div></a><a class="pagination-related" href="/2026/06/08/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/9.%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%8A%A8%E5%8A%9B%E5%AD%A6%E4%B8%8E%E6%8E%A7%E5%88%B6/" title="控制系统基础：机器人动力学与控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-08</div><div class="info-item-2">控制系统基础：机器人动力学与控制</div></div><div class="info-2"><div class="info-item-1">控制系统基础：机器人动力学与控制前面主要研究一般控制系统。现在正式进入机器人控制，理解广义坐标、惯性矩阵、速度相关项和重力项分别表示什么，以及动力学模型如何进入控制律。 机器人最常见的动力学方程是： $$\boxed{M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau}$$ 它描述的是控制力与机器人运动之间的关系，也是解析动力学、学习型动力学和后续控制器推导的共同起点。 动力学研究什么运动学研究“机器人怎样运动”，例如已知关节角后末端在哪里；动力学则研究“什么力产生了怎样的运动”。 最简单的单自由度模型是： $$m\ddot q&#x3D;\tau$$ 加入阻尼、弹性和外力后，可以写成： $$m\ddot q+b\dot q+kq&#x3D;\tau+d$$ 这里已经出现机器人动力学的基本组成：惯性、速度相关作用、位置相关作用、控制输入和未知扰动。 广义坐标、速度与力$q$ 是广义坐标。它不一定只表示传统刚性机械臂的转角，也可以表示：  移动机器人的位置与姿态； 柔性结构的模态坐标； 连续体机器人的曲率、弯曲方向和伸长； 降阶模型中的低维状态...</div></div></div></a><a class="pagination-related" href="/2026/06/10/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/10.%E8%AF%AF%E5%B7%AE%E5%8A%A8%E5%8A%9B%E5%AD%A6%E4%B8%8E%E8%AE%A1%E7%AE%97%E5%8A%9B%E7%9F%A9%E6%8E%A7%E5%88%B6/" title="控制系统基础：误差动力学与计算力矩控制"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-10</div><div class="info-item-2">控制系统基础：误差动力学与计算力矩控制</div></div><div class="info-2"><div class="info-item-1">控制系统基础：误差动力学与计算力矩控制前面说明了机器人动力学各项的含义。这一章进一步回答“控制律从哪里来”：先规定希望误差怎样变化，再通过逆动力学反推出实现这种闭环行为所需的控制力。 核心过程是： $$\text{期望轨迹}\longrightarrow\text{误差动力学}\longrightarrow\text{参考加速度}\longrightarrow\text{逆动力学}\longrightarrow\text{控制力矩}$$ 从轨迹跟踪误差开始设期望轨迹为 $q_d(t)$，实际状态为 $q(t)$，定义： $$\boxed{e&#x3D;q-q_d}$$ 对时间求导： $$\dot e&#x3D;\dot q-\dot q_d$$ 再求一次导数： $$\ddot e&#x3D;\ddot q-\ddot q_d$$ 位置误差说明当前偏离多少，速度误差说明是否以相同速度运动，加速度误差则直接与动力学和控制输入相连。 轨迹跟踪真正需要设计的不是某一时刻的控制量，而是整个闭环误差随时间如何演化，这就是误差动力学。 主动规定期望误差动力学可以希望误差满足稳定二阶系统： $$...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260903-1"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
