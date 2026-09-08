@@ -1,0 +1,455 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：频率响应、Bode 图与稳定裕度 | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：频率响应、Bode 图与稳定裕度时域响应关心输出随时间如何变化，频率响应则研究系统对不同变化速度的信号分别如何反应。它能够揭示跟踪、扰动抑制、噪声放大和稳定裕度之间的联系。 从正弦输入开始对稳定线性时不变系统施加： $$u(t)&#x3D;A\sin(\omega t)$$ 稳态输出仍具有相同频率，但幅值和相位发生变化： $$y(t){}&#x3D;{}A|G(j\omega)|\s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：频率响应、Bode 图与稳定裕度">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：频率响应、Bode 图与稳定裕度时域响应关心输出随时间如何变化，频率响应则研究系统对不同变化速度的信号分别如何反应。它能够揭示跟踪、扰动抑制、噪声放大和稳定裕度之间的联系。 从正弦输入开始对稳定线性时不变系统施加： $$u(t)&#x3D;A\sin(\omega t)$$ 稳态输出仍具有相同频率，但幅值和相位发生变化： $$y(t){}&#x3D;{}A|G(j\omega)|\s">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-27T12:22:00.000Z">
+<meta property="article:modified_time" content="2026-06-27T12:34:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="Bode 图">
+<meta property="article:tag" content="带宽">
+<meta property="article:tag" content="稳定裕度">
+<meta property="article:tag" content="经典控制">
+<meta property="article:tag" content="频率响应">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：频率响应、Bode 图与稳定裕度",
+  "url": "https://mio0721.github.io/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-27T12:22:00.000Z",
+  "dateModified": "2026-06-27T12:34:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：频率响应、Bode 图与稳定裕度',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260907-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">147</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：频率响应、Bode 图与稳定裕度</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：频率响应、Bode 图与稳定裕度</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-27T12:22:00.000Z" title="发表于 2026-06-27 20:22:00">2026-06-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-27T12:34:00.000Z" title="更新于 2026-06-27 20:34:00">2026-06-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：频率响应、Bode-图与稳定裕度"><a href="#控制系统基础：频率响应、Bode-图与稳定裕度" class="headerlink" title="控制系统基础：频率响应、Bode 图与稳定裕度"></a>控制系统基础：频率响应、Bode 图与稳定裕度</h1><p>时域响应关心输出随时间如何变化，频率响应则研究系统对不同变化速度的信号分别如何反应。它能够揭示跟踪、扰动抑制、噪声放大和稳定裕度之间的联系。</p>
+<h2 id="从正弦输入开始"><a href="#从正弦输入开始" class="headerlink" title="从正弦输入开始"></a>从正弦输入开始</h2><p>对稳定线性时不变系统施加：</p>
+<p>$$<br>u(t)&#x3D;A\sin(\omega t)<br>$$</p>
+<p>稳态输出仍具有相同频率，但幅值和相位发生变化：</p>
+<p>$$<br>y(t)<br>{}&#x3D;{}<br>A|G(j\omega)|<br>\sin\left[\omega t+\angle G(j\omega)\right]<br>$$</p>
+<p>频率响应的两个核心量是：</p>
+<ul>
+<li>$|G(j\omega)|$：系统对该频率的放大或衰减；</li>
+<li>$\angle G(j\omega)$：输出相对输入的相位超前或滞后。</li>
+</ul>
+<p>把传递函数中的 $s$ 替换为 $j\omega$，相当于沿虚轴考察系统对持续正弦信号的稳态响应。</p>
+<h2 id="一阶系统的频率响应"><a href="#一阶系统的频率响应" class="headerlink" title="一阶系统的频率响应"></a>一阶系统的频率响应</h2><p>考虑：</p>
+<p>$$<br>G(s)&#x3D;\frac{1}{Ts+1}<br>$$</p>
+<p>代入 $s&#x3D;j\omega$：</p>
+<p>$$<br>G(j\omega)&#x3D;\frac{1}{1+j\omega T}<br>$$</p>
+<p>幅值为：</p>
+<p>$$<br>\boxed{<br>|G(j\omega)|<br>{}&#x3D;{}<br>\frac{1}{\sqrt{1+(\omega T)^2}}<br>}<br>$$</p>
+<p>相位为：</p>
+<p>$$<br>\boxed{<br>\angle G(j\omega)<br>{}&#x3D;{}<br>-\arctan(\omega T)<br>}<br>$$</p>
+<p>低频时：</p>
+<p>$$<br>\omega T\ll1<br>\quad\Longrightarrow\quad<br>|G(j\omega)|\approx1<br>$$</p>
+<p>高频时：</p>
+<p>$$<br>\omega T\gg1<br>\quad\Longrightarrow\quad<br>|G(j\omega)|\approx\frac{1}{\omega T}<br>$$</p>
+<p>因此，一阶系统容易跟随缓慢变化的输入，却会衰减快速变化的输入，表现出低通特性。</p>
+<h2 id="Bode-图"><a href="#Bode-图" class="headerlink" title="Bode 图"></a>Bode 图</h2><p>Bode 图由两部分组成：</p>
+<ol>
+<li>幅频图：横轴为对数频率，纵轴为幅值；</li>
+<li>相频图：横轴为对数频率，纵轴为相位。</li>
+</ol>
+<p>幅值通常用分贝表示：</p>
+<p>$$<br>\boxed{<br>20\log_{10}|G(j\omega)|<br>}<br>$$</p>
+<p>常见换算为：</p>
+<table>
+<thead>
+<tr>
+<th>幅值倍率</th>
+<th>分贝</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$1$</td>
+<td>$0\ \mathrm{dB}$</td>
+</tr>
+<tr>
+<td>$2$</td>
+<td>约 $6\ \mathrm{dB}$</td>
+</tr>
+<tr>
+<td>$0.5$</td>
+<td>约 $-6\ \mathrm{dB}$</td>
+</tr>
+<tr>
+<td>$10$</td>
+<td>$20\ \mathrm{dB}$</td>
+</tr>
+</tbody></table>
+<p>使用对数坐标可以在一张图中同时观察很宽的频率范围，并把乘除关系转化为曲线的加减。</p>
+<h2 id="截止频率与带宽"><a href="#截止频率与带宽" class="headerlink" title="截止频率与带宽"></a>截止频率与带宽</h2><p>对一阶系统：</p>
+<p>$$<br>G(s)&#x3D;\frac{1}{Ts+1}<br>$$</p>
+<p>当：</p>
+<p>$$<br>\omega_c&#x3D;\frac{1}{T}<br>$$</p>
+<p>幅值为：</p>
+<p>$$<br>|G(j\omega_c)|&#x3D;\frac{1}{\sqrt2}<br>$$</p>
+<p>对应约 $-3\ \mathrm{dB}$，因此 $\omega_c$ 常称为截止频率。</p>
+<p>时间常数和带宽具有直观关系：</p>
+<p>$$<br>\boxed{<br>T\downarrow<br>\quad\Longleftrightarrow\quad<br>\omega_c\uparrow<br>}<br>$$</p>
+<p>更高带宽通常意味着系统能跟踪更快的变化，但也更容易接触传感器噪声、结构共振、时延和未建模高频动态。</p>
+<h2 id="P、I、D-的频率作用"><a href="#P、I、D-的频率作用" class="headerlink" title="P、I、D 的频率作用"></a>P、I、D 的频率作用</h2><p>比例项：</p>
+<p>$$<br>C_P(j\omega)&#x3D;K_p<br>$$</p>
+<p>在所有频率上提供相同倍率。</p>
+<p>积分项：</p>
+<p>$$<br>C_I(j\omega)&#x3D;\frac{K_i}{j\omega}<br>$$</p>
+<p>其幅值：</p>
+<p>$$<br>|C_I(j\omega)|&#x3D;\frac{K_i}{\omega}<br>$$</p>
+<p>积分作用在低频较强，因此适合减小稳态误差，但会增加相位滞后并影响稳定裕度。</p>
+<p>理想微分项：</p>
+<p>$$<br>C_D(j\omega)&#x3D;K_dj\omega<br>$$</p>
+<p>其幅值随频率增大：</p>
+<p>$$<br>|C_D(j\omega)|&#x3D;K_d\omega<br>$$</p>
+<p>这有助于提供相位超前和阻尼，也会放大高频测量噪声。实际微分通常加入低通滤波，例如：</p>
+<p>$$<br>C_D(s)<br>{}&#x3D;{}<br>\frac{K_dNs}{s+N}<br>$$</p>
+<h2 id="增益交叉频率"><a href="#增益交叉频率" class="headerlink" title="增益交叉频率"></a>增益交叉频率</h2><p>设开环频率响应为：</p>
+<p>$$<br>L(j\omega)&#x3D;C(j\omega)G(j\omega)<br>$$</p>
+<p>增益交叉频率 $\omega_{gc}$ 满足：</p>
+<p>$$<br>\boxed{<br>|L(j\omega_{gc})|&#x3D;1<br>}<br>$$</p>
+<p>也就是幅频图上的 $0\ \mathrm{dB}$ 交点。</p>
+<p>在单位负反馈下，闭环特征条件为：</p>
+<p>$$<br>1+L(s)&#x3D;0<br>$$</p>
+<p>如果开环响应在幅值为 1 时已经接近 $-180^\circ$，负反馈就接近转化为正反馈，系统对建模误差和时延会非常敏感。</p>
+<h2 id="相位裕度"><a href="#相位裕度" class="headerlink" title="相位裕度"></a>相位裕度</h2><p>相位裕度定义为：</p>
+<p>$$<br>\boxed{<br>\mathrm{PM}<br>{}&#x3D;{}<br>180^\circ+\angle L(j\omega_{gc})<br>}<br>$$</p>
+<p>例如在 $\omega_{gc}$ 处：</p>
+<p>$$<br>\angle L(j\omega_{gc})&#x3D;-135^\circ<br>$$</p>
+<p>则：</p>
+<p>$$<br>\mathrm{PM}&#x3D;45^\circ<br>$$</p>
+<p>它表示在增益交叉处，系统距离 $-180^\circ$ 临界相位还剩多少余量。相位裕度较小通常意味着闭环更容易振荡，并且对额外时延和模型变化更敏感。</p>
+<h2 id="增益裕度"><a href="#增益裕度" class="headerlink" title="增益裕度"></a>增益裕度</h2><p>相位交叉频率 $\omega_{pc}$ 满足：</p>
+<p>$$<br>\angle L(j\omega_{pc})&#x3D;-180^\circ<br>$$</p>
+<p>此时增益裕度可以写成：</p>
+<p>$$<br>\boxed{<br>\mathrm{GM}<br>{}&#x3D;{}<br>\frac{1}{|L(j\omega_{pc})|}<br>}<br>$$</p>
+<p>分贝形式为：</p>
+<p>$$<br>\mathrm{GM(dB)}<br>{}&#x3D;{}<br>-20\log_{10}|L(j\omega_{pc})|<br>$$</p>
+<p>增益裕度描述在相位到达临界值时，开环增益还能放大多少才触及稳定边界。</p>
+<h2 id="稳定裕度不是完整鲁棒性证明"><a href="#稳定裕度不是完整鲁棒性证明" class="headerlink" title="稳定裕度不是完整鲁棒性证明"></a>稳定裕度不是完整鲁棒性证明</h2><p>PM 和 GM 是经典频域鲁棒性指标，但它们基于特定线性开环模型，不能单独覆盖所有非线性、饱和、时变参数和多输入多输出耦合。</p>
+<p>实际系统还应结合：</p>
+<ul>
+<li>闭环极点和时域响应；</li>
+<li>执行器饱和与速率限制；</li>
+<li>采样、计算和通信时延；</li>
+<li>未建模共振；</li>
+<li>工作点变化；</li>
+<li>必要的非线性稳定性分析。</li>
+</ul>
+<h2 id="Observer-与频率"><a href="#Observer-与频率" class="headerlink" title="Observer 与频率"></a>Observer 与频率</h2><p>Observer 带宽越高，通常能更快跟踪状态和扰动，但也更容易把传感器噪声带入估计结果。若估计值直接用于控制，高频噪声还会进一步传入执行器命令。</p>
+<p>因此 Observer 的频率设计需要兼顾：</p>
+<p>$$<br>\boxed{<br>\text{估计速度}<br>\quad\longleftrightarrow\quad<br>\text{噪声抑制}<br>}<br>$$</p>
+<h2 id="SMC-抖振的频率视角"><a href="#SMC-抖振的频率视角" class="headerlink" title="SMC 抖振的频率视角"></a>SMC 抖振的频率视角</h2><p>理想 $\operatorname{sign}(s)$ 会产生快速切换，包含丰富的高频成分。真实执行器和结构不可能无限快响应，因此这些高频成分可能激发振动、噪声和未建模动态。</p>
+<p>使用：</p>
+<p>$$<br>\tanh(s&#x2F;\phi)<br>$$</p>
+<p>或：</p>
+<p>$$<br>\operatorname{sat}(s&#x2F;\phi)<br>$$</p>
+<p>相当于限制零附近的高频切换，但会引入边界层以及精度—平滑性权衡。</p>
+<h2 id="根轨迹与频率响应"><a href="#根轨迹与频率响应" class="headerlink" title="根轨迹与频率响应"></a>根轨迹与频率响应</h2><p>两种工具都分析同一个线性闭环系统，但观察角度不同：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>主要问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>根轨迹</td>
+<td>增益变化时闭环极点如何移动</td>
+</tr>
+<tr>
+<td>Bode 图</td>
+<td>系统对不同频率如何放大、衰减和移相</td>
+</tr>
+</tbody></table>
+<p>根轨迹擅长展示参数与极点的关系，Bode 图擅长展示带宽、噪声、扰动和稳定裕度。二者结合能形成更完整的线性控制直觉。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>频率响应的核心是：</p>
+<p>$$<br>G(j\omega)<br>$$</p>
+<p>幅值表示不同频率被放大或衰减多少，相位表示输出相对输入滞后或超前多少。Bode 图把这些信息放在对数频率轴上，带宽描述系统能响应多快的变化，PM 和 GM 描述线性模型距离临界稳定状态还有多少余量。</p>
+<p>好的控制系统不是在所有频率上都施加强控制，而是让低频跟踪与抗扰足够强，同时在高频区域抑制噪声、时延和未建模动态的影响。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/">https://mio0721.github.io/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94/">频率响应</a><a class="post-meta__tags" href="/tags/Bode-%E5%9B%BE/">Bode 图</a><a class="post-meta__tags" href="/tags/%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/">稳定裕度</a><a class="post-meta__tags" href="/tags/%E5%B8%A6%E5%AE%BD/">带宽</a><a class="post-meta__tags" href="/tags/%E7%BB%8F%E5%85%B8%E6%8E%A7%E5%88%B6/">经典控制</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/07/09/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E7%A1%AC%E4%BB%B6/CAN%E6%80%BB%E7%BA%BF/1.CAN%20%E6%80%BB%E7%BA%BF%E5%9F%BA%E7%A1%80/" title="CAN 总线基础：从 USB2CAN 到达妙电机"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">CAN 总线基础：从 USB2CAN 到达妙电机</div></div><div class="info-2"><div class="info-item-1">CAN 总线基础：从 USB2CAN 到达妙电机最近开始使用达妙 DM-J4310 电机，同时也接触到了 USB 转 CAN 模块、CANH、CANL 和 CAN ID 等概念。 这篇先不深入 CAN 的底层时序，而是从实际设备出发，梳理 CAN 总线在电机控制系统中承担的作用。 整个系统是怎么连接的目前使用的设备主要包括：  电脑 USB2CAN 模块 达妙 DM-J4310 电机 电机电源 CAN 通信线  它们之间的关系可以先理解成： 12345678910电脑  │ USB  ↓USB2CAN  │ CANH / CANL  ↓达妙电机  │  ↓电机执行动作  电脑通常不能直接产生 CAN 总线上的电气信号，因此需要 USB2CAN 作为转换设备。 上位机程序先通过 USB 把命令交给 USB2CAN，再由 USB2CAN 将其转换成 CAN 报文并发送到总线上。 CAN 是什么CAN 的全称是： 1Controller Area Network  中文一般称为控制器局域网。它是一种适合控制器之间交换数据的通信方式，常见于汽车、机器人、工业设备和电机控制系统。 例如，一...</div></div></div></a><a class="pagination-related" href="/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/" title="控制系统基础：根轨迹 Root Locus"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：根轨迹 Root Locus</div></div><div class="info-2"><div class="info-item-1">控制系统基础：根轨迹 Root Locus根轨迹研究的是：当控制器增益连续变化时，闭环极点在复平面上如何移动。它把“参数变化—极点变化—动态性能变化”连接成一幅图。 从闭环传递函数开始单位负反馈系统的开环传递函数记为： $$L(s)&#x3D;KG(s)H(s)$$ 闭环传递函数为： $$T(s){}&#x3D;{}\frac{KG(s)}{1+KG(s)H(s)}$$ 闭环极点由特征方程决定： $$\boxed{1+KG(s)H(s)&#x3D;0}$$ 当 $K$ 从 0 逐渐增大时，这个方程的根会在复平面上形成连续轨迹，即根轨迹。 一个一阶例子设： $$G(s)&#x3D;\frac{1}{s+1},\qquadH(s)&#x3D;1$$ 闭环特征方程： $$1+\frac{K}{s+1}&#x3D;0$$ 因此： $$s&#x3D;-(1+K)$$ 当 $K$ 增大时，闭环极点沿实轴向左移动。对这个简单系统而言，极点实部更负，响应通常更快。 但“增大增益一定更好”只在非常有限的例子中成立。高阶系统的极点可能进入复平面，甚至穿过虚轴进入右半平面。 一个二阶例子设： $$G(...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/" title="控制系统基础：根轨迹 Root Locus"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-26</div><div class="info-item-2">控制系统基础：根轨迹 Root Locus</div></div><div class="info-2"><div class="info-item-1">控制系统基础：根轨迹 Root Locus根轨迹研究的是：当控制器增益连续变化时，闭环极点在复平面上如何移动。它把“参数变化—极点变化—动态性能变化”连接成一幅图。 从闭环传递函数开始单位负反馈系统的开环传递函数记为： $$L(s)&#x3D;KG(s)H(s)$$ 闭环传递函数为： $$T(s){}&#x3D;{}\frac{KG(s)}{1+KG(s)H(s)}$$ 闭环极点由特征方程决定： $$\boxed{1+KG(s)H(s)&#x3D;0}$$ 当 $K$ 从 0 逐渐增大时，这个方程的根会在复平面上形成连续轨迹，即根轨迹。 一个一阶例子设： $$G(s)&#x3D;\frac{1}{s+1},\qquadH(s)&#x3D;1$$ 闭环特征方程： $$1+\frac{K}{s+1}&#x3D;0$$ 因此： $$s&#x3D;-(1+K)$$ 当 $K$ 增大时，闭环极点沿实轴向左移动。对这个简单系统而言，极点实部更负，响应通常更快。 但“增大增益一定更好”只在非常有限的例子中成立。高阶系统的极点可能进入复平面，甚至穿过虚轴进入右半平面。 一个二阶例子设： $$G(...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260903-1"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

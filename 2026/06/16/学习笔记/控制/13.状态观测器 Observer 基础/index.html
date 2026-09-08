@@ -1,0 +1,423 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：状态观测器 Observer | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：状态观测器 Observer控制器经常需要位置、速度和其他内部状态，但传感器通常只能测到其中一部分。直接增加传感器可能受到成本、空间、噪声和可靠性的限制，状态观测器则尝试利用系统模型、已知输入和已有测量重建不可直接获得的状态。 Observer 的核心可以概括为： $$\boxed{\text{状态估计}{}&#x3D;{}\text{模型预测}+\text{测量纠正}}$$ 状态和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：状态观测器 Observer">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/16/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/13.%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%20Observer%20%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：状态观测器 Observer控制器经常需要位置、速度和其他内部状态，但传感器通常只能测到其中一部分。直接增加传感器可能受到成本、空间、噪声和可靠性的限制，状态观测器则尝试利用系统模型、已知输入和已有测量重建不可直接获得的状态。 Observer 的核心可以概括为： $$\boxed{\text{状态估计}{}&#x3D;{}\text{模型预测}+\text{测量纠正}}$$ 状态和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-16T12:17:00.000Z">
+<meta property="article:modified_time" content="2026-06-16T12:29:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="Luenberger Observer">
+<meta property="article:tag" content="Observer">
+<meta property="article:tag" content="可观测性">
+<meta property="article:tag" content="状态空间">
+<meta property="article:tag" content="状态观测器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：状态观测器 Observer",
+  "url": "https://mio0721.github.io/2026/06/16/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/13.%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%20Observer%20%E5%9F%BA%E7%A1%80/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-16T12:17:00.000Z",
+  "dateModified": "2026-06-16T12:29:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/16/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/13.%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%20Observer%20%E5%9F%BA%E7%A1%80/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：状态观测器 Observer',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260907-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">147</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：状态观测器 Observer</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：状态观测器 Observer</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-16T12:17:00.000Z" title="发表于 2026-06-16 20:17:00">2026-06-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-16T12:29:00.000Z" title="更新于 2026-06-16 20:29:00">2026-06-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：状态观测器-Observer"><a href="#控制系统基础：状态观测器-Observer" class="headerlink" title="控制系统基础：状态观测器 Observer"></a>控制系统基础：状态观测器 Observer</h1><p>控制器经常需要位置、速度和其他内部状态，但传感器通常只能测到其中一部分。直接增加传感器可能受到成本、空间、噪声和可靠性的限制，状态观测器则尝试利用系统模型、已知输入和已有测量重建不可直接获得的状态。</p>
+<p>Observer 的核心可以概括为：</p>
+<p>$$<br>\boxed{<br>\text{状态估计}<br>{}&#x3D;{}<br>\text{模型预测}<br>+\text{测量纠正}<br>}<br>$$</p>
+<h2 id="状态和输出不是一回事"><a href="#状态和输出不是一回事" class="headerlink" title="状态和输出不是一回事"></a>状态和输出不是一回事</h2><p>线性系统写成：</p>
+<p>$$<br>\dot x&#x3D;Ax+Bu<br>$$</p>
+<p>$$<br>y&#x3D;Cx<br>$$</p>
+<p>其中 $x$ 是完整状态，$u$ 是已知输入，$y$ 是传感器输出。以位置—速度系统为例：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\\<br>\dot q<br>\end{bmatrix},<br>\qquad<br>y&#x3D;q<br>$$</p>
+<p>只测位置不代表速度一定不可获得。只要速度会通过动力学影响位置变化，连续的输出和已知模型中就可能包含重建速度所需的信息。</p>
+<p>直接对离散位置做差分：</p>
+<p>$$<br>\hat v[k]<br>{}&#x3D;{}<br>\frac{q[k]-q[k-1]}{\Delta t}<br>$$</p>
+<p>实现简单，但测量噪声会被除以较小的 $\Delta t$ 放大。Observer 不只依赖相邻两次测量，还利用系统如何运动的模型，并通过测量误差持续校正估计。</p>
+<h2 id="Luenberger-Observer"><a href="#Luenberger-Observer" class="headerlink" title="Luenberger Observer"></a>Luenberger Observer</h2><p>对于线性系统，可以构造：</p>
+<p>$$<br>\boxed{<br>\dot{\hat x}<br>{}&#x3D;{}<br>A\hat x+Bu+L(y-\hat y)<br>}<br>$$</p>
+<p>其中：</p>
+<p>$$<br>\hat y&#x3D;C\hat x<br>$$</p>
+<p>因此也可写成：</p>
+<p>$$<br>\dot{\hat x}<br>{}&#x3D;{}<br>A\hat x+Bu+L(y-C\hat x)<br>$$</p>
+<p>各部分的职责为：</p>
+<ul>
+<li>$A\hat x+Bu$：根据模型和已知输入预测状态变化；</li>
+<li>$y-\hat y$：实际输出与预测输出之间的残差；</li>
+<li>$L$：决定输出残差以多强的方式修正状态估计。</li>
+</ul>
+<p>Observer 本身也构成反馈回路，但它反馈的是估计残差，改变的是 $\hat x$；Controller 根据跟踪误差计算控制输入，改变的是真实系统。两者不能混为一谈。</p>
+<h2 id="估计误差动力学"><a href="#估计误差动力学" class="headerlink" title="估计误差动力学"></a>估计误差动力学</h2><p>定义估计误差：</p>
+<p>$$<br>\tilde x&#x3D;x-\hat x<br>$$</p>
+<p>对其求导：</p>
+<p>$$<br>\dot{\tilde x}<br>{}&#x3D;{}<br>\dot x-\dot{\hat x}<br>$$</p>
+<p>代入真实系统和 Observer：</p>
+<p>$$<br>\dot{\tilde x}<br>{}&#x3D;{}<br>Ax+Bu-\left[A\hat x+Bu+L(y-\hat y)\right]<br>$$</p>
+<p>又因为：</p>
+<p>$$<br>y-\hat y&#x3D;C(x-\hat x)&#x3D;C\tilde x<br>$$</p>
+<p>最终得到：</p>
+<p>$$<br>\boxed{<br>\dot{\tilde x}<br>{}&#x3D;{}<br>(A-LC)\tilde x<br>}<br>$$</p>
+<p>矩阵 $A-LC$ 决定估计误差如何衰减。在线性时不变系统中，如果能够选择 $L$ 使其全部特征值位于复平面左半平面，则估计误差可以渐近趋于零。</p>
+<h2 id="可观测性"><a href="#可观测性" class="headerlink" title="可观测性"></a>可观测性</h2><p>并不是任意状态都能从输出中重建。可观测性回答的是：</p>
+<blockquote>
+<p>已知输入 $u$ 和输出 $y$ 后，是否有足够信息区分系统的全部内部状态？</p>
+</blockquote>
+<p>对 $n$ 维线性系统，可观测矩阵为：</p>
+<p>$$<br>\mathcal O&#x3D;<br>\begin{bmatrix}<br>C\\<br>CA\\<br>CA^2\\<br>\vdots\\<br>CA^{n-1}<br>\end{bmatrix}<br>$$</p>
+<p>完全可观测的判据是：</p>
+<p>$$<br>\boxed{<br>\operatorname{rank}(\mathcal O)&#x3D;n<br>}<br>$$</p>
+<p>$C$ 反映输出直接包含的状态信息，$CA$、$CA^2$ 等则反映这些状态经过系统动态后如何继续影响输出。</p>
+<h2 id="只测位置时估计速度"><a href="#只测位置时估计速度" class="headerlink" title="只测位置时估计速度"></a>只测位置时估计速度</h2><p>考虑双积分系统：</p>
+<p>$$<br>\ddot q&#x3D;u<br>$$</p>
+<p>定义：</p>
+<p>$$<br>x&#x3D;<br>\begin{bmatrix}<br>q\\<br>\dot q<br>\end{bmatrix},<br>\qquad<br>A&#x3D;<br>\begin{bmatrix}<br>0&amp;1\\<br>0&amp;0<br>\end{bmatrix},<br>\qquad<br>B&#x3D;<br>\begin{bmatrix}<br>0\\<br>1<br>\end{bmatrix}<br>$$</p>
+<p>只测位置：</p>
+<p>$$<br>C&#x3D;<br>\begin{bmatrix}<br>1&amp;0<br>\end{bmatrix}<br>$$</p>
+<p>此时：</p>
+<p>$$<br>CA&#x3D;<br>\begin{bmatrix}<br>0&amp;1<br>\end{bmatrix}<br>$$</p>
+<p>所以：</p>
+<p>$$<br>\mathcal O&#x3D;<br>\begin{bmatrix}<br>1&amp;0\\<br>0&amp;1<br>\end{bmatrix}<br>$$</p>
+<p>其秩为 2，等于状态维数，因此位置和速度都可观测。</p>
+<p>令：</p>
+<p>$$<br>L&#x3D;<br>\begin{bmatrix}<br>l_1\\<br>l_2<br>\end{bmatrix}<br>$$</p>
+<p>Observer 展开为：</p>
+<p>$$<br>\dot{\hat q}<br>{}&#x3D;{}<br>\hat{\dot q}+l_1(q-\hat q)<br>$$</p>
+<p>$$<br>\dot{\hat{\dot q}}<br>{}&#x3D;{}<br>u+l_2(q-\hat q)<br>$$</p>
+<p>虽然没有直接测量速度，但持续出现的位置预测误差会通过 $l_2(q-\hat q)$ 修正速度估计。</p>
+<p>误差矩阵为：</p>
+<p>$$<br>A-LC&#x3D;<br>\begin{bmatrix}<br>-l_1&amp;1\\<br>-l_2&amp;0<br>\end{bmatrix}<br>$$</p>
+<p>对应特征多项式：</p>
+<p>$$<br>s^2+l_1s+l_2<br>$$</p>
+<p>若希望它具有标准二阶形式：</p>
+<p>$$<br>s^2+2\zeta_o\omega_os+\omega_o^2<br>$$</p>
+<p>可以选择：</p>
+<p>$$<br>l_1&#x3D;2\zeta_o\omega_o,<br>\qquad<br>l_2&#x3D;\omega_o^2<br>$$</p>
+<h2 id="Observer-带宽与噪声"><a href="#Observer-带宽与噪声" class="headerlink" title="Observer 带宽与噪声"></a>Observer 带宽与噪声</h2><p>把 Observer 极点放得更靠左，通常能让估计误差更快衰减，但并不是越快越好。高带宽 Observer 对输出残差反应强，会更容易放大测量噪声、离散化误差和未建模高频动态。</p>
+<p>工程设计需要在以下两点之间权衡：</p>
+<p>$$<br>\boxed{<br>\text{快速估计}<br>\quad\longleftrightarrow\quad<br>\text{噪声敏感性}<br>}<br>$$</p>
+<p>Observer 通常需要比主要控制闭环快一些，避免控制器长期使用滞后的估计值；但“快一些”不等于把增益无限增大。</p>
+<h2 id="Observer-based-Control"><a href="#Observer-based-Control" class="headerlink" title="Observer-based Control"></a>Observer-based Control</h2><p>如果 PD 控制器需要速度，但速度不可直接测量，可以使用估计速度：</p>
+<p>$$<br>\tau<br>{}&#x3D;{}<br>-K_p(q-q_d)-K_d(\hat{\dot q}-\dot q_d)<br>$$</p>
+<p>在线性系统中，分离原理允许状态反馈和 Observer 在一定条件下分别设计：</p>
+<ul>
+<li>选择 $K$ 使 $A-BK$ 稳定；</li>
+<li>选择 $L$ 使 $A-LC$ 稳定。</li>
+</ul>
+<p>非线性机器人系统通常不能直接照搬这一结论。Observer 与 Controller 之间的耦合、模型误差和噪声都可能进入闭环，需要针对完整系统进行稳定性分析。</p>
+<h2 id="状态-Observer、滤波器和扰动-Observer"><a href="#状态-Observer、滤波器和扰动-Observer" class="headerlink" title="状态 Observer、滤波器和扰动 Observer"></a>状态 Observer、滤波器和扰动 Observer</h2><p>这些工具的侧重点不同：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>主要目标</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>State Observer</td>
+<td>重建不可直接测量的状态</td>
+</tr>
+<tr>
+<td>Kalman Filter</td>
+<td>在随机噪声模型下进行状态估计</td>
+</tr>
+<tr>
+<td>Disturbance Observer</td>
+<td>估计未知扰动或综合不确定性</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>根据目标和状态计算控制输入</td>
+</tr>
+</tbody></table>
+<p>无论形式如何变化，理解 Observer 时都可以先寻找三个对象：模型预测、测量残差和纠正增益。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Observer 使用模型和实际输出共同更新状态估计。Luenberger Observer 的关键公式是：</p>
+<p>$$<br>\dot{\hat x}<br>{}&#x3D;{}<br>A\hat x+Bu+L(y-C\hat x)<br>$$</p>
+<p>$$<br>\dot{\tilde x}<br>{}&#x3D;{}<br>(A-LC)\tilde x<br>$$</p>
+<p>可观测性决定状态是否原则上能够由输入输出信息重建，增益 $L$ 决定估计误差的动态速度。实际设计还必须考虑噪声、采样频率、模型误差和闭环耦合。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/16/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/13.%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%20Observer%20%E5%9F%BA%E7%A1%80/">https://mio0721.github.io/2026/06/16/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/13.%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8%20Observer%20%E5%9F%BA%E7%A1%80/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4/">状态空间</a><a class="post-meta__tags" href="/tags/Observer/">Observer</a><a class="post-meta__tags" href="/tags/%E7%8A%B6%E6%80%81%E8%A7%82%E6%B5%8B%E5%99%A8/">状态观测器</a><a class="post-meta__tags" href="/tags/%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7/">可观测性</a><a class="post-meta__tags" href="/tags/Luenberger-Observer/">Luenberger Observer</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/06/18/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/14.DOB%20%E4%B8%8E%20NDOB/" title="控制系统基础：DOB 与 NDOB 扰动观测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">控制系统基础：DOB 与 NDOB 扰动观测</div></div><div class="info-2"><div class="info-item-1">控制系统基础：DOB 与 NDOB 扰动观测机器人动力学中经常出现一个无法直接测量的扰动项 $d$。DOB（Disturbance Observer）和 NDOB（Nonlinear Disturbance Observer）的目标，就是根据系统模型、输入和测量信号在线构造 $\hat d$。 先统一扰动符号机器人动力学常见两种写法： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)+d&#x3D;\tau$$ 或者： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau+d$$ 两者只是在定义上相差一个负号，但补偿项的符号会随之改变。本文采用第一种写法，因此理想补偿使用 $-\hat d$。阅读论文时必须先确认作者如何定义扰动，不能脱离动力学方程判断正负号。 Lumped Disturbance实际系统中的 $d$ 往往不是纯外力，而是多个未知量合并后的综合扰动： $$d{}&#x3D;{}d_{\mathrm{ext}}+d_{\mathrm{friction}}+d_{\mathrm{unmodeled}}+d...</div></div></div></a><a class="pagination-related" href="/2026/06/14/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/12.SMC%20%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E6%94%B9%E8%BF%9B/" title="控制系统基础：SMC 的问题与改进"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：SMC 的问题与改进</div></div><div class="info-2"><div class="info-item-1">控制系统基础：SMC 的问题与改进经典滑模控制能够对匹配的有界扰动建立鲁棒性，但它仍面临抖振、到达阶段、线性滑模面误差仅渐近收敛，以及鲁棒增益依赖扰动上界等问题。 TSMC、FTSMC、NTSMC、Integral SMC、RITSMC 和 AITSMC 等名称虽然很多，本质上通常是在修改以下一个或多个部分：  滑模面怎样设计； 到达律怎样设计； 鲁棒增益怎样选择； sign 如何平滑或替换； 是否加入积分、自适应或 Observer。  经典 SMC 的基准经典线性滑模面为： $$s&#x3D;\dot e+\lambda e$$ 控制律常拆成： $$\tau&#x3D;\tau_{\mathrm{eq}}-K\operatorname{sign}(s)$$ 它可以使 $s$ 在有限时间内到达滑模面；但当 $s&#x3D;0$ 时，误差满足： $$\dot e+\lambda e&#x3D;0$$ 所以 $e$ 通常按照指数规律渐近趋于零。后续改进需要明确是在改善“$s$ 如何到达滑模面”，还是在改变“到达后 $e$ 如何归零”。 问题一：抖振sign 函数在零点不连续： $$...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/22/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/3.%E7%8A%B6%E6%80%81%E7%A9%BA%E9%97%B4%E6%96%B9%E7%A8%8B/" title="控制系统基础：状态空间方程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-22</div><div class="info-item-2">控制系统基础：状态空间方程</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态空间方程传递函数从系统外部描述输入与输出的关系。现在转向系统内部，理解控制论文中最常见的： $$\dot{x}&#x3D;Ax+Bu$$ $$y&#x3D;Cx+Du$$ 核心过程是： 1234567高阶微分方程      ↓选择状态变量      ↓拆成多个一阶方程      ↓写成状态空间形式  状态空间关注系统内部传递函数： $$G(s)&#x3D;\frac{Y(s)}{U(s)}$$ 主要回答输入经过系统后会形成什么输出，但不会直接展开系统内部有哪些变量。 状态空间方法会显式记录系统内部状态。例如运动小车可以定义： $$x&#x3D;\begin{bmatrix}p\\v\end{bmatrix}$$ 其中 $p$ 是位置，$v$ 是速度。状态空间关注的是： $$\boxed{\text{系统内部状态如何随时间演化}}$$ 什么是状态状态是一组足以描述系统当前动态情况，并能结合未来输入确定之后运动的变量。 假设两辆小车都位于： $$p&#x3D;10\ \mathrm{m}$$ 其中一辆静止，另一辆以 $20\ \mathrm{m&#x2F;s}$ 向...</div></div></div></a><a class="pagination-related" href="/2026/05/17/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/1.%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/" title="控制系统基础：状态、输入、输出与反馈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-17</div><div class="info-item-2">控制系统基础：状态、输入、输出与反馈</div></div><div class="info-2"><div class="info-item-1">控制系统基础：状态、输入、输出与反馈控制理论里有很多算法和公式，但它们都建立在几个最基本的概念上：系统、状态、输入、输出和反馈。 这篇先不讨论复杂控制算法，而是从机器人控制出发，梳理这些概念之间的关系，并说明动力学模型、观测器和控制器各自位于系统的哪一层。 控制到底是在做什么控制最核心的问题可以概括成一句话：  我希望系统达到某个目标，那么现在应该给它什么输入？  例如，机械臂的期望关节位置为： $$q_d$$ 实际位置为： $$q$$ 控制器需要根据目标和当前状态计算控制输入： $$\tau$$ 基本结构为： 1234567891011121314期望位置 q_d      │      ↓  ┌─────────┐  │  控制器  │  └─────────┘      │ 控制输入 τ      ↓  ┌─────────┐  │  机器人  │  └─────────┘      │      ↓   实际位置 q  因此，控制器的核心任务就是计算控制输入。对于不同系统，这个输入可能是力、力矩、张力、电流、电压或电机指令。 什么是系统系统可以理解成一个具有自身运动规律的...</div></div></div></a><a class="pagination-related" href="/2026/06/18/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/14.DOB%20%E4%B8%8E%20NDOB/" title="控制系统基础：DOB 与 NDOB 扰动观测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-18</div><div class="info-item-2">控制系统基础：DOB 与 NDOB 扰动观测</div></div><div class="info-2"><div class="info-item-1">控制系统基础：DOB 与 NDOB 扰动观测机器人动力学中经常出现一个无法直接测量的扰动项 $d$。DOB（Disturbance Observer）和 NDOB（Nonlinear Disturbance Observer）的目标，就是根据系统模型、输入和测量信号在线构造 $\hat d$。 先统一扰动符号机器人动力学常见两种写法： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)+d&#x3D;\tau$$ 或者： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)&#x3D;\tau+d$$ 两者只是在定义上相差一个负号，但补偿项的符号会随之改变。本文采用第一种写法，因此理想补偿使用 $-\hat d$。阅读论文时必须先确认作者如何定义扰动，不能脱离动力学方程判断正负号。 Lumped Disturbance实际系统中的 $d$ 往往不是纯外力，而是多个未知量合并后的综合扰动： $$d{}&#x3D;{}d_{\mathrm{ext}}+d_{\mathrm{friction}}+d_{\mathrm{unmodeled}}+d...</div></div></div></a><a class="pagination-related" href="/2026/06/24/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/16.%E5%AE%8C%E6%95%B4%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%8E%A7%E5%88%B6%E6%9E%B6%E6%9E%84/" title="控制系统基础：完整机器人控制架构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-24</div><div class="info-item-2">控制系统基础：完整机器人控制架构</div></div><div class="info-2"><div class="info-item-1">控制系统基础：完整机器人控制架构一个完整机器人控制系统通常不只有一条控制律，而是由动力学模型、误差反馈、扰动估计和执行器分配等多个层次共同组成。理解各模块之间的数据流和职责边界，比简单堆叠算法名称更重要。 本文讨论一条通用链路： 123456789101112131415期望轨迹   ↓误差与滑模变量   ↓名义动力学补偿   ↓Observer 扰动补偿   ↓SMC 鲁棒反馈   ↓广义控制力   ↓执行器或张力分配   ↓真实机器人  从机器人动力学开始采用以下动力学约定： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)+d&#x3D;\tau$$ 其中：  $q,\dot q,\ddot q$：广义位置、速度和加速度； $M(q)$：惯性矩阵； $C(q,\dot q)\dot q$：速度相关惯性项； $g(q)$：重力或势能项； $d$：未建模动态、摩擦、参数误差和外部扰动的综合项； $\tau$：期望施加到广义坐标上的控制力。  控制目标是让实际轨迹 $q(t)$ 跟踪期望轨迹 $q_d(t)$。 误差与滑模变量定义跟踪误差： $$e&#x3...</div></div></div></a><a class="pagination-related" href="/2026/06/21/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/15.ESO%E3%80%81NESO%20%E4%B8%8E%20ADO/" title="控制系统基础：ESO、NESO 与 ADO"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-21</div><div class="info-item-2">控制系统基础：ESO、NESO 与 ADO</div></div><div class="info-2"><div class="info-item-1">控制系统基础：ESO、NESO 与 ADOESO、NESO 和 ADO 都可以用于估计未知状态或扰动，但它们强调的设计思想不同：  ESO：把总扰动扩张成新的状态； NESO：在扩张状态观测器中使用非线性误差校正； ADO：通过在线自适应律更新扰动参数或 Observer 参数。  这些名称不是完全互斥的。一个方法可能同时具有 Extended、Nonlinear 和 Adaptive 三种特征，判断方法时应查看实际方程，而不是只看缩写。 ESO：把扰动当成状态考虑二阶系统： $$\ddot q&#x3D;f(q,\dot q,t)+bu$$ $f$ 可以包含未知动力学、参数误差、摩擦和外部扰动。定义扩张状态： $$x_1&#x3D;q,\qquadx_2&#x3D;\dot q,\qquadx_3&#x3D;f$$ 系统变为： $$\dot x_1&#x3D;x_2$$ $$\dot x_2&#x3D;x_3+bu$$ $$\dot x_3&#x3D;w(t)$$ 其中： $$w(t)&#x3D;\dot f(t)$$ 原来的二阶状态被扩张为三阶，因此称为 Extended S...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260903-1"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

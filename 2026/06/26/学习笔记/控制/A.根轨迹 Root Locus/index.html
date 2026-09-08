@@ -1,0 +1,390 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>控制系统基础：根轨迹 Root Locus | mio's blog</title><meta name="author" content="mio"><meta name="copyright" content="mio"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="控制系统基础：根轨迹 Root Locus根轨迹研究的是：当控制器增益连续变化时，闭环极点在复平面上如何移动。它把“参数变化—极点变化—动态性能变化”连接成一幅图。 从闭环传递函数开始单位负反馈系统的开环传递函数记为： $$L(s)&#x3D;KG(s)H(s)$$ 闭环传递函数为： $$T(s){}&#x3D;{}\frac{KG(s)}{1+KG(s)H(s)}$$ 闭环极点由特征方程决定：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="控制系统基础：根轨迹 Root Locus">
+<meta property="og:url" content="https://mio0721.github.io/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/index.html">
+<meta property="og:site_name" content="mio&#39;s blog">
+<meta property="og:description" content="控制系统基础：根轨迹 Root Locus根轨迹研究的是：当控制器增益连续变化时，闭环极点在复平面上如何移动。它把“参数变化—极点变化—动态性能变化”连接成一幅图。 从闭环传递函数开始单位负反馈系统的开环传递函数记为： $$L(s)&#x3D;KG(s)H(s)$$ 闭环传递函数为： $$T(s){}&#x3D;{}\frac{KG(s)}{1+KG(s)H(s)}$$ 闭环极点由特征方程决定：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mio0721.github.io/img/Tiara.png">
+<meta property="article:published_time" content="2026-06-26T11:31:00.000Z">
+<meta property="article:modified_time" content="2026-06-26T11:43:00.000Z">
+<meta property="article:author" content="mio">
+<meta property="article:tag" content="Root Locus">
+<meta property="article:tag" content="根轨迹">
+<meta property="article:tag" content="经典控制">
+<meta property="article:tag" content="闭环极点">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mio0721.github.io/img/Tiara.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "控制系统基础：根轨迹 Root Locus",
+  "url": "https://mio0721.github.io/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/",
+  "image": "https://mio0721.github.io/img/Tiara.png",
+  "datePublished": "2026-06-26T11:31:00.000Z",
+  "dateModified": "2026-06-26T11:43:00.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "mio",
+      "url": "https://mio0721.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.svg"><link rel="canonical" href="https://mio0721.github.io/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const start = 6
+              const end = 18
+              const isNight =
+                start < end
+                    ? hour < start || hour >= end
+                    : hour >= start || hour < end
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '控制系统基础：根轨迹 Root Locus',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post',
+  // 供自定义背景脚本判断：文章头图优先于封面，两者都没有时才随机。
+  postTopImg: "",
+  postCover: ""
+}</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css"><link rel="stylesheet" href="/css/custom.css?v=20260907-1"><meta name="generator" content="Hexo 8.1.2"></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/img/home-bg/home-bg.png);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Tiara.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">50</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">147</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">mio's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">控制系统基础：根轨迹 Root Locus</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="/logs/"><i class="fa-fw fas fa-pen-to-square"></i><span> 日志</span></a></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fas fa-link"></i><span> 链接</span></a></div><div class="menus_item"><a class="site-page" href="https://mio0721.github.io/profile/"><i class="fa-fw fas fa-graduation-cap"></i><span> 学术</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">控制系统基础：根轨迹 Root Locus</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-26T11:31:00.000Z" title="发表于 2026-06-26 19:31:00">2026-06-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-26T11:43:00.000Z" title="更新于 2026-06-26 19:43:00">2026-06-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/">控制</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout hide-aside" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="控制系统基础：根轨迹-Root-Locus"><a href="#控制系统基础：根轨迹-Root-Locus" class="headerlink" title="控制系统基础：根轨迹 Root Locus"></a>控制系统基础：根轨迹 Root Locus</h1><p>根轨迹研究的是：当控制器增益连续变化时，闭环极点在复平面上如何移动。它把“参数变化—极点变化—动态性能变化”连接成一幅图。</p>
+<h2 id="从闭环传递函数开始"><a href="#从闭环传递函数开始" class="headerlink" title="从闭环传递函数开始"></a>从闭环传递函数开始</h2><p>单位负反馈系统的开环传递函数记为：</p>
+<p>$$<br>L(s)&#x3D;KG(s)H(s)<br>$$</p>
+<p>闭环传递函数为：</p>
+<p>$$<br>T(s)<br>{}&#x3D;{}<br>\frac{KG(s)}{1+KG(s)H(s)}<br>$$</p>
+<p>闭环极点由特征方程决定：</p>
+<p>$$<br>\boxed{<br>1+KG(s)H(s)&#x3D;0<br>}<br>$$</p>
+<p>当 $K$ 从 0 逐渐增大时，这个方程的根会在复平面上形成连续轨迹，即根轨迹。</p>
+<h2 id="一个一阶例子"><a href="#一个一阶例子" class="headerlink" title="一个一阶例子"></a>一个一阶例子</h2><p>设：</p>
+<p>$$<br>G(s)&#x3D;\frac{1}{s+1},<br>\qquad<br>H(s)&#x3D;1<br>$$</p>
+<p>闭环特征方程：</p>
+<p>$$<br>1+\frac{K}{s+1}&#x3D;0<br>$$</p>
+<p>因此：</p>
+<p>$$<br>s&#x3D;-(1+K)<br>$$</p>
+<p>当 $K$ 增大时，闭环极点沿实轴向左移动。对这个简单系统而言，极点实部更负，响应通常更快。</p>
+<p>但“增大增益一定更好”只在非常有限的例子中成立。高阶系统的极点可能进入复平面，甚至穿过虚轴进入右半平面。</p>
+<h2 id="一个二阶例子"><a href="#一个二阶例子" class="headerlink" title="一个二阶例子"></a>一个二阶例子</h2><p>设：</p>
+<p>$$<br>G(s)&#x3D;\frac{1}{s(s+2)}<br>$$</p>
+<p>单位负反馈特征方程为：</p>
+<p>$$<br>1+\frac{K}{s(s+2)}&#x3D;0<br>$$</p>
+<p>整理：</p>
+<p>$$<br>s^2+2s+K&#x3D;0<br>$$</p>
+<p>闭环极点：</p>
+<p>$$<br>s_{1,2}<br>{}&#x3D;{}<br>-1\pm\sqrt{1-K}<br>$$</p>
+<p>随着 $K$ 变化：</p>
+<ul>
+<li>$K&#x3D;0$：极点位于 $0$ 和 $-2$；</li>
+<li>$0&lt;K&lt;1$：两个实极点逐渐靠近；</li>
+<li>$K&#x3D;1$：两个极点在 $-1$ 重合；</li>
+<li>$K&gt;1$：形成共轭复极点 $-1\pm j\sqrt{K-1}$。</li>
+</ul>
+<p>这说明增益不仅改变响应速度，也会改变阻尼和振荡特性。</p>
+<h2 id="极点位置代表什么"><a href="#极点位置代表什么" class="headerlink" title="极点位置代表什么"></a>极点位置代表什么</h2><p>对连续时间系统：</p>
+<ul>
+<li>极点位于左半平面：对应衰减动态；</li>
+<li>极点位于右半平面：对应发散动态；</li>
+<li>极点靠近虚轴：衰减慢、调节时间长；</li>
+<li>共轭复极点：通常对应振荡；</li>
+<li>实部更负：通常衰减更快，但还需考虑其他极点、零点和执行器限制。</li>
+</ul>
+<p>根轨迹不能只看某一条分支。闭环性能由全部极点共同决定，最靠近虚轴的主导极点往往影响最大。</p>
+<h2 id="根轨迹为什么从开环极点出发"><a href="#根轨迹为什么从开环极点出发" class="headerlink" title="根轨迹为什么从开环极点出发"></a>根轨迹为什么从开环极点出发</h2><p>当 $K&#x3D;0$ 时，闭环特征方程退化到开环分母，因此根轨迹从开环极点开始。随着 $K\rightarrow\infty$，分支趋向开环零点；如果零点数量少于极点数量，其余分支趋向无穷远。</p>
+<p>因此：</p>
+<p>$$<br>\boxed{<br>\text{分支数}&#x3D;\text{开环极点数}<br>}<br>$$</p>
+<p>每条分支从一个开环极点出发，最终到达某个开环零点或无穷远。</p>
+<h2 id="角度条件与幅值条件"><a href="#角度条件与幅值条件" class="headerlink" title="角度条件与幅值条件"></a>角度条件与幅值条件</h2><p>由：</p>
+<p>$$<br>1+KL_0(s)&#x3D;0<br>$$</p>
+<p>可得：</p>
+<p>$$<br>KL_0(s)&#x3D;-1<br>$$</p>
+<p>一个点位于根轨迹上，需要满足角度条件：</p>
+<p>$$<br>\boxed{<br>\angle L_0(s)&#x3D;(2k+1)\pi<br>}<br>$$</p>
+<p>对应增益由幅值条件给出：</p>
+<p>$$<br>\boxed{<br>K&#x3D;\frac{1}{|L_0(s)|}<br>}<br>$$</p>
+<p>角度条件判断“这个位置能否成为闭环极点”，幅值条件计算“需要多大的增益”。</p>
+<h2 id="控制器极点和零点的作用"><a href="#控制器极点和零点的作用" class="headerlink" title="控制器极点和零点的作用"></a>控制器极点和零点的作用</h2><p>加入控制器后，开环传递函数的极点和零点会改变，根轨迹形状也随之改变。</p>
+<p>PD 控制器：</p>
+<p>$$<br>C(s)&#x3D;K(s+z)<br>$$</p>
+<p>引入一个零点，可以把根轨迹向更有利于阻尼和响应速度的区域拉动。</p>
+<p>PI 控制器：</p>
+<p>$$<br>C(s)&#x3D;K\frac{s+z}{s}<br>$$</p>
+<p>在原点增加积分极点，以改善低频跟踪和稳态误差，但也会改变稳定裕度和瞬态响应。</p>
+<p>控制器设计不能只看增益大小，还要看新增极点与零点如何重塑闭环极点轨迹。</p>
+<h2 id="根轨迹适合回答什么"><a href="#根轨迹适合回答什么" class="headerlink" title="根轨迹适合回答什么"></a>根轨迹适合回答什么</h2><p>根轨迹特别适合研究：</p>
+<ul>
+<li>增益变化会不会使系统失稳；</li>
+<li>哪个增益区间具有合适阻尼；</li>
+<li>闭环主导极点如何变化；</li>
+<li>加入补偿器极点或零点后轨迹如何移动；</li>
+<li>响应速度与超调之间如何权衡。</li>
+</ul>
+<p>它主要适用于线性时不变模型和单参数变化。面对强非线性、饱和、时变系统和多参数耦合时，根轨迹只能提供局部或近似信息。</p>
+<h2 id="与-Lyapunov-方法的区别"><a href="#与-Lyapunov-方法的区别" class="headerlink" title="与 Lyapunov 方法的区别"></a>与 Lyapunov 方法的区别</h2><p>根轨迹从线性闭环特征方程出发，通过极点位置分析稳定性和瞬态性能；Lyapunov 方法可以直接处理更一般的非线性状态方程，不一定需要显式求解极点。</p>
+<p>两者并不冲突：</p>
+<ul>
+<li>根轨迹适合直观看参数如何改变线性闭环动态；</li>
+<li>Lyapunov 方法适合证明非线性系统在给定条件下的稳定性质。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>根轨迹的核心关系是：</p>
+<p>$$<br>1+KG(s)H(s)&#x3D;0<br>$$</p>
+<p>它展示控制增益变化时闭环极点的移动轨迹。使用根轨迹时，应同时关注稳定区域、主导极点、阻尼、响应速度以及控制器新增极点和零点，而不能把增大 $K$ 简单理解为控制作用更强。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mio0721.github.io">mio</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mio0721.github.io/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/">https://mio0721.github.io/2026/06/26/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/A.%E6%A0%B9%E8%BD%A8%E8%BF%B9%20Root%20Locus/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mio0721.github.io" target="_blank">mio's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%BB%8F%E5%85%B8%E6%8E%A7%E5%88%B6/">经典控制</a><a class="post-meta__tags" href="/tags/%E6%A0%B9%E8%BD%A8%E8%BF%B9/">根轨迹</a><a class="post-meta__tags" href="/tags/Root-Locus/">Root Locus</a><a class="post-meta__tags" href="/tags/%E9%97%AD%E7%8E%AF%E6%9E%81%E7%82%B9/">闭环极点</a></div><div class="post-share"><div class="social-share" data-image="/img/Tiara.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/" title="控制系统基础：频率响应、Bode 图与稳定裕度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">控制系统基础：频率响应、Bode 图与稳定裕度</div></div><div class="info-2"><div class="info-item-1">控制系统基础：频率响应、Bode 图与稳定裕度时域响应关心输出随时间如何变化，频率响应则研究系统对不同变化速度的信号分别如何反应。它能够揭示跟踪、扰动抑制、噪声放大和稳定裕度之间的联系。 从正弦输入开始对稳定线性时不变系统施加： $$u(t)&#x3D;A\sin(\omega t)$$ 稳态输出仍具有相同频率，但幅值和相位发生变化： $$y(t){}&#x3D;{}A|G(j\omega)|\sin\left[\omega t+\angle G(j\omega)\right]$$ 频率响应的两个核心量是：  $|G(j\omega)|$：系统对该频率的放大或衰减； $\angle G(j\omega)$：输出相对输入的相位超前或滞后。  把传递函数中的 $s$ 替换为 $j\omega$，相当于沿虚轴考察系统对持续正弦信号的稳态响应。 一阶系统的频率响应考虑： $$G(s)&#x3D;\frac{1}{Ts+1}$$ 代入 $s&#x3D;j\omega$： $$G(j\omega)&#x3D;\frac{1}{1+j\omega T}$$ 幅值为： $$\boxed{|G(j...</div></div></div></a><a class="pagination-related" href="/2026/06/24/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/16.%E5%AE%8C%E6%95%B4%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%8E%A7%E5%88%B6%E6%9E%B6%E6%9E%84/" title="控制系统基础：完整机器人控制架构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">控制系统基础：完整机器人控制架构</div></div><div class="info-2"><div class="info-item-1">控制系统基础：完整机器人控制架构一个完整机器人控制系统通常不只有一条控制律，而是由动力学模型、误差反馈、扰动估计和执行器分配等多个层次共同组成。理解各模块之间的数据流和职责边界，比简单堆叠算法名称更重要。 本文讨论一条通用链路： 123456789101112131415期望轨迹   ↓误差与滑模变量   ↓名义动力学补偿   ↓Observer 扰动补偿   ↓SMC 鲁棒反馈   ↓广义控制力   ↓执行器或张力分配   ↓真实机器人  从机器人动力学开始采用以下动力学约定： $$M(q)\ddot q+C(q,\dot q)\dot q+g(q)+d&#x3D;\tau$$ 其中：  $q,\dot q,\ddot q$：广义位置、速度和加速度； $M(q)$：惯性矩阵； $C(q,\dot q)\dot q$：速度相关惯性项； $g(q)$：重力或势能项； $d$：未建模动态、摩擦、参数误差和外部扰动的综合项； $\tau$：期望施加到广义坐标上的控制力。  控制目标是让实际轨迹 $q(t)$ 跟踪期望轨迹 $q_d(t)$。 误差与滑模变量定义跟踪误差： $$e&#x3...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/27/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/%E6%8E%A7%E5%88%B6/B.%E9%A2%91%E7%8E%87%E5%93%8D%E5%BA%94%E3%80%81Bode%20%E5%9B%BE%E4%B8%8E%E7%A8%B3%E5%AE%9A%E8%A3%95%E5%BA%A6/" title="控制系统基础：频率响应、Bode 图与稳定裕度"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-27</div><div class="info-item-2">控制系统基础：频率响应、Bode 图与稳定裕度</div></div><div class="info-2"><div class="info-item-1">控制系统基础：频率响应、Bode 图与稳定裕度时域响应关心输出随时间如何变化，频率响应则研究系统对不同变化速度的信号分别如何反应。它能够揭示跟踪、扰动抑制、噪声放大和稳定裕度之间的联系。 从正弦输入开始对稳定线性时不变系统施加： $$u(t)&#x3D;A\sin(\omega t)$$ 稳态输出仍具有相同频率，但幅值和相位发生变化： $$y(t){}&#x3D;{}A|G(j\omega)|\sin\left[\omega t+\angle G(j\omega)\right]$$ 频率响应的两个核心量是：  $|G(j\omega)|$：系统对该频率的放大或衰减； $\angle G(j\omega)$：输出相对输入的相位超前或滞后。  把传递函数中的 $s$ 替换为 $j\omega$，相当于沿虚轴考察系统对持续正弦信号的稳态响应。 一阶系统的频率响应考虑： $$G(s)&#x3D;\frac{1}{Ts+1}$$ 代入 $s&#x3D;j\omega$： $$G(j\omega)&#x3D;\frac{1}{1+j\omega T}$$ 幅值为： $$\boxed{|G(j...</div></div></div></a></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2024 - 2026 By mio</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><div class="js-pjax"><script>(() => {
+  const changeScriptToMath = article => {
+    article.querySelectorAll('script[type^="math/tex"]').forEach(el => {
+      const display = /mode=display/.test(el.type)
+      const node = document.createElement(display ? 'div' : 'span')
+      node.textContent = display
+        ? `$$${el.textContent}$$`
+        : `$${el.textContent}$`
+      el.parentNode.replaceChild(node, el)
+    })
+  }
+
+  const loadMathjax = () => {
+    const article = document.getElementById('article-container')
+    if (!article || article.querySelector('.hbe-container')) return
+    changeScriptToMath(article)
+
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem',
+            'ui/lazy'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          lazyMargin: '200px',
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.typesetClear()
+      MathJax.typesetPromise([ article ])
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script src="/js/random-home-bg.js?v=20260903-1"></script><script src="/js/tag-search.js?v=20260829-1"></script><script src="/js/mobile-menu.js?v=20260830-1"></script><script src="/js/background-view.js?v=20260901-2"></script><script src="/js/update-heatmap.js?v=20260901-1"></script><script src="/js/category-view.js?v=20260902-1"></script><script src="/js/glass-select.js?v=20260902-1"></script><script src="/js/nav-title-fit.js?v=20260902-2"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>
