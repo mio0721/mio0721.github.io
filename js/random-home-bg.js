@@ -1,6 +1,9 @@
 /* 清单加载失败时使用的备用背景，防止页面出现空白。 */
 const fallbackBackgrounds = ["/img/home-bg/home-bg.png"];
 
+/* 用户通过右下角图钉固定的随机图库背景。 */
+const pinnedBackgroundStorageKey = "mio-pinned-background";
+
 
 /**
  * 读取 Hexo 构建时自动生成的背景清单。
@@ -23,8 +26,33 @@ async function loadBackgrounds() {
 }
 
 
+/**
+ * 读取已固定的背景。
+ *
+ * 只有路径仍存在于构建生成的背景清单中时才采用；这样以后删除图片
+ * 不会让浏览器继续请求一个已经不存在的旧地址。
+ */
+function getPinnedBackground(backgroundImages) {
+  try {
+    const pinnedBackground =
+      window.localStorage.getItem(pinnedBackgroundStorageKey) || "";
+
+    if (!pinnedBackground) return "";
+    if (backgroundImages.includes(pinnedBackground)) return pinnedBackground;
+
+    window.localStorage.removeItem(pinnedBackgroundStorageKey);
+  } catch (error) {
+    console.warn("无法读取固定背景记录，将继续使用随机背景。", error);
+  }
+
+  return "";
+}
+
+
 function applyPageBackground(backgroundImages) {
+  const pinnedBackground = getPinnedBackground(backgroundImages);
   const randomImage =
+    pinnedBackground ||
     backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
 
   /*
@@ -67,8 +95,16 @@ function applyPageBackground(backgroundImages) {
      */
     webBg.dataset.backgroundPath = pageBackground;
     window.mioCurrentBackground = pageBackground;
+    window.mioRandomBackground = randomImage;
+    window.mioBackgroundImages = backgroundImages.slice();
+    window.mioBackgroundPinStorageKey = pinnedBackgroundStorageKey;
+    window.mioBackgroundPinned = Boolean(pinnedBackground);
     document.dispatchEvent(new CustomEvent("mio:background-changed", {
-      detail: { path: pageBackground }
+      detail: {
+        path: pageBackground,
+        randomPath: randomImage,
+        pinned: Boolean(pinnedBackground)
+      }
     }));
   }
 }

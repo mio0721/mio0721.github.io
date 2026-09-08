@@ -13,6 +13,8 @@
   const html = document.documentElement;
   const viewClass = "mio-background-view";
   const buttonId = "background-view-btn";
+  const pinButtonId = "background-pin-btn";
+  const defaultPinStorageKey = "mio-pinned-background";
 
 
   /**
@@ -62,6 +64,80 @@
   };
 
 
+  /** 读取固定背景路径；localStorage 不可用时安全退回未固定状态。 */
+  const getPinnedBackground = () => {
+    try {
+      const storageKey =
+        window.mioBackgroundPinStorageKey || defaultPinStorageKey;
+      return window.localStorage.getItem(storageKey) || "";
+    } catch (error) {
+      return "";
+    }
+  };
+
+
+  /** 图钉控制的是随机图库背景，不覆盖文章单独设置的头图或封面。 */
+  const getRandomBackground = () => {
+    if (window.mioRandomBackground) return window.mioRandomBackground;
+
+    const currentBackground = window.mioCurrentBackground || "";
+    const backgroundImages = Array.isArray(window.mioBackgroundImages)
+      ? window.mioBackgroundImages
+      : [];
+
+    return backgroundImages.includes(currentBackground)
+      ? currentBackground
+      : "";
+  };
+
+
+  /** 根据固定状态同步图钉图标、提示文字和无障碍属性。 */
+  const updatePinButton = button => {
+    if (!button) return;
+
+    const pinnedBackground = getPinnedBackground();
+    const isPinned = Boolean(pinnedBackground);
+    const icon = button.querySelector("i");
+
+    button.title = isPinned
+      ? "取消固定背景"
+      : "固定当前背景";
+    button.setAttribute(
+      "aria-label",
+      isPinned ? "取消固定随机背景" : "固定当前随机背景"
+    );
+    button.setAttribute("aria-pressed", String(isPinned));
+    button.classList.toggle("is-pinned", isPinned);
+
+    if (icon) icon.className = "fas fa-thumbtack";
+    window.mioBackgroundPinned = isPinned;
+  };
+
+
+  /** 将图钉放在鉴赏模式按钮正上方。 */
+  const ensurePinButton = container => {
+    let pinButton = document.getElementById(pinButtonId);
+    const viewButton = document.getElementById(buttonId);
+
+    if (!pinButton) {
+      pinButton = document.createElement("button");
+      pinButton.id = pinButtonId;
+      pinButton.type = "button";
+      pinButton.innerHTML = '<i class="fas fa-thumbtack"></i>';
+    }
+
+    if (viewButton && viewButton.parentElement === container) {
+      if (pinButton.nextElementSibling !== viewButton) {
+        container.insertBefore(pinButton, viewButton);
+      }
+    } else if (pinButton.parentElement !== container) {
+      container.appendChild(pinButton);
+    }
+
+    updatePinButton(pinButton);
+  };
+
+
   /** 将按钮加入右下角折叠设置区，并保持与主题按钮相同的 DOM 结构。 */
   const ensureButton = () => {
     const container = document.querySelector("#rightside-config-hide");
@@ -84,6 +160,7 @@
     }
 
     updateButton(button);
+    ensurePinButton(container);
   };
 
 
@@ -92,6 +169,30 @@
     window.mioBackgroundViewInitialized = true;
 
     document.addEventListener("click", event => {
+      const pinButton = event.target.closest(`#${pinButtonId}`);
+
+      if (pinButton) {
+        const storageKey =
+          window.mioBackgroundPinStorageKey || defaultPinStorageKey;
+        const pinnedBackground = getPinnedBackground();
+
+        try {
+          if (pinnedBackground) {
+            window.localStorage.removeItem(storageKey);
+          } else {
+            const randomBackground = getRandomBackground();
+            if (randomBackground) {
+              window.localStorage.setItem(storageKey, randomBackground);
+            }
+          }
+        } catch (error) {
+          console.warn("无法保存背景固定状态。", error);
+        }
+
+        updatePinButton(pinButton);
+        return;
+      }
+
       const button = event.target.closest(`#${buttonId}`);
       if (!button) return;
 
@@ -105,6 +206,12 @@
 
     /* 悬浮前再读取一次，确保提示对应 PJAX 切换后的当前背景。 */
     document.addEventListener("pointerover", event => {
+      const pinButton = event.target.closest(`#${pinButtonId}`);
+      if (pinButton) {
+        updatePinButton(pinButton);
+        return;
+      }
+
       const button = event.target.closest(`#${buttonId}`);
       if (button) updateButton(button);
     });

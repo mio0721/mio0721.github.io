@@ -1977,6 +1977,33 @@ html.mio-background-view #background-view-btn i {
 }
 
 
+/*
+ * 图钉按钮位于鉴赏模式按钮上方。
+ * 未固定时略微倾斜，固定后回正并沿用主题强调色。
+ */
+#background-pin-btn i {
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  transform: rotate(-28deg);
+  opacity: 0.82;
+}
+
+
+#background-pin-btn:hover i {
+  opacity: 1;
+  transform: rotate(-18deg) scale(1.08);
+}
+
+
+#background-pin-btn.is-pinned i {
+  color: var(--theme-color);
+  opacity: 1;
+  transform: rotate(0deg) scale(1.06);
+}
+
+
 /* =========================================================
    31. 搜索弹窗毛玻璃
 
